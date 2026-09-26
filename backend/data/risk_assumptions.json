@@ -1,0 +1,18 @@
+{
+  "model": "FAIR-style: Annual Loss Exposure = Attempts per year × Probability of success × Loss per success",
+  "step_pass_probability": {
+    "stopped": 0.20,
+    "detected": 0.60,
+    "missed": 0.95,
+    "starting_condition": 1.00,
+    "_explanation": "Probability the attacker gets past a step with this outcome. 'Stopped' is not 0 because controls can fail or be misconfigured; 'missed' is not 1 because some attacks fail for other reasons."
+  },
+  "scenarios": {
+    "S1": { "attempts_per_year": { "min": 12,  "likely": 24, "max": 48 }, "loss_per_success": { "min": 30000,  "likely": 60000,   "max": 180000 } },
+    "S2": { "attempts_per_year": { "min": 6,   "likely": 12, "max": 24 }, "loss_per_success": { "min": 20000,  "likely": 40000,   "max": 120000 } },
+    "S3": { "attempts_per_year": { "min": 1.5, "likely": 3,  "max": 6  }, "loss_per_success": { "min": 60000,  "likely": 120000,  "max": 360000 } },
+    "S4": { "attempts_per_year": { "min": 3,   "likely": 6,  "max": 12 }, "loss_per_success": { "min": 750000, "likely": 1500000, "max": 4500000 } }
+  },
+  "severity_thresholds": { "critical": 0.50, "high": 0.20, "medium": 0.05 },
+  "monte_carlo": { "iterations": 10000, "seed": 42, "distribution": "PERT" }
+}

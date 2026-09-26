@@ -1,0 +1,37 @@
+[
+  { "tool_id": "email_security", "technique_id": "T1566.002", "effect": "stop", "evidence_type": "mitre_mitigation", "mitre_mitigation_hint": "Restrict Web-Based Content" },
+  { "tool_id": "email_security", "technique_id": "T1566.001", "effect": "stop", "evidence_type": "mitre_mitigation", "mitre_mitigation_hint": "Antivirus/Antimalware" },
+
+  { "tool_id": "edr", "technique_id": "T1059.001", "effect": "stop", "evidence_type": "mitre_mitigation", "mitre_mitigation_hint": "Execution Prevention" },
+  { "tool_id": "edr", "technique_id": "T1059",     "effect": "stop", "evidence_type": "mitre_mitigation", "mitre_mitigation_hint": "Execution Prevention" },
+  { "tool_id": "edr", "technique_id": "T1003",     "effect": "stop", "evidence_type": "mitre_mitigation", "mitre_mitigation_hint": "Credential Access Protection" },
+  { "tool_id": "edr", "technique_id": "T1490",     "effect": "stop", "evidence_type": "team_assumption" },
+  { "tool_id": "edr", "technique_id": "T1486",     "effect": "stop", "evidence_type": "mitre_mitigation", "mitre_mitigation_hint": "Behavior Prevention on Endpoint" },
+  { "tool_id": "edr", "technique_id": "T1204.002", "effect": "detect", "evidence_type": "mitre_detection" },
+  { "tool_id": "edr", "technique_id": "T1539",     "effect": "detect", "evidence_type": "mitre_detection" },
+  { "tool_id": "edr", "technique_id": "T1570",     "effect": "detect", "evidence_type": "mitre_detection" },
+
+  { "tool_id": "firewall", "technique_id": "T1133",     "effect": "stop", "evidence_type": "mitre_mitigation", "mitre_mitigation_hint": "Limit Access to Resource Over Network" },
+  { "tool_id": "firewall", "technique_id": "T1190",     "effect": "stop", "evidence_type": "mitre_mitigation", "mitre_mitigation_hint": "Network Segmentation" },
+  { "tool_id": "firewall", "technique_id": "T1021.001", "effect": "stop", "evidence_type": "mitre_mitigation", "mitre_mitigation_hint": "Limit Access to Resource Over Network" },
+  { "tool_id": "firewall", "technique_id": "T1567",     "effect": "detect", "evidence_type": "mitre_detection" },
+  { "tool_id": "firewall", "technique_id": "T1041",     "effect": "detect", "evidence_type": "mitre_detection" },
+
+  { "tool_id": "siem", "technique_id": "T1110.003", "effect": "detect", "evidence_type": "mitre_detection" },
+  { "tool_id": "siem", "technique_id": "T1110.004", "effect": "detect", "evidence_type": "mitre_detection" },
+  { "tool_id": "siem", "technique_id": "T1078.004", "effect": "detect", "evidence_type": "mitre_detection" },
+
+  { "tool_id": "tool_x", "technique_id": "T1059.001", "effect": "stop", "evidence_type": "team_assumption" },
+  { "tool_id": "tool_x", "technique_id": "T1059",     "effect": "stop", "evidence_type": "team_assumption" },
+
+  { "tool_id": "mfa_owned", "technique_id": "T1078.004", "effect": "stop", "evidence_type": "mitre_mitigation", "mitre_mitigation_hint": "Multi-factor Authentication" },
+  { "tool_id": "mfa_owned", "technique_id": "T1621",     "effect": "stop", "evidence_type": "mitre_mitigation", "mitre_mitigation_hint": "Multi-factor Authentication" },
+
+  { "tool_id": "identity_suite", "technique_id": "T1557",     "effect": "stop", "evidence_type": "vendor_claim" },
+  { "tool_id": "identity_suite", "technique_id": "T1539",     "effect": "stop", "evidence_type": "vendor_claim" },
+  { "tool_id": "identity_suite", "technique_id": "T1550.004", "effect": "stop", "evidence_type": "vendor_claim" },
+  { "tool_id": "identity_suite", "technique_id": "T1110.003", "effect": "stop", "evidence_type": "vendor_claim" },
+  { "tool_id": "identity_suite", "technique_id": "T1110.004", "effect": "stop", "evidence_type": "vendor_claim" },
+
+  { "tool_id": "payment_process", "technique_id": "T1657", "effect": "stop", "evidence_type": "mitre_mitigation", "mitre_mitigation_hint": "User Training" }
+]

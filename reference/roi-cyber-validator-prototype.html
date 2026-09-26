@@ -1,0 +1,679 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ROI Cyber-Validator — prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F2F4F7;--surface:#FFFFFF;--ink:#13202F;--muted:#5A6878;--line:#D9DFE6;--soft:#E8ECF1;
+  --accent:#2F49D1;--accent-soft:#E6EAFB;
+  --stop:#0D8466;--stop-soft:#E1F3EC;--det:#A96C10;--det-soft:#FBF0DC;--miss:#C0392F;--miss-soft:#FBE6E3;--start:#7E8A99;
+  --critical:#B32430;--high:#D0602A;--medium:#B98912;--low:#2E8B67;
+  --r-lg:14px;--r-md:10px;--r-sm:6px;
+  --font:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0F1722;--surface:#16212F;--ink:#E7EDF4;--muted:#9AA8B8;--line:#27364A;--soft:#1C2A3B;
+  --accent:#7D92FF;--accent-soft:#1E2A52;--stop:#3CC49A;--stop-soft:#12302A;--det:#E3A845;--det-soft:#33280F;--miss:#F07166;--miss-soft:#3A1B1A;--start:#8391A3;
+  --critical:#F0606A;--high:#F2894F;--medium:#E3B545;--low:#4FC495;}}
+:root[data-theme="dark"]{
+  --paper:#0F1722;--surface:#16212F;--ink:#E7EDF4;--muted:#9AA8B8;--line:#27364A;--soft:#1C2A3B;
+  --accent:#7D92FF;--accent-soft:#1E2A52;--stop:#3CC49A;--stop-soft:#12302A;--det:#E3A845;--det-soft:#33280F;--miss:#F07166;--miss-soft:#3A1B1A;--start:#8391A3;
+  --critical:#F0606A;--high:#F2894F;--medium:#E3B545;--low:#4FC495;}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font);font-size:17px;line-height:1.5;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
+a{color:var(--accent)}
+.wrap{max-width:1320px;margin:0 auto;padding:0 24px}
+
+/* header */
+header{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:20}
+.hrow{display:flex;align-items:center;gap:20px;min-height:64px;flex-wrap:wrap;padding:8px 0}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;white-space:nowrap}
+.brand-mark{width:30px;height:30px;border-radius:8px;background:var(--ink);display:grid;place-items:center;color:var(--surface)}
+.story{display:flex;gap:4px;flex:1;justify-content:center;flex-wrap:wrap}
+.story button{border:0;background:none;padding:8px 12px;border-radius:999px;color:var(--muted);font-weight:500;font-size:15px;display:flex;gap:8px;align-items:center}
+.story button .n{width:22px;height:22px;border-radius:50%;border:1.5px solid currentColor;display:grid;place-items:center;font-size:12px;font-weight:600}
+.story button[aria-current="step"],.story button.done[aria-current="step"]{background:var(--ink);color:var(--surface)}
+.story button[aria-current="step"] .n{border-color:var(--surface)}
+.story button.done:not([aria-current]){color:var(--ink)}
+.hbtns{display:flex;gap:8px}
+.ghost{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;font-size:15px;font-weight:500}
+.ghost:hover{background:var(--soft)}
+
+/* exposure band */
+.band{background:var(--ink);color:var(--paper)}
+:root[data-theme="dark"] .band{background:#0A111B}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .band{background:#0A111B}}
+.band .wrap{display:grid;grid-template-columns:1.4fr 1fr 1.6fr;gap:28px;padding-top:22px;padding-bottom:22px;align-items:end}
+.band .lbl{font-size:14px;opacity:.72;display:flex;gap:8px;align-items:center}
+.est{font-size:11.5px;font-weight:600;border:1px solid currentColor;border-radius:999px;padding:1px 8px;opacity:.85}
+.big{font-size:52px;font-weight:700;line-height:1.05;letter-spacing:-.02em;margin-top:4px}
+.mid{font-size:30px;font-weight:600;line-height:1.1;margin-top:4px}
+.sub{font-size:14px;opacity:.72;margin-top:4px}
+.delta{font-size:15px;font-weight:600;margin-top:6px;min-height:22px}
+.delta.good{color:#6FE0B6}.delta.bad{color:#FF9A90}
+.sevrow{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.sevchip{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.07);font-size:14px}
+.sevchip b{font-size:18px}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none}
+
+/* layout */
+main .wrap{display:grid;grid-template-columns:330px 1fr;gap:28px;padding-top:28px;padding-bottom:40px}
+.rail{position:sticky;top:96px;align-self:start;display:flex;flex-direction:column;gap:18px}
+.rail h3{font-size:14px;color:var(--muted);font-weight:600;margin:0 0 8px}
+.tool{display:flex;gap:12px;align-items:flex-start;padding:12px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface);margin-bottom:8px;transition:border-color .2s,background .2s}
+.tool.on{border-color:var(--ink)}
+.tool.flash{background:var(--accent-soft)}
+.tool .meta{flex:1;min-width:0}
+.tool .nm{font-weight:600;font-size:15.5px;line-height:1.3}
+.tool .ds{font-size:13.5px;color:var(--muted);line-height:1.35;margin-top:2px}
+.tool .cost{font-size:14px;font-weight:600;white-space:nowrap}
+.tag{display:inline-block;font-size:12px;font-weight:600;padding:1px 8px;border-radius:999px;margin-top:6px;border:1px solid var(--line);color:var(--muted)}
+.tag.vendor{border-color:#8B6CD9;color:#7B5CD0}
+.switch{position:relative;width:44px;height:26px;flex:none;margin-top:2px}
+.switch input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer}
+.switch span{position:absolute;inset:0;border-radius:999px;background:var(--line);transition:background .2s}
+.switch span::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .2s}
+.switch input:checked+span{background:var(--ink)}
+:root[data-theme="dark"] .switch input:checked+span{background:var(--accent)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .switch input:checked+span{background:var(--accent)}}
+.switch input:checked+span::after{transform:translateX(18px)}
+.switch input:focus-visible+span{outline:3px solid var(--accent);outline-offset:2px}
+.reset{font-size:14px;border:0;background:none;color:var(--accent);padding:4px 0;font-weight:600;text-align:left}
+
+/* chapters */
+.chap{display:none}.chap.active{display:block}
+.chap h1{font-size:34px;line-height:1.15;letter-spacing:-.015em;margin:0 0 10px;font-weight:700;max-width:30ch}
+.chap .lead{font-size:19px;color:var(--muted);max-width:62ch;margin:0 0 24px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:22px}
+.next{display:flex;justify-content:space-between;align-items:center;margin-top:28px;gap:12px;flex-wrap:wrap}
+.primary{background:var(--accent);color:#fff;border:0;border-radius:999px;padding:13px 24px;font-weight:600;font-size:16.5px}
+.primary:hover{filter:brightness(1.08)}
+.secondary{background:none;border:1px solid var(--line);border-radius:999px;padding:12px 20px;font-weight:500}
+.how{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.how .card h4{margin:0 0 6px;font-size:17px}
+.how .card p{margin:0;color:var(--muted);font-size:15.5px}
+.how .num{width:32px;height:32px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:700;margin-bottom:10px}
+
+/* scenarios */
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.tabs button{border:1px solid var(--line);background:var(--surface);border-radius:var(--r-md);padding:10px 14px;text-align:left;display:flex;gap:10px;align-items:center;min-width:180px}
+.tabs button[aria-selected="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.tabs .tn{font-weight:600;font-size:15.5px}.tabs .ts{font-size:13px;color:var(--muted)}
+.scgrid{display:grid;grid-template-columns:1fr 330px;gap:20px;align-items:start}
+.chain{position:relative;padding-left:4px}
+.step{display:grid;grid-template-columns:44px 1fr;gap:14px;position:relative;padding-bottom:14px}
+.step:not(:last-child)::before{content:"";position:absolute;left:21px;top:44px;bottom:0;width:2px;background:var(--line)}
+.node{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--line);background:var(--surface);font-weight:700;font-size:15px;color:var(--muted);transition:all .35s}
+.step .body{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:12px 14px;transition:all .35s}
+.step .txt{font-weight:500;font-size:16px}
+.step .res{display:flex;gap:10px;align-items:center;margin-top:6px;flex-wrap:wrap;font-size:14.5px}
+.badge{display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:13.5px;padding:3px 10px;border-radius:999px}
+.b-stopped{background:var(--stop-soft);color:var(--stop)}.b-detected{background:var(--det-soft);color:var(--det)}.b-missed{background:var(--miss-soft);color:var(--miss)}.b-start{background:var(--soft);color:var(--start)}
+.step.s-stopped .node{border-color:var(--stop);background:var(--stop);color:#fff}
+.step.s-detected .node{border-color:var(--det);background:var(--det);color:#fff}
+.step.s-missed .node{border-color:var(--miss);background:var(--miss);color:#fff}
+.step.s-start .node{border-style:dashed;color:var(--start)}
+.step.pending .body{opacity:.45}
+.step.current .body{border-color:var(--ink);box-shadow:0 0 0 3px var(--accent-soft)}
+.who{color:var(--muted)}
+details.ev{margin-top:8px;font-size:14px}
+details.ev summary{cursor:pointer;color:var(--accent);font-weight:500;list-style:none}
+details.ev summary::-webkit-details-marker{display:none}
+details.ev ul{margin:8px 0 0;padding-left:18px;color:var(--muted)}
+.goal{display:flex;gap:10px;align-items:center;padding:12px 14px;border-radius:var(--r-md);border:1px dashed var(--line);margin-left:58px;font-weight:600}
+.side .card{position:sticky;top:96px}
+.pct{font-size:44px;font-weight:700;line-height:1;letter-spacing:-.02em}
+.sevpill{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:14px;padding:4px 12px;border-radius:999px;color:#fff}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--line);font-size:15.5px}
+.kv span:first-child{color:var(--muted)}
+.math{font-size:14px;color:var(--muted);background:var(--soft);border-radius:var(--r-sm);padding:10px 12px;margin-top:10px;overflow-x:auto}
+.math code{font-family:var(--font);font-weight:600;color:var(--ink)}
+
+/* returns */
+.rows{display:flex;flex-direction:column;gap:10px}
+.rrow{display:grid;grid-template-columns:220px 1fr 150px;gap:18px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px}
+.rrow.focus{border-color:var(--high);box-shadow:0 0 0 3px color-mix(in srgb,var(--high) 18%,transparent)}
+.rrow .nm{font-weight:600}
+.rrow .small{font-size:13.5px;color:var(--muted)}
+.bars{display:flex;flex-direction:column;gap:6px}
+.bar{display:grid;grid-template-columns:92px 1fr 90px;gap:10px;align-items:center;font-size:13.5px}
+.bar .track{height:12px;background:var(--soft);border-radius:999px;overflow:hidden}
+.bar .fill{height:100%;border-radius:999px;transition:width .6s cubic-bezier(.2,.8,.2,1)}
+.fill.cost{background:var(--muted)}.fill.red{background:var(--stop)}
+.bar .v{text-align:right;font-weight:600}
+.rosi{text-align:right}
+.rosi .v{font-size:24px;font-weight:700;line-height:1.1}
+.cls{font-size:13px;font-weight:600;margin-top:2px}
+.c-high,.c-free{color:var(--stop)}.c-positive{color:var(--accent)}.c-low{color:var(--high)}
+.note{font-size:13.5px;color:var(--muted);margin-top:4px}
+
+/* what-if */
+.presets{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+.preset{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:10px 16px;font-weight:500;font-size:15.5px}
+.preset:hover{border-color:var(--ink)}
+.preset.active{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.cmp .card h4{margin:0;font-size:15px;color:var(--muted);font-weight:600}
+.changes{list-style:none;margin:0;padding:0}
+.changes li{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-top:1px solid var(--line);font-size:16px}
+.changes li:first-child{border-top:0}
+.arrow{font-weight:700}
+.empty{color:var(--muted);font-size:16px}
+
+/* plan */
+.plan{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+.move{display:flex;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.move:first-of-type{border-top:0}
+.mv{font-size:13px;font-weight:700;padding:3px 10px;border-radius:999px;min-width:92px;text-align:center}
+.mv.remove{background:var(--miss-soft);color:var(--miss)}.mv.enable{background:var(--stop-soft);color:var(--stop)}.mv.add{background:var(--accent-soft);color:var(--accent)}
+.cmpbar{margin:14px 0}
+.cmpbar .row{display:grid;grid-template-columns:70px 1fr 110px;gap:10px;align-items:center;margin:8px 0;font-size:15px}
+.cmpbar .track{height:26px;background:var(--soft);border-radius:8px;overflow:hidden}
+.cmpbar .fill{height:100%;border-radius:8px;transition:width .8s cubic-bezier(.2,.8,.2,1)}
+.hero-red{font-size:56px;font-weight:700;letter-spacing:-.02em;line-height:1;color:var(--stop)}
+.ctrl{display:flex;flex-direction:column;gap:14px}
+.ctrl label{font-size:15px;font-weight:500}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.chk{display:flex;gap:10px;align-items:flex-start;font-size:15px}
+.chk input{width:18px;height:18px;margin-top:3px;accent-color:var(--accent)}
+.warn{background:var(--det-soft);color:var(--det);border-radius:var(--r-sm);padding:10px 12px;font-size:14.5px;font-weight:500}
+
+/* drawer */
+.scrim{position:fixed;inset:0;background:rgba(10,16,26,.45);z-index:40;display:none}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(520px,100%);background:var(--surface);z-index:41;transform:translateX(100%);transition:transform .3s;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.drawer.open{transform:none}.scrim.open{display:block}
+.drawer .hd{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid var(--line)}
+.drawer .hd h2{margin:0;font-size:21px}
+.drawer .bd{overflow:auto;padding:18px 22px;flex:1}
+.drawer h3{font-size:16px;margin:18px 0 8px}
+.fgrid{display:grid;grid-template-columns:1fr 110px;gap:8px 12px;align-items:center;font-size:15px}
+.fgrid input{width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:var(--paper);text-align:right}
+.drawer p{color:var(--muted);font-size:14.5px}
+.formula{background:var(--soft);border-radius:8px;padding:10px 12px;font-size:14.5px;font-weight:500}
+
+footer{border-top:1px solid var(--line);padding:18px 0 28px;color:var(--muted);font-size:13px}
+footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.proto{display:inline-flex;gap:6px;align-items:center}
+
+@media (max-width:1080px){
+  .band .wrap{grid-template-columns:1fr 1fr}.band .sevbox{grid-column:1/-1}
+  main .wrap{grid-template-columns:1fr}.rail{position:static}
+  .scgrid,.plan,.cmp{grid-template-columns:1fr}.side .card{position:static}
+  .rrow{grid-template-columns:1fr}.rosi{text-align:left}
+}
+@media (max-width:640px){
+  .wrap{padding:0 16px}.big{font-size:40px}.chap h1{font-size:27px}.how{grid-template-columns:1fr}
+  .story button .t{display:none}.band .wrap{grid-template-columns:1fr}
+  .bar{grid-template-columns:70px 1fr 80px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media print{header,.rail,.next,.presets{display:none}.band{background:#fff;color:#000}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap hrow">
+    <div class="brand"><div class="brand-mark" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg></div>ROI Cyber-Validator</div>
+    <nav class="story" aria-label="Story" id="story"></nav>
+    <div class="hbtns"><button class="ghost" id="openAssume">Assumptions</button><button class="ghost" id="theme" aria-label="Switch light or dark">◐</button></div>
+  </div>
+</header>
+
+<section class="band" aria-live="polite">
+  <div class="wrap">
+    <div>
+      <div class="lbl">Estimated yearly loss exposure <span class="est">Estimate</span></div>
+      <div class="big" id="expo">$0</div>
+      <div class="sub" id="expoRange"></div>
+      <div class="delta" id="expoDelta"></div>
+    </div>
+    <div>
+      <div class="lbl">Yearly security spend</div>
+      <div class="mid" id="spend">$0</div>
+      <div class="delta" id="spendDelta"></div>
+    </div>
+    <div class="sevbox">
+      <div class="lbl">Tested attacks by severity</div>
+      <div class="sevrow" id="sevrow"></div>
+    </div>
+  </div>
+</section>
+
+<main>
+  <div class="wrap">
+    <aside class="rail" aria-label="Your security tools">
+      <div><h3>You pay for these</h3><div id="g-active"></div></div>
+      <div><h3>You already own, but it's switched off</h3><div id="g-owned"></div></div>
+      <div><h3>You're considering</h3><div id="g-candidate"></div></div>
+      <button class="reset" id="resetTools">Reset to today's setup</button>
+    </aside>
+
+    <div>
+      <!-- 1 -->
+      <section class="chap" id="c1">
+        <h1>You spend $345,000 a year on security. What is it buying you?</h1>
+        <p class="lead">We safely test your tools against four common attacks, estimate what each attack could cost you in a year, and show which tools earn their price.</p>
+        <div class="how">
+          <div class="card"><div class="num">1</div><h4>Run the attacks</h4><p>Each attack is a chain of real attacker steps from MITRE ATT&CK. We check which of your tools blocks each step.</p></div>
+          <div class="card"><div class="num">2</div><h4>Estimate the cost</h4><p>Blocked steps lower the chance an attack succeeds. That chance, times how often it's tried and what it costs, gives a yearly estimate.</p></div>
+          <div class="card"><div class="num">3</div><h4>Compare your options</h4><p>Switch tools on or off and see the estimate change. Then let the planner find a better mix for the same budget.</p></div>
+        </div>
+        <div class="next"><span></span><button class="primary" data-go="2">Run the attacks</button></div>
+      </section>
+
+      <!-- 2 -->
+      <section class="chap" id="c2">
+        <h1>Four attacks against your setup</h1>
+        <p class="lead">Pick an attack and watch it move through your defenses. Click any step to see the evidence behind it.</p>
+        <div class="tabs" role="tablist" id="tabs"></div>
+        <div class="scgrid">
+          <div>
+            <div class="chain" id="chain"></div>
+            <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap"><button class="secondary" id="replay">Replay attack</button></div>
+          </div>
+          <div class="side"><div class="card" id="scside"></div></div>
+        </div>
+        <div class="next"><button class="secondary" data-go="1">Back</button><button class="primary" data-go="3">See what each tool returns</button></div>
+      </section>
+
+      <!-- 3 -->
+      <section class="chap" id="c3">
+        <h1>What each tool returns for its price</h1>
+        <p class="lead">For every tool: what it costs, how much estimated loss it removes, and the return on that money. Grey rows show tools you could add.</p>
+        <div class="rows" id="rows"></div>
+        <p class="note" style="margin-top:14px">Return on security investment (ROSI) = (estimated loss removed − yearly cost) ÷ yearly cost. Based on the four tested attacks only.</p>
+        <div class="next"><button class="secondary" data-go="2">Back</button><button class="primary" data-go="4">Try a what-if</button></div>
+      </section>
+
+      <!-- 4 -->
+      <section class="chap" id="c4">
+        <h1>What if you changed one thing?</h1>
+        <p class="lead">Try a change below, or flip any switch on the left. Everything recalculates instantly.</p>
+        <div class="presets" id="presets"></div>
+        <div class="cmp" id="cmp"></div>
+        <div class="card"><h4 style="margin:0 0 6px;font-size:17px">What changed</h4><ul class="changes" id="changes"></ul></div>
+        <div class="next"><button class="secondary" data-go="3">Back</button><button class="primary" data-go="5">Find the best plan</button></div>
+      </section>
+
+      <!-- 5 -->
+      <section class="chap" id="c5">
+        <h1>A better plan for the same budget</h1>
+        <p class="lead">The planner tries every combination of your tools, what you already own, and what you're considering, and picks the one with the lowest estimated loss that fits your budget.</p>
+        <div class="plan">
+          <div class="card ctrl">
+            <label for="budget">Budget: <b id="budgetV"></b> per year</label>
+            <input type="range" id="budget" min="150000" max="450000" step="5000">
+            <label class="chk"><input type="checkbox" id="allowBase"> <span>Allow removing required baseline tools (Email Security, Firewall, Log Monitoring)</span></label>
+            <div id="planWarn"></div>
+            <h4 style="margin:6px 0 0">The plan</h4>
+            <div id="moves"></div>
+            <button class="primary" id="apply" style="align-self:flex-start">Apply this plan</button>
+          </div>
+          <div class="card" id="planResult"></div>
+        </div>
+        <div class="next"><button class="secondary" data-go="4">Back</button><button class="secondary" id="restart">Start over</button></div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span class="proto">Prototype — fictional company. Costs, attack frequencies and loss values are sample assumptions you can change.</span>
+    <span>MITRE ATT&CK® Enterprise v19.2. © 2026 The MITRE Corporation. This work is reproduced and distributed with the permission of The MITRE Corporation.</span>
+  </div>
+</footer>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="Assumptions" aria-hidden="true">
+  <div class="hd"><h2>Assumptions</h2><button class="ghost" id="closeAssume">Close</button></div>
+  <div class="bd" id="assumeBody"></div>
+</aside>
+
+<script>
+const TECH={"T1003": {"n": "OS Credential Dumping", "u": "https://attack.mitre.org/techniques/T1003"}, "T1021.001": {"n": "Remote Desktop Protocol", "u": "https://attack.mitre.org/techniques/T1021/001"}, "T1041": {"n": "Exfiltration Over C2 Channel", "u": "https://attack.mitre.org/techniques/T1041"}, "T1059": {"n": "Command and Scripting Interpreter", "u": "https://attack.mitre.org/techniques/T1059"}, "T1059.001": {"n": "PowerShell", "u": "https://attack.mitre.org/techniques/T1059/001"}, "T1078.004": {"n": "Cloud Accounts", "u": "https://attack.mitre.org/techniques/T1078/004"}, "T1098.005": {"n": "Device Registration", "u": "https://attack.mitre.org/techniques/T1098/005"}, "T1110.003": {"n": "Password Spraying", "u": "https://attack.mitre.org/techniques/T1110/003"}, "T1110.004": {"n": "Credential Stuffing", "u": "https://attack.mitre.org/techniques/T1110/004"}, "T1114.002": {"n": "Remote Email Collection", "u": "https://attack.mitre.org/techniques/T1114/002"}, "T1114.003": {"n": "Email Forwarding Rule", "u": "https://attack.mitre.org/techniques/T1114/003"}, "T1133": {"n": "External Remote Services", "u": "https://attack.mitre.org/techniques/T1133"}, "T1190": {"n": "Exploit Public-Facing Application", "u": "https://attack.mitre.org/techniques/T1190"}, "T1204.002": {"n": "Malicious File", "u": "https://attack.mitre.org/techniques/T1204/002"}, "T1486": {"n": "Data Encrypted for Impact", "u": "https://attack.mitre.org/techniques/T1486"}, "T1490": {"n": "Inhibit System Recovery", "u": "https://attack.mitre.org/techniques/T1490"}, "T1534": {"n": "Internal Spearphishing", "u": "https://attack.mitre.org/techniques/T1534"}, "T1539": {"n": "Steal Web Session Cookie", "u": "https://attack.mitre.org/techniques/T1539"}, "T1550.004": {"n": "Web Session Cookie", "u": "https://attack.mitre.org/techniques/T1550/004"}, "T1557": {"n": "Adversary-in-the-Middle", "u": "https://attack.mitre.org/techniques/T1557"}, "T1564.008": {"n": "Email Hiding Rules", "u": "https://attack.mitre.org/techniques/T1564/008"}, "T1566.001": {"n": "Spearphishing Attachment", "u": "https://attack.mitre.org/techniques/T1566/001"}, "T1566.002": {"n": "Spearphishing Link", "u": "https://attack.mitre.org/techniques/T1566/002"}, "T1567": {"n": "Exfiltration Over Web Service", "u": "https://attack.mitre.org/techniques/T1567"}, "T1570": {"n": "Lateral Tool Transfer", "u": "https://attack.mitre.org/techniques/T1570"}, "T1621": {"n": "Multi-Factor Authentication Request Generation", "u": "https://attack.mitre.org/techniques/T1621"}, "T1657": {"n": "Financial Theft", "u": "https://attack.mitre.org/techniques/T1657"}, "T1684.001": {"n": "Impersonation", "u": "https://attack.mitre.org/techniques/T1684/001"}};
+const SCEN_RAW=[{"id": "S1", "steps": [{"o": 1, "t": "T1566.002", "s": "Employee receives an email with a link to a fake login page", "a": ["T1566.001"]}, {"o": 2, "t": "T1557", "s": "Fake page relays the real login and captures password and session", "a": ["T1539"]}, {"o": 3, "t": "T1550.004", "s": "Attacker reuses the stolen session to enter the mailbox without a password prompt", "a": ["T1078.004"]}, {"o": 4, "t": "T1098.005", "s": "Attacker registers their own device to keep access", "a": ["T1564.008"]}, {"o": 5, "t": "T1114.002", "s": "Attacker reads and downloads email", "a": []}]}, {"id": "S2", "steps": [{"o": 1, "t": "T1110.003", "s": "Attacker tries a few common passwords across many accounts", "a": ["T1110.004"]}, {"o": 2, "t": "T1621", "s": "If a second login check exists, attacker floods the employee with approval requests", "a": []}, {"o": 3, "t": "T1078.004", "s": "Attacker signs in as the employee", "a": []}, {"o": 4, "t": "T1114.003", "s": "Attacker sets a rule that silently forwards the employee's email", "a": ["T1564.008"]}]}, {"id": "S3", "steps": [{"o": 1, "t": "T1078.004", "s": "Attacker already controls an employee mailbox (e.g. after S1 or S2)", "a": []}, {"o": 2, "t": "T1564.008", "s": "Attacker hides replies from customers so the employee doesn't notice", "a": ["T1114.003"]}, {"o": 3, "t": "T1534", "s": "Attacker emails colleagues or customers from the real account", "a": ["T1684.001"]}, {"o": 4, "t": "T1657", "s": "Customer pays a fake invoice to the attacker's bank account", "a": []}]}, {"id": "S4", "steps": [{"o": 1, "t": "T1566.001", "s": "Employee receives an email with a malicious attachment", "a": ["T1133", "T1190"]}, {"o": 2, "t": "T1204.002", "s": "Employee opens the file", "a": []}, {"o": 3, "t": "T1059.001", "s": "Malicious script runs on the laptop", "a": ["T1059"]}, {"o": 4, "t": "T1003", "s": "Attacker steals stored passwords from the machine", "a": []}, {"o": 5, "t": "T1021.001", "s": "Attacker moves to other computers using remote desktop", "a": ["T1570"]}, {"o": 6, "t": "T1567", "s": "Attacker copies company data out (for extortion)", "a": ["T1041"]}, {"o": 7, "t": "T1490", "s": "Attacker deletes backups and recovery options", "a": []}, {"o": 8, "t": "T1486", "s": "Attacker encrypts company files and demands payment", "a": []}]}];
+
+const SCEN_META={
+  S1:{name:"Fake login page",long:"Phishing & credential theft",goal:"the attacker reads the employee's email"},
+  S2:{name:"Password guessing",long:"Account compromise",goal:"the attacker signs in as an employee"},
+  S3:{name:"Invoice fraud",long:"Business email compromise",goal:"a customer pays a fake invoice"},
+  S4:{name:"Ransomware",long:"Ransomware",goal:"company files are locked for ransom"}
+};
+const TOOLS=[
+  {id:"email_security",name:"Email Security",short:"Email Security",cost:40000,status:"active",base:true,desc:"Filters malicious links and attachments."},
+  {id:"edr",name:"Endpoint Protection (EDR)",short:"EDR",cost:90000,status:"active",base:false,desc:"Watches and blocks malicious activity on laptops."},
+  {id:"firewall",name:"Firewall",short:"Firewall",cost:70000,status:"active",base:true,desc:"Controls network traffic in and out."},
+  {id:"siem",name:"Log Monitoring (SIEM)",short:"SIEM",cost:85000,status:"active",base:true,desc:"Collects logs and raises alerts."},
+  {id:"tool_x",name:"Tool X — Script Control",short:"Tool X",cost:60000,status:"active",base:false,desc:"Blocks unapproved scripts on laptops."},
+  {id:"mfa_owned",name:"Second login check (MFA)",short:"MFA",cost:0,status:"owned",base:false,desc:"Already in your license. Not switched on."},
+  {id:"identity_suite",name:"Identity Protection Suite",short:"Identity Suite",cost:50000,status:"candidate",base:false,desc:"Considering buying. Vendor description, not tested."},
+  {id:"payment_process",name:"Payment check by phone",short:"Payment check",cost:8000,status:"candidate",base:false,desc:"Call on a known number before changing payment details."}
+];
+const TOOLMAP=Object.fromEntries(TOOLS.map(t=>[t.id,t]));
+const MAP=[
+ ["email_security","T1566.002","stop","MITRE mitigation: Restrict Web-Based Content"],["email_security","T1566.001","stop","MITRE mitigation: Antivirus/Antimalware"],
+ ["edr","T1059.001","stop","MITRE mitigation: Execution Prevention"],["edr","T1059","stop","MITRE mitigation: Execution Prevention"],["edr","T1003","stop","MITRE mitigation: Credential Access Protection"],["edr","T1490","stop","Team assumption — to be validated"],["edr","T1486","stop","MITRE mitigation: Behavior Prevention on Endpoint"],
+ ["edr","T1204.002","detect","MITRE detection strategy"],["edr","T1539","detect","MITRE detection strategy"],["edr","T1570","detect","MITRE detection strategy"],
+ ["firewall","T1133","stop","MITRE mitigation: Limit Access to Resource Over Network"],["firewall","T1190","stop","MITRE mitigation: Network Segmentation"],["firewall","T1021.001","stop","MITRE mitigation: Limit Access to Resource Over Network"],["firewall","T1567","detect","MITRE detection strategy"],["firewall","T1041","detect","MITRE detection strategy"],
+ ["siem","T1110.003","detect","MITRE detection strategy"],["siem","T1110.004","detect","MITRE detection strategy"],["siem","T1078.004","detect","MITRE detection strategy"],
+ ["tool_x","T1059.001","stop","Team assumption — to be validated"],["tool_x","T1059","stop","Team assumption — to be validated"],
+ ["mfa_owned","T1078.004","stop","MITRE mitigation: Multi-factor Authentication"],["mfa_owned","T1621","stop","MITRE mitigation: Multi-factor Authentication"],
+ ["identity_suite","T1557","stop","Vendor description — not tested"],["identity_suite","T1539","stop","Vendor description — not tested"],["identity_suite","T1550.004","stop","Vendor description — not tested"],["identity_suite","T1110.003","stop","Vendor description — not tested"],["identity_suite","T1110.004","stop","Vendor description — not tested"],
+ ["payment_process","T1657","stop","MITRE mitigation: User Training"]
+];
+const NOISE={email_security:4,edr:6,firewall:9,siem:18,tool_x:31,mfa_owned:0,payment_process:0,identity_suite:null};
+const DEFAULT_ASSUME={
+  pass:{stopped:0.20,detected:0.60,missed:0.95,start:1.0},
+  sc:{S1:{f:[12,24,48],l:[30000,60000,180000]},S2:{f:[6,12,24],l:[20000,40000,120000]},S3:{f:[1.5,3,6],l:[60000,120000,360000]},S4:{f:[3,6,12],l:[750000,1500000,4500000]}},
+  sev:{critical:0.5,high:0.2,medium:0.05}
+};
+const BASELINE=["email_security","edr","firewall","siem","tool_x"];
+
+function outcomes(tools){
+  const set=new Set(tools), stop={}, det={};
+  for(const [tl,t,e,ev] of MAP){ if(!set.has(tl)) continue;
+    (det[t]=det[t]||[]).push({tool:tl,effect:e,ev}); if(e==="stop")(stop[t]=stop[t]||[]).push(tl); }
+  const res={};
+  for(const sc of SCEN_RAW){
+    res[sc.id]=sc.steps.map(st=>{
+      if(sc.id==="S3"&&st.o===1) return {out:"start",stopBy:[],seenBy:[],open:[],evidence:[]};
+      const ts=[st.t,...st.a];
+      const allStop=ts.every(t=>stop[t]), allDet=ts.every(t=>det[t]);
+      const out=allStop?"stopped":allDet?"detected":"missed";
+      const stopBy=[...new Set(ts.flatMap(t=>stop[t]||[]))];
+      const seenBy=[...new Set(ts.flatMap(t=>(det[t]||[]).map(x=>x.tool)))];
+      const open=ts.filter(t=>!stop[t]);
+      const evidence=ts.flatMap(t=>(det[t]||[]).map(x=>({t,...x})));
+      return {out,stopBy:out==="stopped"?stopBy:[],seenBy,open,evidence};
+    });
+  }
+  return res;
+}
+function risk(tools,A){
+  const o=outcomes(tools), r={}; let total=0;
+  for(const id in o){
+    let p=1; for(const s of o[id]) p*=A.pass[s.out];
+    const ale=A.sc[id].f[1]*p*A.sc[id].l[1];
+    const sev=p>=A.sev.critical?"critical":p>=A.sev.high?"high":p>=A.sev.medium?"medium":"low";
+    r[id]={p,ale,sev,steps:o[id],stops:o[id].filter(s=>s.out==="stopped").length};
+    total+=ale;
+  }
+  return {sc:r,total,spend:tools.reduce((a,t)=>a+TOOLMAP[t].cost,0),noise:tools.reduce((a,t)=>a+(NOISE[t]||0),0),tools:[...tools]};
+}
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}}
+function gamma(k,rnd){ if(k<1){return gamma(k+1,rnd)*Math.pow(rnd(),1/k);}
+  const d=k-1/3,c=1/Math.sqrt(9*d);
+  for(;;){let x,v;do{const u1=rnd()||1e-12,u2=rnd();x=Math.sqrt(-2*Math.log(u1))*Math.cos(2*Math.PI*u2);v=1+c*x;}while(v<=0);
+    v=v*v*v;const u=rnd()||1e-12;if(u<1-0.0331*x*x*x*x||Math.log(u)<0.5*x*x+d*(1-v+Math.log(v)))return d*v;}}
+function pert(a,m,c,rnd){if(c===a)return a;const al=1+4*(m-a)/(c-a),be=1+4*(c-m)/(c-a);const x=gamma(al,rnd),y=gamma(be,rnd);return a+(x/(x+y))*(c-a);}
+function range(R,A,n=4000){
+  const rnd=mulberry(42), vals=[];
+  for(let i=0;i<n;i++){let t=0;for(const id in R.sc){const s=A.sc[id];t+=pert(...s.f,rnd)*R.sc[id].p*pert(...s.l,rnd);}vals.push(t);}
+  vals.sort((a,b)=>a-b); return {p10:vals[Math.floor(n*.1)],p90:vals[Math.floor(n*.9)]};
+}
+function toolReturns(tools,A){
+  const base=risk(tools,A);
+  return TOOLS.map(t=>{
+    const on=tools.includes(t.id);
+    const alt=risk(on?tools.filter(x=>x!==t.id):[...tools,t.id],A);
+    const red=on?alt.total-base.total:base.total-alt.total;
+    const rosi=t.cost>0?(red-t.cost)/t.cost:null;
+    let uniq=0;
+    if(on){ for(const id in base.sc) base.sc[id].steps.forEach((s,i)=>{ if(s.out==="stopped"&&alt.sc[id].steps[i].out!=="stopped") uniq++; }); }
+    const cls=rosi===null?(red>0.5?"free":"none"):rosi>=1?"high":rosi>=0?"positive":"low";
+    return {...t,on,reduction:red,rosi,cls,uniq,noise:NOISE[t.id]};
+  });
+}
+function optimize(A,budget,allowBase){
+  const locked=TOOLS.filter(t=>t.base&&!allowBase).map(t=>t.id);
+  const free=TOOLS.filter(t=>!locked.includes(t.id)).map(t=>t.id);
+  let best=null;
+  for(let m=0;m<(1<<free.length);m++){
+    const cfg=[...locked,...free.filter((_,i)=>m>>i&1)];
+    const sp=cfg.reduce((a,t)=>a+TOOLMAP[t].cost,0); if(sp>budget) continue;
+    const r=risk(cfg,A);
+    if(!best||r.total<best.total-0.5||(Math.abs(r.total-best.total)<=0.5&&r.spend<best.spend)) best=r;
+  }
+  return best;
+}
+
+
+const $=s=>document.querySelector(s);
+const fmt=n=>"$"+Math.round(n).toLocaleString("en-US");
+const fmtK=n=>n>=1e6?"$"+(n/1e6).toFixed(2).replace(/\.?0+$/,"")+"M":n>=1e3?"$"+Math.round(n/1e3)+"K":"$"+Math.round(n);
+const pctS=p=>p*100<0.1?"under 0.1%":(p*100).toFixed(1)+"%";
+const SEV={critical:"Critical",high:"High",medium:"Medium",low:"Low"};
+const OUT={stopped:["Blocked","b-stopped","✓"],detected:["Seen, not blocked","b-detected","◉"],missed:["No tool reacted","b-missed","✕"],start:["Starting point","b-start","•"]};
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+const S={tools:new Set(BASELINE),chap:1,scen:"S1",A:JSON.parse(JSON.stringify(DEFAULT_ASSUME)),preset:null,budget:345000,allowBase:false,visited:new Set([1])};
+let lastTotal=null;
+
+function cur(){return risk([...S.tools],S.A)}
+function today(){return risk(BASELINE,S.A)}
+
+/* animated number */
+function tween(el,to,f){const from=+el.dataset.v||0;el.dataset.v=to;if(reduce||from===to){el.textContent=f(to);return}
+  const t0=performance.now(),d=700;const step=t=>{const k=Math.min(1,(t-t0)/d),e=1-Math.pow(1-k,3);el.textContent=f(from+(to-from)*e);if(k<1)requestAnimationFrame(step)};requestAnimationFrame(step)}
+
+function renderStory(){
+  const names=["The bill","The attacks","Tool returns","What if","Best plan"];
+  $("#story").innerHTML=names.map((n,i)=>`<button data-go="${i+1}" ${S.chap===i+1?'aria-current="step"':''} class="${S.visited.has(i+1)?'done':''}"><span class="n">${i+1}</span><span class="t">${n}</span></button>`).join("");
+}
+function renderBand(){
+  const r=cur(),t=today(),rg=range(r,S.A);
+  tween($("#expo"),r.total,fmt);
+  $("#expoRange").textContent=`Likely range ${fmtK(rg.p10)} – ${fmtK(rg.p90)} (P10–P90)`;
+  const d=r.total-t.total;
+  $("#expoDelta").className="delta "+(d<-0.5?"good":d>0.5?"bad":"");
+  $("#expoDelta").textContent=Math.abs(d)<0.5?"Same as today's setup":`${d<0?"▼":"▲"} ${fmt(Math.abs(d))} vs today (${d<0?"−":"+"}${Math.abs(d/t.total*100).toFixed(1)}%)`;
+  tween($("#spend"),r.spend,fmt);
+  const ds=r.spend-t.spend;
+  $("#spendDelta").className="delta "+(ds<0?"good":ds>0?"bad":"");
+  $("#spendDelta").textContent=ds===0?"Same as today":`${ds<0?"▼":"▲"} ${fmt(Math.abs(ds))} vs today`;
+  const c={critical:0,high:0,medium:0,low:0};for(const id in r.sc)c[r.sc[id].sev]++;
+  $("#sevrow").innerHTML=Object.keys(c).map(k=>`<div class="sevchip"><span class="dot" style="background:var(--${k})"></span><span>${SEV[k]}</span><b>${c[k]}</b></div>`).join("");
+}
+function toolCard(t){
+  const on=S.tools.has(t.id);
+  const tag=t.status==="candidate"?`<span class="tag ${t.id==="identity_suite"?"vendor":""}">${t.id==="identity_suite"?"Vendor description — not tested":"Process change"}</span>`:t.status==="owned"?`<span class="tag">Included in your license</span>`:t.base?`<span class="tag">Required baseline</span>`:"";
+  return `<div class="tool ${on?"on":""}" id="tc-${t.id}"><label class="switch"><input type="checkbox" data-tool="${t.id}" ${on?"checked":""} aria-label="${t.name}"><span></span></label>
+  <div class="meta"><div class="nm">${t.name}</div><div class="ds">${t.desc}</div>${tag}</div><div class="cost">${t.cost?fmtK(t.cost):"$0"}</div></div>`;
+}
+function renderRail(){
+  for(const g of ["active","owned","candidate"]) $("#g-"+g).innerHTML=TOOLS.filter(t=>t.status===g).map(toolCard).join("");
+}
+function tn(id){return TOOLMAP[id].short}
+function list(a){return a.length<=1?a.join(""):a.slice(0,-1).join(", ")+" and "+a.at(-1)}
+
+/* chapter 2 */
+function renderTabs(){
+  const r=cur();
+  $("#tabs").innerHTML=Object.keys(SCEN_META).map(id=>{const s=r.sc[id];return `<button role="tab" aria-selected="${S.scen===id}" data-scen="${id}"><span class="dot" style="background:var(--${s.sev})"></span><span><span class="tn">${SCEN_META[id].name}</span><br><span class="ts">${SEV[s.sev]} · ${pctS(s.p)} chance</span></span></button>`}).join("");
+}
+function stepHTML(sc,st,res,i){
+  const [lab,cls,ic]=OUT[res.out];
+  let who="";
+  if(res.out==="stopped") who=`Blocked by ${list(res.stopBy.map(tn))}`;
+  else if(res.out==="detected") who=`Seen by ${list(res.seenBy.map(tn))}, but the attacker continues`;
+  else if(res.out==="missed") who=res.seenBy.length?`${list(res.seenBy.map(tn))} covers one route, but the attacker can still use another`:"None of your tools reacts to this step";
+  else who="This attack starts after an account is already taken over";
+  const techs=[st.t,...st.a];
+  const ev=res.out==="start"?"":`<details class="ev"><summary>Evidence and attacker routes</summary><ul>${techs.map(t=>{const e=res.evidence.filter(x=>x.t===t);const blocked=!res.open.includes(t);return `<li><a href="${TECH[t].u}" target="_blank" rel="noopener">${t} ${TECH[t].n}</a>${t!==st.t?" (alternative route)":""} — ${e.length?e.map(x=>`${tn(x.tool)} ${x.effect==="stop"?"blocks":"detects"} it. <i>${x.ev}</i>`).join(" "):"no tool covers it"}${blocked?"":" · still open"}</li>`}).join("")}</ul></details>`;
+  return `<div class="step pending" data-i="${i}" data-out="${res.out}"><div class="node" aria-hidden="true">${i+1}</div><div class="body"><div class="txt">${st.s}</div><div class="res"><span class="badge ${cls}" hidden>${ic} ${lab}</span><span class="who" hidden>${who}</span></div>${ev}</div></div>`;
+}
+let runTimer=null;
+function renderChain(animate){
+  const r=cur(),s=r.sc[S.scen],sc=SCEN_RAW.find(x=>x.id===S.scen);
+  $("#chain").innerHTML=sc.steps.map((st,i)=>stepHTML(sc,st,s.steps[i],i)).join("")+`<div class="goal" id="goal" hidden><span class="dot" style="background:var(--${s.sev})"></span>If every step works: ${SCEN_META[S.scen].goal}</div>`;
+  const steps=[...document.querySelectorAll(".step")];
+  const reveal=el=>{el.classList.remove("pending","current");el.classList.add("s-"+el.dataset.out);el.querySelectorAll("[hidden]").forEach(h=>h.hidden=false)};
+  clearTimeout(runTimer);
+  if(!animate||reduce){steps.forEach(reveal);$("#goal").hidden=false;renderSide(true);return}
+  renderSide(false);let i=0;
+  const tick=()=>{if(i>0)reveal(steps[i-1]);if(i<steps.length){steps[i].classList.add("current");i++;runTimer=setTimeout(tick,650)}else{$("#goal").hidden=false;renderSide(true)}};
+  tick();
+}
+function renderSide(show){
+  const r=cur(),s=r.sc[S.scen],a=S.A.sc[S.scen];
+  if(!show){$("#scside").innerHTML=`<div class="lbl" style="color:var(--muted)">Running the attack…</div>`;return}
+  const factors=s.steps.map(x=>S.A.pass[x.out].toFixed(2));
+  $("#scside").innerHTML=`<div style="color:var(--muted);font-size:14px">Chance this attack succeeds <span class="est" style="color:var(--muted)">Estimate</span></div>
+   <div style="display:flex;align-items:center;gap:12px;margin:6px 0 14px"><div class="pct">${pctS(s.p)}</div><span class="sevpill" style="background:var(--${s.sev})">${SEV[s.sev]}</span></div>
+   <div class="kv"><span>Blocked steps</span><b>${s.stops} of ${s.steps.filter(x=>x.out!=="start").length}</b></div>
+   <div class="kv"><span>Tries per year</span><b>${a.f[1]}</b></div>
+   <div class="kv"><span>Cost if it succeeds</span><b>${fmt(a.l[1])}</b></div>
+   <div class="kv"><span>Estimated yearly loss</span><b>${fmt(s.ale)}</b></div>
+   <details class="ev"><summary>How we calculated this</summary><div class="math">Each blocked step leaves a ${Math.round(S.A.pass.stopped*100)}% chance to get past (tools can fail), a seen step ${Math.round(S.A.pass.detected*100)}%, an uncovered step ${Math.round(S.A.pass.missed*100)}%.<br><br>Chance = <code>${factors.join(" × ")}</code> = <code>${pctS(s.p)}</code><br>Yearly loss = <code>${a.f[1]} tries × ${pctS(s.p)} × ${fmt(a.l[1])}</code> = <code>${fmt(s.ale)}</code></div></details>`;
+}
+
+/* chapter 3 */
+function renderRows(){
+  const rs=toolReturns([...S.tools],S.A);
+  const max=Math.max(...rs.map(t=>Math.max(t.cost,t.reduction)),1);
+  const order=[...rs].sort((a,b)=>(b.on-a.on)||((b.rosi??99)-(a.rosi??99)));
+  $("#rows").innerHTML=order.map(t=>{
+    const rosiTxt=t.rosi===null?(t.reduction>0.5?"Free":"—"):(t.rosi>=0?"+":"")+Math.round(t.rosi*100)+"%";
+    const clsTxt=(t.cls==="low"&&t.base)?"Low return in tested attacks":{high:"High return",positive:"Positive return",low:"Low return in tested attacks — worth a closer look",free:"Lowers loss at no extra cost",none:"No change in tested attacks"}[t.cls];
+    const verb=t.on?"Loss removed":"Would remove";
+    const notes=[];
+    if(t.base&&t.on)notes.push("Required baseline — its value reaches beyond these four attacks.");
+    if(t.id==="identity_suite")notes.push("Based on the vendor's description, not tested.");
+    if(t.on&&t.noise!=null)notes.push(`${t.noise} false alarms on a normal workday.`);
+    return `<div class="rrow ${t.cls==="low"&&t.on&&!t.base?"focus":""}" style="${t.on?"":"opacity:.62"}">
+      <div><div class="nm">${t.name}</div><div class="small">${t.on?"In use":t.status==="owned"?"Owned, switched off":"Not owned"}</div>${notes.map(n=>`<div class="note">${n}</div>`).join("")}</div>
+      <div class="bars"><div class="bar"><span>Yearly cost</span><div class="track"><div class="fill cost" style="width:${t.cost/max*100}%"></div></div><span class="v">${fmt(t.cost)}</span></div>
+      <div class="bar"><span>${verb}</span><div class="track"><div class="fill red" style="width:${Math.max(0,t.reduction)/max*100}%"></div></div><span class="v">${fmt(Math.max(0,t.reduction))}</span></div></div>
+      <div class="rosi"><div class="v c-${t.cls}">${rosiTxt}</div><div class="cls c-${t.cls}">${clsTxt}</div></div></div>`}).join("");
+}
+
+/* chapter 4 */
+const PRESETS=[
+  {id:"rmx",label:"Remove Tool X",apply:s=>s.delete("tool_x")},
+  {id:"rme",label:"Remove EDR",apply:s=>s.delete("edr")},
+  {id:"mfa",label:"Switch on MFA you own",apply:s=>s.add("mfa_owned")},
+  {id:"ids",label:"Buy the Identity Suite",apply:s=>s.add("identity_suite")},
+  {id:"pay",label:"Add payment check by phone",apply:s=>s.add("payment_process")}
+];
+function renderPresets(){$("#presets").innerHTML=PRESETS.map(p=>`<button class="preset ${S.preset===p.id?"active":""}" data-preset="${p.id}">${p.label}</button>`).join("")+`<button class="preset" data-preset="reset">Back to today</button>`}
+function renderCompare(){
+  const r=cur(),t=today();
+  const box=(h,x)=>`<div class="card"><h4>${h}</h4><div class="mid" style="margin-top:6px">${fmt(x.total)}</div><div class="note">estimated yearly loss <span class="est">Estimate</span></div><div class="kv" style="margin-top:10px"><span>Yearly spend</span><b>${fmt(x.spend)}</b></div><div class="kv"><span>False alarms per normal day</span><b>${x.noise}</b></div></div>`;
+  $("#cmp").innerHTML=box("Today",t)+box("With your changes",r);
+  const items=[];
+  const added=[...S.tools].filter(x=>!BASELINE.includes(x)),removed=BASELINE.filter(x=>!S.tools.has(x));
+  removed.forEach(x=>items.push(["−",`Removed ${TOOLMAP[x].name}`,"var(--miss)"]));
+  added.forEach(x=>items.push(["+",`${TOOLMAP[x].status==="owned"?"Switched on":"Added"} ${TOOLMAP[x].name}`,"var(--stop)"]));
+  for(const id in r.sc){const a=t.sc[id],b=r.sc[id];
+    if(Math.abs(a.ale-b.ale)>0.5||a.stops!==b.stops){
+      const sev=a.sev!==b.sev?`${SEV[a.sev]} → ${SEV[b.sev]}, `:"";
+      items.push([b.ale<a.ale?"▼":b.ale>a.ale?"▲":"=",`<b>${SCEN_META[id].name}:</b> ${sev}chance ${pctS(a.p)} → ${pctS(b.p)}, estimated loss ${fmt(a.ale)} → ${fmt(b.ale)}${a.stops!==b.stops?`, blocked steps ${a.stops} → ${b.stops}`:""}`,b.ale<a.ale?"var(--stop)":"var(--miss)"]);}}
+  if(removed.length&&r.total-t.total<0.5&&r.total-t.total>-0.5) items.push(["=",`No change in any tested attack. The same steps are still blocked by other tools.`,"var(--muted)"]);
+  $("#changes").innerHTML=items.length?items.map(([a,txt,c])=>`<li><span class="arrow" style="color:${c}">${a}</span><span>${txt}</span></li>`).join(""):`<li class="empty">Nothing changed yet. Pick a change above or flip a switch on the left.</li>`;
+}
+
+/* chapter 5 */
+function renderPlan(){
+  $("#budget").value=S.budget;$("#budgetV").textContent=fmt(S.budget);
+  const t=today(),o=optimize(S.A,S.budget,S.allowBase);
+  if(!o){$("#moves").innerHTML=`<p class="empty">No combination fits this budget. Raise the budget to see a plan.</p>`;$("#planResult").innerHTML="";return}
+  const mv=[];
+  BASELINE.filter(x=>!o.tools.includes(x)).forEach(x=>mv.push(["remove","Remove",x]));
+  o.tools.filter(x=>!BASELINE.includes(x)).forEach(x=>mv.push([TOOLMAP[x].status==="owned"?"enable":"add",TOOLMAP[x].status==="owned"?"Switch on":"Add",x]));
+  $("#moves").innerHTML=mv.length?mv.map(([c,l,x])=>`<div class="move"><span class="mv ${c}">${l}</span><span><b>${TOOLMAP[x].name}</b> <span class="note">${TOOLMAP[x].cost?fmtK(TOOLMAP[x].cost)+"/yr":"$0"}</span></span></div>`).join(""):`<p class="empty">Today's setup is already the best fit for this budget.</p>`;
+  $("#planWarn").innerHTML=S.allowBase&&mv.some(m=>m[0]==="remove"&&TOOLMAP[m[2]].base)?`<div class="warn">This plan removes a required baseline tool. Check compliance, insurance and incident-response needs first.</div>`:"";
+  const red=(1-o.total/t.total)*100,rt=range(t,S.A),ro=range(o,S.A),mx=Math.max(t.total,o.total);
+  $("#planResult").innerHTML=`<div style="color:var(--muted);font-size:15px">In this sample model, the plan lowers estimated yearly loss by</div>
+   <div class="hero-red">${red.toFixed(1)}%</div>
+   <div class="cmpbar"><div class="row"><span>Today</span><div class="track"><div class="fill" style="width:${t.total/mx*100}%;background:var(--miss)"></div></div><b>${fmtK(t.total)}</b></div>
+   <div class="row"><span>Plan</span><div class="track"><div class="fill" style="width:${o.total/mx*100}%;background:var(--stop)"></div></div><b>${fmtK(o.total)}</b></div></div>
+   <div class="kv"><span>Estimated yearly loss</span><b>${fmt(t.total)} → ${fmt(o.total)}</b></div>
+   <div class="kv"><span>Likely range after plan</span><b>${fmtK(ro.p10)} – ${fmtK(ro.p90)}</b></div>
+   <div class="kv"><span>Yearly spend</span><b>${fmt(t.spend)} → ${fmt(o.spend)}</b></div>
+   <p class="note">An estimate from the assumptions you can see and change. Not a guarantee.</p>`;
+  $("#apply").onclick=()=>{S.tools=new Set(o.tools);S.preset=null;update(true)};
+}
+
+/* assumptions */
+function renderAssume(){
+  const A=S.A,row=(l,k,v,step)=>`<label for="${k}">${l}</label><input id="${k}" data-k="${k}" type="number" step="${step}" value="${v}">`;
+  $("#assumeBody").innerHTML=`<p>Every number here is a sample assumption. Replace it with your organization's data or a sourced industry figure, and the whole app recalculates.</p>
+  <div class="formula">Yearly loss = tries per year × chance of success × cost per success<br>Chance of success = product of the step chances below</div>
+  <h3>Chance an attacker gets past a step</h3><div class="fgrid">${row("Blocked step","pass.stopped",A.pass.stopped,0.05)}${row("Seen, not blocked","pass.detected",A.pass.detected,0.05)}${row("No tool reacted","pass.missed",A.pass.missed,0.05)}</div>
+  ${Object.keys(SCEN_META).map(id=>`<h3>${SCEN_META[id].name}</h3><div class="fgrid">${row("Tries per year (likely)","sc."+id+".f",A.sc[id].f[1],0.5)}${row("Cost per success, $ (likely)","sc."+id+".l",A.sc[id].l[1],5000)}</div>`).join("")}
+  <p>Ranges use low = half and high = double the tries, and low = half and high = three times the cost, with a PERT distribution (4,000 runs, fixed seed).</p>
+  <p>Severity: Critical from ${A.sev.critical*100}% chance, High from ${A.sev.high*100}%, Medium from ${A.sev.medium*100}%.</p>
+  <p>Methods: loss follows the FAIR structure (Open Group). Return on security investment follows the ROSI formula described by ENISA. Attack steps come from MITRE ATT&CK.</p>
+  <button class="secondary" id="resetA">Reset to sample values</button>`;
+}
+function setAssume(k,v){
+  v=parseFloat(v);if(!isFinite(v)||v<0)return;
+  const p=k.split(".");
+  if(p[0]==="pass")S.A.pass[p[1]]=Math.min(1,v);
+  else{const s=S.A.sc[p[1]];if(p[2]==="f")s.f=[v/2,v,v*2];else s.l=[v/2,v,v*3];}
+  update(false,true);
+}
+
+/* main update */
+function update(flash,skipAssume){
+  renderStory();renderBand();renderRail();
+  if(S.chap===2){renderTabs();renderChain(false)}
+  if(S.chap===3)renderRows();
+  if(S.chap===4){renderPresets();renderCompare()}
+  if(S.chap===5)renderPlan();
+  if(!skipAssume)renderAssume();
+}
+function go(n){
+  S.chap=n;S.visited.add(n);
+  document.querySelectorAll(".chap").forEach((c,i)=>c.classList.toggle("active",i+1===n));
+  renderStory();
+  if(n===2){renderTabs();renderChain(true)}
+  if(n===3)renderRows();
+  if(n===4){renderPresets();renderCompare()}
+  if(n===5)renderPlan();
+  window.scrollTo({top:0,behavior:reduce?"auto":"smooth"});
+}
+
+document.addEventListener("click",e=>{
+  const g=e.target.closest("[data-go]");if(g){go(+g.dataset.go);return}
+  const sc=e.target.closest("[data-scen]");if(sc){S.scen=sc.dataset.scen;renderTabs();renderChain(true);return}
+  const pr=e.target.closest("[data-preset]");
+  if(pr){const id=pr.dataset.preset;S.tools=new Set(BASELINE);
+    if(id==="reset"){S.preset=null}else{S.preset=id;PRESETS.find(p=>p.id===id).apply(S.tools)}
+    update(true);return}
+});
+document.addEventListener("change",e=>{
+  const t=e.target.closest("[data-tool]");
+  if(t){t.checked?S.tools.add(t.dataset.tool):S.tools.delete(t.dataset.tool);S.preset=null;update(true);
+    const c=document.getElementById("tc-"+t.dataset.tool);if(c){c.classList.add("flash");setTimeout(()=>c.classList.remove("flash"),900)}}
+  if(e.target.id==="allowBase"){S.allowBase=e.target.checked;renderPlan()}
+});
+document.addEventListener("input",e=>{
+  if(e.target.id==="budget"){S.budget=+e.target.value;renderPlan()}
+  if(e.target.dataset&&e.target.dataset.k)setAssume(e.target.dataset.k,e.target.value);
+});
+$("#assumeBody").addEventListener("click",e=>{if(e.target.id==="resetA"){S.A=JSON.parse(JSON.stringify(DEFAULT_ASSUME));update(false)}});
+$("#replay").onclick=()=>renderChain(true);
+$("#resetTools").onclick=()=>{S.tools=new Set(BASELINE);S.preset=null;update(true)};
+$("#restart").onclick=()=>{S.tools=new Set(BASELINE);S.preset=null;S.budget=345000;S.allowBase=false;$("#allowBase").checked=false;update();go(1)};
+const openD=o=>{$("#drawer").classList.toggle("open",o);$("#scrim").classList.toggle("open",o);$("#drawer").setAttribute("aria-hidden",!o)};
+$("#openAssume").onclick=()=>openD(true);$("#closeAssume").onclick=()=>openD(false);$("#scrim").onclick=()=>openD(false);
+document.addEventListener("keydown",e=>{if(e.key==="Escape")openD(false);
+  if(e.target.matches("input"))return;
+  if(e.key==="ArrowRight"&&S.chap<5)go(S.chap+1);if(e.key==="ArrowLeft"&&S.chap>1)go(S.chap-1)});
+$("#theme").onclick=()=>{const r=document.documentElement;const dark=r.dataset.theme?r.dataset.theme==="dark":matchMedia("(prefers-color-scheme: dark)").matches;r.dataset.theme=dark?"light":"dark"};
+
+update();go(1);
+</script>
+</body>
+</html>
