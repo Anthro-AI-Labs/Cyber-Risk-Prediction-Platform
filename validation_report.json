@@ -70,12 +70,12 @@
     {
       "dimension": "Correctness",
       "metric": "automated tests (pytest + vitest) / Python–TS parity / Monte Carlo range agreement",
-      "result": "51/51 (100%) / 256/256 (100%) / 2/2 (100%)",
+      "result": "54/54 (100%) / 256/256 (100%) / 2/2 (100%)",
       "status": "PASS",
       "details": [
         {
           "status": "PASS",
-          "meaning": "51 of 51 automated tests passed (pytest: 44/44, vitest: 7/7)."
+          "meaning": "54 of 54 automated tests passed (pytest: 46/46, vitest: 8/8)."
         },
         {
           "status": "PASS",
@@ -83,7 +83,7 @@
         },
         {
           "status": "PASS",
-          "meaning": "Baseline P10 and P90 from the TypeScript engine are within ±3% of the Python engine (P10 0.51%, P90 0.32%). The two engines use different random number generators, so ranges are close but not identical."
+          "meaning": "Baseline P10 and P90 from the TypeScript engine are within ±3% of the Python engine (P10 0.34%, P90 0.14%; 10,000 iterations each). The two engines use different random number generators, so the ranges are close but not identical."
         }
       ]
     },
@@ -363,29 +363,29 @@
   },
   "d4_correctness_reproducibility": {
     "acceptance_tests": {
-      "passed": 51,
-      "total": 51,
+      "passed": 54,
+      "total": 54,
       "pct": 100.0,
       "status": "PASS",
       "suites": {
         "pytest": {
-          "passed": 44,
+          "passed": 46,
           "failed": 0,
           "errors": 0,
           "skipped": 0,
-          "total": 44,
+          "total": 46,
           "exit_code": 0
         },
         "vitest": {
-          "passed": 7,
+          "passed": 8,
           "failed": 0,
           "errors": 0,
           "skipped": 0,
-          "total": 7,
+          "total": 8,
           "exit_code": 0
         }
       },
-      "meaning": "51 of 51 automated tests passed (pytest: 44/44, vitest: 7/7).",
+      "meaning": "54 of 54 automated tests passed (pytest: 46/46, vitest: 8/8).",
       "evidence": "pytest-json-report and vitest --reporter=json output"
     },
     "python_ts_parity": {
@@ -426,21 +426,21 @@
         {
           "percentile": "p10",
           "python": 654043,
-          "typescript": 657356,
-          "relative_difference_pct": 0.5065940700378095,
+          "typescript": 656273,
+          "relative_difference_pct": 0.3410864874133966,
           "ok": true
         },
         {
           "percentile": "p90",
           "python": 1306454,
-          "typescript": 1302274,
-          "relative_difference_pct": 0.31991771125674284,
+          "typescript": 1308262,
+          "relative_difference_pct": 0.13839738609754587,
           "ok": true
         }
       ],
       "python_iterations": 10000,
-      "typescript_iterations": 4000,
-      "meaning": "Baseline P10 and P90 from the TypeScript engine are within ±3% of the Python engine (P10 0.51%, P90 0.32%). The two engines use different random number generators, so ranges are close but not identical.",
+      "typescript_iterations": 10000,
+      "meaning": "Baseline P10 and P90 from the TypeScript engine are within ±3% of the Python engine (P10 0.34%, P90 0.14%; 10,000 iterations each). The two engines use different random number generators, so the ranges are close but not identical.",
       "evidence": "Python risk.run_monte_carlo vs frontend/scripts/engine-dump.mjs, baseline tools"
     }
   },

@@ -275,7 +275,7 @@ export const AssumptionsDrawer: React.FC<AssumptionsDrawerProps> = ({
 
           <div className="pt-3 border-t border-[var(--line)] space-y-2 text-[14px] text-[var(--muted)] leading-relaxed">
             <p>
-              Ranges use low = half and high = double the tries, and low = half and high = three times the cost, with a PERT distribution (10,000 iterations, fixed seed).
+              Ranges use low = half and high = double the tries, and low = half and high = three times the cost, with a PERT distribution ({assumptions.monte_carlo.iterations.toLocaleString("en-US")} iterations, fixed seed).
             </p>
             <p>
               Severity: Critical from {assumptions.severity_thresholds.critical * 100}% chance, High from {assumptions.severity_thresholds.high * 100}%, Medium from {assumptions.severity_thresholds.medium * 100}%.

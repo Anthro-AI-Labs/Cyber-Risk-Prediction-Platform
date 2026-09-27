@@ -6,6 +6,9 @@ import { ArrowLeft, BookOpen, ShieldAlert } from "lucide-react";
 import { Header } from "../../components/Header";
 import { Footer } from "../../components/Footer";
 import { EvidenceReport } from "../../lib/types";
+import { DEFAULT_ASSUMPTIONS } from "../../lib/engine";
+
+const MC = DEFAULT_ASSUMPTIONS.monte_carlo;
 
 export default function MethodologyPage() {
   const [report, setReport] = useState<EvidenceReport | null>(null);
@@ -124,7 +127,7 @@ export default function MethodologyPage() {
               4. Monte Carlo Uncertainty Ranges (PERT)
             </h2>
             <p className="text-[15.5px] text-[var(--muted)] mb-3 leading-relaxed">
-              Every exposure figure displays a P10–P90 range computed using a 10,000-iteration Monte Carlo simulation with Program Evaluation and Review Technique (PERT) Beta distributions for annual attempts and cost per success (low = min, likely = mode, high = max).
+              Every exposure figure displays a P10–P90 range computed using a {MC.iterations.toLocaleString("en-US")}-iteration Monte Carlo simulation (fixed seed {MC.seed}) with Program Evaluation and Review Technique (PERT) Beta distributions for annual attempts and cost per success (low = min, likely = mode, high = max). The browser and the server use different random number generators, so their ranges are close but not identical; the validation checks they agree within ±3%.
             </p>
           </section>
 

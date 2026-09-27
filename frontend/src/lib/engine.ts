@@ -210,12 +210,15 @@ function samplePert(a: number, m: number, c: number, rnd: () => number): number 
   return a + (x / (x + y)) * (c - a);
 }
 
-export const DEFAULT_MC_ITERATIONS = 4000;
+// Same iteration count as the Python engine (risk_assumptions.json → monte_carlo.iterations).
+// The random generators differ (mulberry32 here, Python's Mersenne Twister there), so P10/P90 agree
+// within a tested tolerance, not exactly.
+export const DEFAULT_MC_ITERATIONS: number = DEFAULT_ASSUMPTIONS.monte_carlo.iterations;
 
 export function computeRisk(
   tools: string[],
   assumptions: RiskAssumptions = DEFAULT_ASSUMPTIONS,
-  mcIterations: number = DEFAULT_MC_ITERATIONS
+  mcIterations: number = assumptions.monte_carlo.iterations
 ): SimulationResponse {
   const outcomes = computeOutcomes(tools);
   const pass = assumptions.step_pass_probability;

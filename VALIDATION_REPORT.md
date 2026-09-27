@@ -11,7 +11,7 @@
 | Accuracy vs. source | MITRE fidelity / CTID fidelity / published figures | **118/118 (100%) / 179/179 (100%) / 2/2 (100%)** | PASS |
 | Completeness & validity | schema validity / referential integrity / completeness | **7/7 (100%) / 100/100 (100%) / 49/49 (100%)** | PASS |
 | Traceability | mappings with evidence labels / inputs with source labels (backed by official sources; from published figures) | **31/31 (100%) / 11/11 (100%) (74.2% = 23/31; 18.2% = 2/11)** | PASS |
-| Correctness | automated tests (pytest + vitest) / Python–TS parity / Monte Carlo range agreement | **51/51 (100%) / 256/256 (100%) / 2/2 (100%)** | PASS |
+| Correctness | automated tests (pytest + vitest) / Python–TS parity / Monte Carlo range agreement | **54/54 (100%) / 256/256 (100%) / 2/2 (100%)** | PASS |
 | Reproducibility | determinism checks (simulation & Monte Carlo) | **2/2 (100%)** | PASS |
 | Robustness | plan and Tool X finding unchanged under ±50% (one-at-a-time / joint) | **22/22 (100%) / 500/500 (100%)** | PASS |
 | Compliance | banned-phrase violations | **0 violations** | PASS |
@@ -72,20 +72,20 @@
 
 ## D4. Engine Correctness and Reproducibility
 
-- **Automated tests:** 51 / 51 (100.0%) — **PASS**
-  - 51 of 51 automated tests passed (pytest: 44/44, vitest: 7/7).
+- **Automated tests:** 54 / 54 (100.0%) — **PASS**
+  - 54 of 54 automated tests passed (pytest: 46/46, vitest: 8/8).
   - Evidence: pytest-json-report and vitest --reporter=json output
-  - pytest: 44 passed, 0 failed, 0 errors, 0 skipped (of 44)
-  - vitest: 7 passed, 0 failed, 0 errors, 0 skipped (of 7)
+  - pytest: 46 passed, 0 failed, 0 errors, 0 skipped (of 46)
+  - vitest: 8 passed, 0 failed, 0 errors, 0 skipped (of 8)
 - **Python–TypeScript parity:** 256 / 256 (100.0%) — **PASS**
   - 256 of 256 tool combinations give identical rounded ALE, risk score, severity and step outcomes in the Python and TypeScript engines.
   - Evidence: Python engine vs frontend/scripts/engine-dump.mjs (TypeScript engine), all 2^n combinations
 - **Monte Carlo range agreement:** 2 / 2 (100.0%) — **PASS**
-  - Baseline P10 and P90 from the TypeScript engine are within ±3% of the Python engine (P10 0.51%, P90 0.32%). The two engines use different random number generators, so ranges are close but not identical.
+  - Baseline P10 and P90 from the TypeScript engine are within ±3% of the Python engine (P10 0.34%, P90 0.14%; 10,000 iterations each). The two engines use different random number generators, so the ranges are close but not identical.
   - Evidence: Python risk.run_monte_carlo vs frontend/scripts/engine-dump.mjs, baseline tools
-  - Iterations: Python 10,000, TypeScript 4,000
-  - P10: Python $654,043 vs TypeScript $657,356 (0.51%, tolerance ±3%)
-  - P90: Python $1,306,454 vs TypeScript $1,302,274 (0.32%, tolerance ±3%)
+  - Iterations: Python 10,000, TypeScript 10,000
+  - P10: Python $654,043 vs TypeScript $656,273 (0.34%, tolerance ±3%)
+  - P90: Python $1,306,454 vs TypeScript $1,308,262 (0.14%, tolerance ±3%)
 - **Determinism:** 2 / 2 (100.0%) — **PASS**
   - Repeated runs give identical point ALE and Monte Carlo percentiles (seed 42, 10,000 iterations).
   - Evidence: double run of the baseline simulation

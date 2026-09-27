@@ -5,6 +5,7 @@ import {
   computeWhatIf,
   BASELINE_TOOLS,
   DEFAULT_ASSUMPTIONS,
+  DEFAULT_MC_ITERATIONS,
 } from "./engine";
 
 describe("TypeScript Engine — Exact Section 8 Assertions (v3.2)", () => {
@@ -226,5 +227,20 @@ describe("TypeScript Engine — Exact Section 8 Assertions (v3.2)", () => {
       }
     }
   });
-});
 
+  it("keeps the Monte Carlo range within ±3% of the Python engine (different random generators)", async () => {
+    const fs = await import("fs");
+    const path = await import("path");
+    const refPath = path.resolve(__dirname, "../../../backend/tests/fixtures/monte_carlo_reference.json");
+    const ref: { tools: string[]; iterations: number; p10: number; p90: number } = JSON.parse(
+      fs.readFileSync(refPath, "utf-8")
+    );
+    expect(DEFAULT_MC_ITERATIONS).toBe(ref.iterations);
+    expect(ref.iterations).toBe(10000);
+
+    const sim = computeRisk(ref.tools, DEFAULT_ASSUMPTIONS);
+    const tolerance = 0.03;
+    expect(Math.abs(sim.total_ale_range.p10 - ref.p10) / ref.p10).toBeLessThanOrEqual(tolerance);
+    expect(Math.abs(sim.total_ale_range.p90 - ref.p90) / ref.p90).toBeLessThanOrEqual(tolerance);
+  });
+});

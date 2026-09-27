@@ -525,6 +525,15 @@ def python_engine_results(configs: List[List[str]]) -> List[Dict[str, Any]]:
     return out
 
 
+def python_monte_carlo_reference(tool_ids: Optional[List[str]] = None) -> Dict[str, Any]:
+    """Baseline total-ALE percentiles from the Python engine (seeded, so exactly reproducible)."""
+    tools = tool_ids or BASELINE_TOOLS
+    a = data_loader.current_assumptions
+    rng = _simulate(tools, a).total_ale_range
+    return {"tools": tools, "iterations": a.monte_carlo.iterations, "seed": a.monte_carlo.seed,
+            "p10": rng.p10, "p50": rng.p50, "p90": rng.p90}
+
+
 def compare_engines(py: List[Dict[str, Any]], ts: List[Dict[str, Any]]) -> Dict[str, Any]:
     ts_by_cfg = {tuple(sorted(r["active_tool_ids"])): r for r in ts}
     failures: List[str] = []

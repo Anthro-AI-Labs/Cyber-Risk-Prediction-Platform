@@ -28,11 +28,11 @@ from app.validation import (  # noqa: E402
     all_tool_configs,
     generate_full_validation_report,
     python_engine_results,
+    python_monte_carlo_reference,
 )
-from app.data_loader import data_loader  # noqa: E402
-from app.risk import compute_simulation  # noqa: E402
 
 PARITY_FIXTURE = BACKEND / "tests" / "fixtures" / "parity.json"
+MC_FIXTURE = BACKEND / "tests" / "fixtures" / "monte_carlo_reference.json"
 JSON_PATH = REPO_ROOT / "validation_report.json"
 MD_PATH = REPO_ROOT / "VALIDATION_REPORT.md"
 MC_TOLERANCE = 0.03  # TS P10/P90 must be within ±3% of Python (different random generators)
@@ -42,10 +42,13 @@ def log(msg: str) -> None:
     print(f"[validate.py] {msg}", flush=True)
 
 
-def write_parity_fixture() -> None:
+def write_fixtures() -> None:
+    """Python reference outputs consumed by vitest (tests/test_fixture_freshness.py checks they are current)."""
     results = python_engine_results(all_tool_configs())
     PARITY_FIXTURE.write_text(json.dumps(results, indent=1) + "\n", encoding="utf-8")
     log(f"Wrote {len(results)} Python engine results to {PARITY_FIXTURE.relative_to(REPO_ROOT)}")
+    MC_FIXTURE.write_text(json.dumps(python_monte_carlo_reference(), indent=1) + "\n", encoding="utf-8")
+    log(f"Wrote Python Monte Carlo reference to {MC_FIXTURE.relative_to(REPO_ROOT)}")
 
 
 def run_pytest() -> dict:
@@ -94,27 +97,24 @@ def run_ts_engine(configs: list) -> dict:
 
 def monte_carlo_agreement(ts_range: dict) -> dict:
     """TS and Python use different random generators, so ranges are compared within a tolerance."""
-    a = data_loader.current_assumptions
-    py = compute_simulation(
-        active_tool_ids=BASELINE_TOOLS, all_tools=data_loader.tools, scenarios=data_loader.scenarios,
-        mappings=data_loader.mappings, scenario_overrides=data_loader.scenario_overrides,
-        techniques=data_loader.techniques, assumptions=a, tool_noise_fn=data_loader.get_tool_noise,
-    ).total_ale_range
+    py = python_monte_carlo_reference()
     rows = []
     for q in ("p10", "p90"):
-        rel = abs(ts_range[q] - getattr(py, q)) / getattr(py, q)
-        rows.append({"percentile": q, "python": round(getattr(py, q)), "typescript": round(ts_range[q]),
+        rel = abs(ts_range[q] - py[q]) / py[q]
+        rows.append({"percentile": q, "python": round(py[q]), "typescript": round(ts_range[q]),
                      "relative_difference_pct": rel * 100, "ok": rel <= MC_TOLERANCE})
     passed = sum(r["ok"] for r in rows)
+    same_iterations = ts_range.get("iterations") == py["iterations"]
     return {
         "passed": passed, "total": len(rows), "pct": passed / len(rows) * 100,
-        "status": "PASS" if passed == len(rows) else "FAIL",
+        "status": "PASS" if passed == len(rows) and same_iterations else "FAIL",
         "tolerance_pct": MC_TOLERANCE * 100, "rows": rows,
-        "python_iterations": a.monte_carlo.iterations, "typescript_iterations": ts_range.get("iterations"),
+        "python_iterations": py["iterations"], "typescript_iterations": ts_range.get("iterations"),
         "meaning": (
             f"Baseline P10 and P90 from the TypeScript engine are within ±{MC_TOLERANCE * 100:.0f}% of the Python engine "
-            f"({', '.join(f'{r['percentile'].upper()} {r['relative_difference_pct']:.2f}%' for r in rows)}). "
-            "The two engines use different random number generators, so ranges are close but not identical."
+            f"({', '.join(f"{r['percentile'].upper()} {r['relative_difference_pct']:.2f}%" for r in rows)}; "
+            f"{py['iterations']:,} iterations each). The two engines use different random number generators, so the ranges "
+            "are close but not identical."
         ),
         "evidence": "Python risk.run_monte_carlo vs frontend/scripts/engine-dump.mjs, baseline tools",
     }
@@ -205,7 +205,7 @@ def render_markdown(r: dict) -> str:
 
 def main() -> int:
     log("Running full validation...")
-    write_parity_fixture()
+    write_fixtures()
     tests = {"pytest": run_pytest(), "vitest": run_vitest()}
     ts = run_ts_engine(all_tool_configs())
     mc = monte_carlo_agreement(ts["range"])
