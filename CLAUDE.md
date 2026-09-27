@@ -1,6 +1,6 @@
 # CLAUDE.md — ROI Cyber-Validator (Cyber Risk Prediction Platform)
 
-This file describes what the code **actually does** (derived from the source on 2026-09-27, commit `0d7217c`).
+This file describes what the code **actually does** (derived from the source on 2026-09-27; updated after the audit fixes).
 
 **Ground truth for expected values** (product rules, data hashes, provenance, acceptance numbers, known problems) is in [`docs/REFERENCE_FACTS.md`](docs/REFERENCE_FACTS.md). Never edit that file. If the code and REFERENCE_FACTS disagree, investigate; do not assume the code is right. The current audit status is in [`AUDIT.md`](AUDIT.md).
 
@@ -30,7 +30,7 @@ scripts/sync-data.mjs  (runs as predev / prebuild / pretest)
                                        └─► app/page.tsx + components/Chapter*.tsx  (UI numbers ALWAYS come from here)
 
 frontend/src/lib/api.ts: fetchWithFallback, 2 s timeout, falls back to the local TS engine.
-   page.tsx calls the backend only to detect "Offline mode". /report and /noise use the API with fallback.
+   page.tsx calls the backend only to detect "Offline mode". /report, /noise and /validation use the API with fallback.
 ```
 
 - **Backend:** FastAPI + Pydantic v2, Python 3.14 venv in `backend/.venv`.
@@ -47,9 +47,12 @@ frontend/src/lib/api.ts: fetchWithFallback, 2 s timeout, falls back to the local
 | `tools.json` | `Tool` | cost, `baseline_required`, status (active/owned_off/candidate) |
 | `scenario_overrides.json` | raw dict | S3 step 1 = `assumed_compromise` → `starting_condition` |
 | `normal_day.json` | `NormalDayEvent` | false-alarm noise per tool |
+| `MANIFEST.sha256` | `verify_data_manifest()` | SHA-256 of the 4 provided files. `DataLoader` refuses to start on any mismatch (`DataIntegrityError`). |
 | `.cache/` | used by validation only | Official MITRE v19.2 STIX and CTID M365 files (byte-identical to the upstream downloads) |
 
-Expected SHA-256 hashes of the 4 provided files are in `docs/REFERENCE_FACTS.md` §3. The originals are in `~/Downloads/data_update_v3_1/` on the author's machine.
+The expected hashes are in `docs/REFERENCE_FACTS.md` §3; `tests/test_data_integrity.py` pins the manifest to them. The originals are in `~/Downloads/data_update_v3_1/` on the author's machine.
+
+**Baseline ("today's setup")** = tools whose `status` is `active` in tools.json. The default optimizer budget is their total cost. Both are derived in code (`optimizer.baseline_tool_ids`, `engine.ts` `BASELINE_TOOLS` / `BASELINE_SPEND`); never type them.
 
 **Mapping validation** (`data_loader.py:143-239`):
 - A `ctid_mapping` row with `effect: stop` needs a CTID row with protect + significant, otherwise it is downgraded to `team_assumption`.
@@ -68,12 +71,13 @@ Expected SHA-256 hashes of the 4 provided files are in `docs/REFERENCE_FACTS.md`
 - **ALE:** point ALE = likely attempts × P × likely loss. Money is rounded to $1 at the end.
 - **Monte Carlo:** PERT (beta distribution) on attempts and loss.
   - Python: `random.Random(42)`, 10,000 iterations; `iterations <= 0` returns zeros (used by sensitivity).
-  - TS: mulberry32 + gamma sampling, **4,000 iterations by default** (`engine.ts:216`), so the TS P10/P90 differ slightly from the API.
+  - TS: mulberry32 + gamma sampling, the same iteration count (read from the data). The generators differ, so P10/P90 agree within **±3%**, tested in vitest and validate.py, not exactly. Point values are identical.
 - **ROSI:** removal counterfactual for active tools, addition counterfactual for inactive ones. ROSI = (reduction − cost) / cost.
   - ≥ 1.0 → `high_return`; ≥ 0 → `positive_return`; otherwise `low_return`.
   - `baseline_note` is set for `baseline_required` tools.
 - **Optimizer** (`optimizer.py`):
-  - exhaustive 2^n search over the non-locked tools within budget (default 345,000);
+  - exhaustive 2^n search over the non-locked tools within budget (default = baseline spend);
+  - if even the locked tools exceed the budget, the plan reports them with their own figures and `fits_budget: false`;
   - baseline-required tools (email_security, firewall, siem) are locked unless `allow_remove_baseline`;
   - picks the lowest ALE; ties within $0.5 go to the lower spend.
 
@@ -81,14 +85,14 @@ Expected SHA-256 hashes of the 4 provided files are in `docs/REFERENCE_FACTS.md`
 
 | Method | Path | Notes |
 |---|---|---|
-| GET | `/health`, `/meta`, `/meta/evidence-report`, `/meta/validation` | `/meta/validation` runs the full validation report on every call |
+| GET | `/health`, `/meta`, `/meta/evidence-report`, `/meta/validation` | `/meta/validation` serves `validation_report.json` from the last `scripts/validate.py` run (404 if absent) |
 | GET | `/tools`, `/scenarios`, `/scenarios/{id}`, `/techniques/{id}` | |
 | GET / PUT | `/assumptions` | PUT replaces the in-memory global assumptions |
 | POST | `/assumptions/reset` | |
 | POST | `/simulate` `{tool_ids}` | uses the server's current assumptions |
 | POST | `/whatif` `{baseline_tool_ids, variant_tool_ids? , change?}` | |
 | POST | `/optimize` `{budget?, allow_remove_baseline}` | |
-| POST | `/agent/narrate` `{scenario_id, tool_ids}` | |
+| POST | `/agent/narrate` `{scenario_id, tool_ids}` | 404 for an unknown scenario; `mode` is `llm` only if a step's narration really came from the LLM |
 | POST | `/summary` `{tool_ids}` | |
 | GET | `/normal-day?tool_ids=a,b` | |
 
@@ -103,29 +107,35 @@ Expected SHA-256 hashes of the 4 provided files are in `docs/REFERENCE_FACTS.md`
 - **Always on screen:** `ExposureBand` (P10–P90), `ToolRail`, `Header` (Simple/Advanced toggle, theme), `AssumptionsDrawer`, `Footer`.
 - **Other pages:**
   - `/methodology`: static text.
-  - `/validation`: scorecard and tornado are currently literals in the page; it does not call the API.
+  - `/validation`: renders the computed report (`/api/meta/validation`, offline copy `src/data/validation-report.json` made by sync-data), including the ±3% range tolerance.
   - `/report`: summary.
   - `/noise`: normal-day view.
 - **Tests:**
-  - `lib/engine.test.ts`: acceptance numbers, plus 256-config parity against `backend/tests/fixtures/parity.json`.
-  - `lib/data-sync.test.ts`: meta hashes vs backend files, and no `T\d{4}` or step text outside `src/data/`.
-- **Theme:** the app defaults to dark (`page.tsx:80`); the reference prototype defaults to light.
+  - `lib/engine.test.ts`: acceptance numbers; 256-config parity against `backend/tests/fixtures/parity.json`; the ±3% Monte Carlo check against `monte_carlo_reference.json`; the optimizer no-fit case.
+  - `lib/data-sync.test.ts`:
+    - the committed generated data must equal what `sync-data.mjs` `buildGenerated()` produces now;
+    - no technique IDs or step text outside `src/data/`;
+    - no data values ≥ 1,000, key computed results or literal tool-ID lists outside `src/data/`.
+- **Theme:** `lib/useTheme.ts`. Light by default; the toggle is remembered. The tokens in `globals.css` are identical to the reference, except `--band-ink`, which makes the dark band readable (the reference's is dark-on-dark).
+- Shared copy (e.g. the range explanation) lives in `lib/copy.ts`.
 
 ## 7. Commands
 
 ```bash
 # backend (from backend/)
 .venv/bin/uvicorn app.main:app --reload --port 8000
-PYTHONPATH=. .venv/bin/pytest -v          # 28 tests; test_fixtures.py REWRITES tests/fixtures/engine_test_cases.json
+PYTHONPATH=. .venv/bin/pytest -v          # 49 tests (needs pytest-json-report only for validate.py)
 
 # frontend (from frontend/)
-npm run sync-data                          # regenerates src/data/generated*.json (also runs on dev/build/test)
-npm test                                   # vitest, 7 tests
+npm run sync-data                          # regenerates src/data/generated*.json + validation-report.json (also runs on dev/build)
+npm test                                   # vitest, 10 tests; does NOT re-sync, so stale generated data fails
 npm run lint
 npm run build
 npm run dev                                # :3000, NEXT_PUBLIC_API_URL=http://localhost:8000 (.env.local)
 
-# validation (from repo root) — writes validation_report.json + VALIDATION_REPORT.md at repo root
+# validation (from repo root): regenerates tests/fixtures/{parity,monte_carlo_reference}.json, runs pytest + vitest
+# (JSON reporters), runs both engines over all 256 configs, writes validation_report.json + VALIDATION_REPORT.md.
+# Exits 1 if any check fails. Run `npm run sync-data` afterwards to refresh the /validation offline copy.
 backend/.venv/bin/python scripts/validate.py
 ```
 
@@ -134,8 +144,9 @@ backend/.venv/bin/python scripts/validate.py
 
 ## 8. Key files
 
-- `backend/app/validation.py`: the D1–D5 metrics. Known gaps are in AUDIT.md: hard-coded test counts, literal PASS statuses, and a parity check that only counts entries.
-- `scripts/validate.py`: renders the JSON to Markdown. Some numbers and text are still hard-coded there.
+- `backend/app/validation.py`: the D1–D5 checks, with every status computed. `check_mitre_fidelity()` compares IDs, URLs, names and reference sets with the official STIX.
+- `scripts/validate.py`: runs the real inputs (tests, both engines) and renders the Markdown only from the JSON.
+- `frontend/scripts/engine-dump.mjs`: runs the TS engine in Node (via Vite SSR) for validate.py.
 - `backend/app/summary.py`: `BANNED_PHRASES` and the template summary.
 - `reference/roi-cyber-validator-prototype.html`: visual and numeric reference; identical to the original.
 - `context_bundle/`: a **stale snapshot** of the previous agent's outputs. Not used by the code; do not treat it as current.
