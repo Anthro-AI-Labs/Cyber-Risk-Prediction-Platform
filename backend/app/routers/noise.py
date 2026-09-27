@@ -1,6 +1,7 @@
 from typing import List, Optional
 from fastapi import APIRouter, Query
 from app.data_loader import data_loader
+from app.optimizer import baseline_tool_ids
 from app.models import NormalDayResponse, NormalDayToolNoise
 
 router = APIRouter(prefix="/api", tags=["noise"])
@@ -16,7 +17,7 @@ def get_normal_day(tool_ids: Optional[List[str]] = Query(None)):
                 active_ids.append(t.strip())
     else:
         # Default baseline if not supplied
-        active_ids = ["email_security", "edr", "firewall", "siem", "tool_x"]
+        active_ids = baseline_tool_ids(data_loader.tools)
 
     active_set = set(active_ids)
     tool_noises: List[NormalDayToolNoise] = []

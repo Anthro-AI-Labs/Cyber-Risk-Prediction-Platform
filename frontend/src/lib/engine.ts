@@ -38,7 +38,10 @@ export const TOOL_MAP: Record<string, Tool> = Object.fromEntries(
   TOOLS.map((t) => [t.id, t])
 );
 
-export const BASELINE_TOOLS = ["email_security", "edr", "firewall", "siem", "tool_x"];
+/** Today's setup: every tool whose status in tools.json is "active". */
+export const BASELINE_TOOLS: string[] = TOOLS.filter((t) => t.status === "active").map((t) => t.id);
+/** What today's setup costs per year; the optimizer's default budget. */
+export const BASELINE_SPEND: number = BASELINE_TOOLS.reduce((sum, id) => sum + (TOOL_MAP[id]?.annual_cost || 0), 0);
 
 export const TECHNIQUES: Record<
   string,
@@ -466,7 +469,7 @@ export function computeRisk(
 }
 
 export function computeOptimizer(
-  budget: number = 345000,
+  budget: number = BASELINE_SPEND,
   allowRemoveBaseline: boolean = false,
   assumptions: RiskAssumptions = DEFAULT_ASSUMPTIONS
 ): OptimizerPlan {

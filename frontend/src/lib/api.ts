@@ -17,6 +17,7 @@ import {
   SCENARIOS,
   DEFAULT_ASSUMPTIONS,
   NOISE_DATA,
+  BASELINE_SPEND,
 } from "./engine";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -115,7 +116,7 @@ export async function simulateTools(
 }
 
 export async function optimizeBudget(
-  budget: number = 345000,
+  budget: number = BASELINE_SPEND,
   allowRemoveBaseline: boolean = false,
   assumptions: RiskAssumptions = DEFAULT_ASSUMPTIONS
 ): Promise<{ data: OptimizerPlan; isOffline: boolean }> {

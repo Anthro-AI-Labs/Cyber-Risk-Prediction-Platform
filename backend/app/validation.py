@@ -19,7 +19,7 @@ from app.models import (
     ScenarioOverride,
     Tool,
 )
-from app.optimizer import run_optimizer
+from app.optimizer import baseline_tool_ids, run_optimizer
 from app.risk import compute_simulation
 from app.summary import BANNED_PHRASES
 
@@ -182,7 +182,7 @@ def check_mitre_fidelity(subset: Dict[str, Any], stix_objects: List[Dict[str, An
 
 
 CTID_SUBSET_PATH = REPO_ROOT / "backend" / "data" / "ctid" / "ctid_m365_mappings_subset.json"
-BASELINE_TOOLS = ["email_security", "edr", "firewall", "siem", "tool_x"]
+BASELINE_TOOLS = baseline_tool_ids(data_loader.tools)  # tools.json status == "active"
 
 # Published inputs whose derivation is re-checked (FBI IC3 2025 Internet Crime Report).
 IC3_BEC_LOSSES = 3_046_598_558

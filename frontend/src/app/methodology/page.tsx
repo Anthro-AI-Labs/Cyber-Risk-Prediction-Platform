@@ -6,7 +6,7 @@ import { ArrowLeft, BookOpen, ShieldAlert } from "lucide-react";
 import { Header } from "../../components/Header";
 import { Footer } from "../../components/Footer";
 import { EvidenceReport } from "../../lib/types";
-import { DEFAULT_ASSUMPTIONS } from "../../lib/engine";
+import { DEFAULT_ASSUMPTIONS, MAPPINGS } from "../../lib/engine";
 import { RANGE_EXPLANATION } from "../../lib/copy";
 import { useTheme } from "../../lib/useTheme";
 
@@ -21,7 +21,7 @@ export default function MethodologyPage() {
       .then((r) => r.json())
       .then((d) => setReport(d))
       .catch(() => {
-        setReport({ validated_mappings_count: 28, downgrades: [] });
+        setReport({ validated_mappings_count: MAPPINGS.length, downgrades: [] });
       });
   }, []);
 

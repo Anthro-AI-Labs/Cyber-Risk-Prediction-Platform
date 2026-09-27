@@ -7,11 +7,10 @@ import { Header } from "../../components/Header";
 import { Footer } from "../../components/Footer";
 import { SummaryResponse, SimulationResponse } from "../../lib/types";
 import { fetchSummary } from "../../lib/api";
-import { computeRisk } from "../../lib/engine";
+import { computeRisk, BASELINE_TOOLS as BASELINE_TOOL_IDS } from "../../lib/engine";
 import { fmt, fmtK, SEVERITY_CONFIG } from "../../lib/format";
 import { useTheme } from "../../lib/useTheme";
 
-const BASELINE_TOOL_IDS = ["email_security", "edr", "firewall", "siem", "tool_x"];
 
 const SCENARIO_NAMES: Record<string, string> = {
   S1: "Fake login page",

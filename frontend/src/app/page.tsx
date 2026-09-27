@@ -18,6 +18,8 @@ import {
   computeRisk,
   computeOptimizer,
   computeWhatIf,
+  BASELINE_TOOLS as BASELINE_TOOL_IDS,
+  BASELINE_SPEND,
 } from "../lib/engine";
 import {
   simulateTools,
@@ -27,7 +29,6 @@ import {
 import { RiskAssumptions, SimulationResponse, OptimizerPlan, WhatIfDiff, PresentationMode } from "../lib/types";
 import { useTheme } from "../lib/useTheme";
 
-const BASELINE_TOOL_IDS = ["email_security", "edr", "firewall", "siem", "tool_x"];
 
 const CHAPTER_HASHES: Record<number, string> = {
   1: "#bill",
@@ -68,7 +69,7 @@ export default function HomePage() {
     () => JSON.parse(JSON.stringify(DEFAULT_ASSUMPTIONS))
   );
   const [activePreset, setActivePreset] = useState<string | null>(null);
-  const [budget, setBudget] = useState<number>(345000);
+  const [budget, setBudget] = useState<number>(BASELINE_SPEND);
   const [allowRemoveBaseline, setAllowRemoveBaseline] = useState<boolean>(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const { isDark, toggleTheme } = useTheme();
@@ -217,7 +218,7 @@ export default function HomePage() {
   const handleRestart = useCallback(() => {
     setActiveToolIds(new Set(BASELINE_TOOL_IDS));
     setActivePreset(null);
-    setBudget(345000);
+    setBudget(BASELINE_SPEND);
     setAllowRemoveBaseline(false);
     goToChapter(1);
   }, [goToChapter]);

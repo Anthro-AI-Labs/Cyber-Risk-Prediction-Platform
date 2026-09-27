@@ -2,6 +2,8 @@ import React from "react";
 import { ArrowRight, BookOpen } from "lucide-react";
 import { PresentationMode } from "../lib/types";
 import generated from "../data/generated.json";
+import { BASELINE_SPEND } from "../lib/engine";
+import { fmt } from "../lib/format";
 
 const MITRE_VERSION = (generated as { source: { version: string } }).source.version;
 
@@ -18,7 +20,7 @@ export const ChapterBill: React.FC<ChapterBillProps> = ({ onNext, mode = "simple
       <h1 className="text-[34px] sm:text-[38px] leading-[1.15] tracking-tight font-bold mb-3 max-w-[32ch] text-[var(--ink)]">
         You spend{" "}
         <span className="text-[var(--accent)] underline decoration-[var(--accent)]/40 underline-offset-4">
-          $345,000
+          {fmt(BASELINE_SPEND)}
         </span>{" "}
         a year on security. What is it buying you?
       </h1>

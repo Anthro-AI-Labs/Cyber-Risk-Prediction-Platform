@@ -8,67 +8,38 @@ import { Footer } from "../../components/Footer";
 import { NormalDayResponse } from "../../lib/types";
 import { fetchNormalDay } from "../../lib/api";
 import { useTheme } from "../../lib/useTheme";
+import { BASELINE_TOOLS as BASELINE_TOOL_IDS, TOOLS, TOOL_MAP, NOISE_DATA } from "../../lib/engine";
+import generated from "../../data/generated.json";
 
-const NORMAL_EVENTS = [
-  {
-    id: "E1",
-    name: "Marketing newsletter with tracking links",
-    count: 4,
-    alerting_tools: ["email_security"],
-    alerting_tool_names: ["Email Security"],
-  },
-  {
-    id: "E2",
-    name: "IT admin runs a PowerShell maintenance script",
-    count: 6,
-    alerting_tools: ["edr", "tool_x"],
-    alerting_tool_names: ["EDR", "Tool X (Script Control)"],
-  },
-  {
-    id: "E3",
-    name: "Software update downloads large files",
-    count: 9,
-    alerting_tools: ["firewall", "tool_x"],
-    alerting_tool_names: ["Firewall", "Tool X (Script Control)"],
-  },
-  {
-    id: "E4",
-    name: "Employee signs in from a new city (business trip)",
-    count: 8,
-    alerting_tools: ["siem"],
-    alerting_tool_names: ["SIEM (Log Monitoring)"],
-  },
-  {
-    id: "E5",
-    name: "Several failed sign-ins after a password change",
-    count: 10,
-    alerting_tools: ["siem"],
-    alerting_tool_names: ["SIEM (Log Monitoring)"],
-  },
-  {
-    id: "E6",
-    name: "Finance team opens spreadsheets with macros",
-    count: 16,
-    alerting_tools: ["tool_x"],
-    alerting_tool_names: ["Tool X (Script Control)"],
-  },
-  {
-    id: "E7",
-    name: "Normal internal emails",
-    count: 220,
-    alerting_tools: [],
-    alerting_tool_names: ["None (benign)"],
-  },
-  {
-    id: "E8",
-    name: "Normal file sharing",
-    count: 85,
-    alerting_tools: [],
-    alerting_tool_names: ["None (benign)"],
-  },
-];
+interface NormalDayEvent {
+  id: string;
+  name: string;
+  count: number;
+  alerting_tools: string[];
+}
 
-const BASELINE_TOOL_IDS = ["email_security", "edr", "firewall", "siem", "tool_x"];
+// Events and counts come from backend/data/normal_day.json via the generated data.
+const NORMAL_EVENTS = ((generated as { normal_day: { event_types: NormalDayEvent[] } }).normal_day.event_types || []).map(
+  (ev) => ({
+    ...ev,
+    alerting_tool_names: ev.alerting_tools.length
+      ? ev.alerting_tools.map((id) => TOOL_MAP[id]?.name || id)
+      : ["None (benign)"],
+  })
+);
+
+// Per-tool false-alarm counts (NOISE_DATA is computed from normal_day.json by sync-data).
+const TOOL_SUMMARIES = TOOLS.map((t) => {
+  const count = NOISE_DATA[t.id] ?? null;
+  const events = NORMAL_EVENTS.filter((ev) => ev.alerting_tools.includes(t.id)).map((ev) => ev.name.toLowerCase());
+  const note =
+    count === null
+      ? "Not measured (not owned)"
+      : events.length
+      ? `Alerts on: ${events.join("; ")}`
+      : "Generates no false alarms during normal operations";
+  return { id: t.id, name: t.name, count, category: t.category, note };
+});
 
 export default function NoisePage() {
   const [data, setData] = useState<NormalDayResponse | null>(null);
@@ -81,16 +52,6 @@ export default function NoisePage() {
   }, []);
 
 
-  const toolSummaries = [
-    { id: "email_security", name: "Email Security", count: 4, category: "Email", note: "Alerts on tracking links" },
-    { id: "edr", name: "EDR (Endpoint Protection)", count: 6, category: "Endpoint", note: "Alerts on admin PowerShell activity" },
-    { id: "firewall", name: "Firewall", count: 9, category: "Network", note: "Alerts on large update downloads" },
-    { id: "siem", name: "SIEM (Log Monitoring)", count: 18, category: "Monitoring", note: "Alerts on new-city logins and failed attempts" },
-    { id: "tool_x", name: "Tool X (Script Control)", count: 31, category: "Endpoint", note: "Alerts on PowerShell, downloads, and finance macros" },
-    { id: "mfa_owned", name: "Second Login Check (MFA)", count: 0, category: "Identity", note: "Generates no false alarms during normal operations" },
-    { id: "payment_process", name: "Payment Verification Procedure", count: 0, category: "Process", note: "Out-of-band verification process generates no alerts" },
-    { id: "identity_suite", name: "Identity Protection Suite", count: null, category: "Identity", note: "Not measured (not owned)" },
-  ];
 
   return (
     <div className="min-h-screen flex flex-col bg-[var(--paper)] text-[var(--ink)]">
@@ -163,7 +124,7 @@ export default function NoisePage() {
             </h2>
 
             <div className="divide-y divide-[var(--line)]">
-              {toolSummaries.map((tool) => {
+              {TOOL_SUMMARIES.map((tool) => {
                 const isBaseline = BASELINE_TOOL_IDS.includes(tool.id);
                 return (
                   <div key={tool.id} className="py-3.5 flex items-center justify-between gap-4 flex-wrap">

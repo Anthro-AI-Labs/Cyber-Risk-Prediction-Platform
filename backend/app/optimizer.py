@@ -12,7 +12,10 @@ from app.models import (
 from app.engine import evaluate_all_scenarios
 from app.risk import calculate_scenario_probability, run_monte_carlo
 
-BASELINE_TOOL_IDS = ["email_security", "edr", "firewall", "siem", "tool_x"]
+def baseline_tool_ids(all_tools: Dict[str, Tool]) -> List[str]:
+    """Today's setup: every tool whose status in tools.json is 'active'."""
+    return [tid for tid, t in all_tools.items() if t.status == "active"]
+
 
 def run_optimizer(
     budget: Optional[int],
@@ -24,7 +27,9 @@ def run_optimizer(
     techniques: Dict[str, MITRETechnique],
     assumptions: RiskAssumptions,
 ) -> OptimizerPlan:
-    target_budget = budget if budget is not None else 345000
+    BASELINE_TOOL_IDS = baseline_tool_ids(all_tools)
+    # Default budget = what today's setup costs.
+    target_budget = budget if budget is not None else sum(all_tools[t].annual_cost for t in BASELINE_TOOL_IDS)
 
     pass_probs = {
         "stopped": assumptions.step_pass_probability.stopped,

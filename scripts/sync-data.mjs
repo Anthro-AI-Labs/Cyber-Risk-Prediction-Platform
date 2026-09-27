@@ -23,7 +23,8 @@ export function computeSha256(filePath) {
   return crypto.createHash("sha256").update(content).digest("hex");
 }
 
-export function syncData() {
+/** Build the generated frontend data from the backend files, without writing anything. */
+export function buildGenerated() {
   const fileHashes = {};
   for (const relPath of INPUT_FILES) {
     const absPath = path.join(REPO_ROOT, relPath);
@@ -167,10 +168,21 @@ export function syncData() {
     limitations,
   };
 
+  // No timestamp: the output depends only on the inputs, so re-running sync on unchanged data
+  // produces no diff (and the guard test can compare it byte-for-byte).
   const metaData = {
-    timestamp: new Date().toISOString(),
     files: fileHashes,
   };
+
+  return { generatedData, metaData };
+}
+
+export function serialize(obj) {
+  return JSON.stringify(obj, null, 2);
+}
+
+export function syncData() {
+  const { generatedData, metaData } = buildGenerated();
 
   const outDataDir = path.join(REPO_ROOT, "frontend/src/data");
   if (!fs.existsSync(outDataDir)) {
@@ -180,8 +192,8 @@ export function syncData() {
   const outDataPath = path.join(outDataDir, "generated.json");
   const outMetaPath = path.join(outDataDir, "generated.meta.json");
 
-  fs.writeFileSync(outDataPath, JSON.stringify(generatedData, null, 2), "utf8");
-  fs.writeFileSync(outMetaPath, JSON.stringify(metaData, null, 2), "utf8");
+  fs.writeFileSync(outDataPath, serialize(generatedData), "utf8");
+  fs.writeFileSync(outMetaPath, serialize(metaData), "utf8");
 
   // Offline copy of the last validation run (written by scripts/validate.py) for the /validation page.
   const reportSrc = path.join(REPO_ROOT, "validation_report.json");
