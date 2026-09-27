@@ -9,6 +9,7 @@ import { SummaryResponse, SimulationResponse } from "../../lib/types";
 import { fetchSummary } from "../../lib/api";
 import { computeRisk } from "../../lib/engine";
 import { fmt, fmtK, SEVERITY_CONFIG } from "../../lib/format";
+import { useTheme } from "../../lib/useTheme";
 
 const BASELINE_TOOL_IDS = ["email_security", "edr", "firewall", "siem", "tool_x"];
 
@@ -22,7 +23,7 @@ const SCENARIO_NAMES: Record<string, string> = {
 export default function ReportPage() {
   const [summary, setSummary] = useState<SummaryResponse | null>(null);
   const [sim] = useState<SimulationResponse>(() => computeRisk(BASELINE_TOOL_IDS));
-  const [isDark, setIsDark] = useState(false);
+  const { isDark, toggleTheme } = useTheme();
 
   useEffect(() => {
     fetchSummary(BASELINE_TOOL_IDS)
@@ -46,10 +47,6 @@ export default function ReportPage() {
       });
   }, [sim]);
 
-  const toggleTheme = () => {
-    setIsDark(!isDark);
-    document.documentElement.setAttribute("data-theme", !isDark ? "dark" : "light");
-  };
 
   const handlePrint = () => {
     if (typeof window !== "undefined") {

@@ -28,50 +28,68 @@
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
+/* Dark tokens: identical to reference/roi-cyber-validator-prototype.html */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --paper: #080D15;
-    --surface: #0E1624;
-    --ink: #F3F7FC;
-    --muted: #94A3B8;
-    --line: #202F44;
-    --soft: #152032;
-    --accent: #5E7CFF;
-    --accent-soft: rgba(94, 124, 255, 0.16);
-    --stop: #00F09F;
-    --stop-soft: rgba(0, 240, 159, 0.14);
-    --det: #FFBA08;
-    --det-soft: rgba(255, 186, 8, 0.14);
-    --miss: #FF4757;
-    --miss-soft: rgba(255, 71, 87, 0.14);
-    --start: #8195AB;
-    --critical: #FF3838;
-    --high: #FF9F1A;
-    --medium: #FFC048;
-    --low: #2ED573;
+    --paper: #0F1722;
+    --surface: #16212F;
+    --ink: #E7EDF4;
+    --muted: #9AA8B8;
+    --line: #27364A;
+    --soft: #1C2A3B;
+    --accent: #7D92FF;
+    --accent-soft: #1E2A52;
+    --stop: #3CC49A;
+    --stop-soft: #12302A;
+    --det: #E3A845;
+    --det-soft: #33280F;
+    --miss: #F07166;
+    --miss-soft: #3A1B1A;
+    --start: #8391A3;
+    --critical: #F0606A;
+    --high: #F2894F;
+    --medium: #E3B545;
+    --low: #4FC495;
   }
 }
 
 :root[data-theme="dark"] {
-  --paper: #080D15;
-  --surface: #0E1624;
-  --ink: #F3F7FC;
-  --muted: #94A3B8;
-  --line: #202F44;
-  --soft: #152032;
-  --accent: #5E7CFF;
-  --accent-soft: rgba(94, 124, 255, 0.16);
-  --stop: #00F09F;
-  --stop-soft: rgba(0, 240, 159, 0.14);
-  --det: #FFBA08;
-  --det-soft: rgba(255, 186, 8, 0.14);
-  --miss: #FF4757;
-  --miss-soft: rgba(255, 71, 87, 0.14);
-  --start: #8195AB;
-  --critical: #FF3838;
-  --high: #FF9F1A;
-  --medium: #FFC048;
-  --low: #2ED573;
+  --paper: #0F1722;
+  --surface: #16212F;
+  --ink: #E7EDF4;
+  --muted: #9AA8B8;
+  --line: #27364A;
+  --soft: #1C2A3B;
+  --accent: #7D92FF;
+  --accent-soft: #1E2A52;
+  --stop: #3CC49A;
+  --stop-soft: #12302A;
+  --det: #E3A845;
+  --det-soft: #33280F;
+  --miss: #F07166;
+  --miss-soft: #3A1B1A;
+  --start: #8391A3;
+  --critical: #F0606A;
+  --high: #F2894F;
+  --medium: #E3B545;
+  --low: #4FC495;
+}
+
+/* Exposure band: as in the reference, an ink-coloured band in light mode and a fixed dark navy in
+   dark mode. One deliberate deviation: the reference keeps the band text at --paper in dark mode,
+   which is dark-on-dark (#0F1722 on #0A111B) and unreadable, so --band-ink switches to --ink there. */
+:root {
+  --band-ink: var(--paper);
+}
+:root[data-theme="dark"] .band {
+  background: #0A111B;
+  --band-ink: var(--ink);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .band {
+    background: #0A111B;
+    --band-ink: var(--ink);
+  }
 }
 
 *, *::before, *::after {
@@ -255,12 +273,10 @@ a {
 }
 :root[data-theme="dark"] .switch input:checked + span {
   background: var(--accent);
-  box-shadow: 0 0 12px rgba(94, 124, 255, 0.45);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .switch input:checked + span {
     background: var(--accent);
-    box-shadow: 0 0 12px rgba(94, 124, 255, 0.45);
   }
 }
 .switch input:checked + span::after {
@@ -271,8 +287,8 @@ a {
   outline-offset: 2px;
 }
 
-/* Primary buttons with controlled neon glow on LCD */
-.btn-neon-primary, .primary {
+/* Primary buttons */
+.primary {
   background: var(--accent);
   color: #fff;
   border: 0;
@@ -280,27 +296,12 @@ a {
   padding: 13px 24px;
   font-weight: 600;
   font-size: 16px;
-  box-shadow: 0 0 14px rgba(94, 124, 255, 0.3);
   transition: all 0.2s ease-in-out;
 }
-.btn-neon-primary:hover, .primary:hover {
+.primary:hover {
   filter: brightness(1.1);
-  box-shadow: 0 0 22px rgba(94, 124, 255, 0.5);
 }
 
-/* Neon glow indicators for important states */
-.neon-glow-stop {
-  box-shadow: 0 0 14px rgba(0, 240, 159, 0.32);
-}
-.neon-glow-det {
-  box-shadow: 0 0 14px rgba(255, 186, 8, 0.32);
-}
-.neon-glow-miss {
-  box-shadow: 0 0 14px rgba(255, 71, 87, 0.32);
-}
-.neon-glow-accent {
-  box-shadow: 0 0 14px rgba(94, 124, 255, 0.35);
-}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

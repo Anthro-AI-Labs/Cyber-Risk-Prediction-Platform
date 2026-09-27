@@ -7,6 +7,7 @@ import { Header } from "../../components/Header";
 import { Footer } from "../../components/Footer";
 import { NormalDayResponse } from "../../lib/types";
 import { fetchNormalDay } from "../../lib/api";
+import { useTheme } from "../../lib/useTheme";
 
 const NORMAL_EVENTS = [
   {
@@ -71,7 +72,7 @@ const BASELINE_TOOL_IDS = ["email_security", "edr", "firewall", "siem", "tool_x"
 
 export default function NoisePage() {
   const [data, setData] = useState<NormalDayResponse | null>(null);
-  const [isDark, setIsDark] = useState(false);
+  const { isDark, toggleTheme } = useTheme();
 
   useEffect(() => {
     fetchNormalDay(BASELINE_TOOL_IDS).then((res) => {
@@ -79,10 +80,6 @@ export default function NoisePage() {
     });
   }, []);
 
-  const toggleTheme = () => {
-    setIsDark(!isDark);
-    document.documentElement.setAttribute("data-theme", !isDark ? "dark" : "light");
-  };
 
   const toolSummaries = [
     { id: "email_security", name: "Email Security", count: 4, category: "Email", note: "Alerts on tracking links" },

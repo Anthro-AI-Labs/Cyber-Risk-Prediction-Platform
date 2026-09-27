@@ -102,7 +102,7 @@ export const Header: React.FC<HeaderProps> = ({
                 aria-pressed={presentationMode === "simple"}
                 className={`px-3 py-1 rounded-full transition-all flex items-center gap-1.5 cursor-pointer ${
                   presentationMode === "simple"
-                    ? "bg-[var(--accent)] text-white shadow-[0_0_12px_rgba(94,124,255,0.45)] font-bold"
+                    ? "bg-[var(--accent)] text-white font-bold"
                     : "text-[var(--muted)] hover:text-[var(--ink)]"
                 }`}
               >
@@ -114,7 +114,7 @@ export const Header: React.FC<HeaderProps> = ({
                 aria-pressed={presentationMode === "advanced"}
                 className={`px-3 py-1 rounded-full transition-all flex items-center gap-1.5 cursor-pointer ${
                   presentationMode === "advanced"
-                    ? "bg-[var(--accent)] text-white shadow-[0_0_12px_rgba(94,124,255,0.45)] font-bold"
+                    ? "bg-[var(--accent)] text-white font-bold"
                     : "text-[var(--muted)] hover:text-[var(--ink)]"
                 }`}
               >

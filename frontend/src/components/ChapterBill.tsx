@@ -32,7 +32,7 @@ export const ChapterBill: React.FC<ChapterBillProps> = ({ onNext, mode = "simple
         {/* Card 1 */}
         <div className="card flex flex-col justify-between p-[22px] bg-[var(--surface)] border border-[var(--line)] rounded-[14px] hover:border-[var(--accent)]/40 transition-colors">
           <div>
-            <div className="w-8 h-8 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center font-bold mb-3 shadow-[0_0_10px_rgba(94,124,255,0.2)]">
+            <div className="w-8 h-8 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center font-bold mb-3">
               1
             </div>
             <h4 className="text-[17px] font-semibold mb-2 text-[var(--ink)]">Run the attacks</h4>
@@ -47,7 +47,7 @@ export const ChapterBill: React.FC<ChapterBillProps> = ({ onNext, mode = "simple
         {/* Card 2 */}
         <div className="card flex flex-col justify-between p-[22px] bg-[var(--surface)] border border-[var(--line)] rounded-[14px] hover:border-[var(--accent)]/40 transition-colors">
           <div>
-            <div className="w-8 h-8 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center font-bold mb-3 shadow-[0_0_10px_rgba(94,124,255,0.2)]">
+            <div className="w-8 h-8 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center font-bold mb-3">
               2
             </div>
             <h4 className="text-[17px] font-semibold mb-2 text-[var(--ink)]">Estimate the cost</h4>
@@ -62,7 +62,7 @@ export const ChapterBill: React.FC<ChapterBillProps> = ({ onNext, mode = "simple
         {/* Card 3 */}
         <div className="card flex flex-col justify-between p-[22px] bg-[var(--surface)] border border-[var(--line)] rounded-[14px] hover:border-[var(--accent)]/40 transition-colors">
           <div>
-            <div className="w-8 h-8 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center font-bold mb-3 shadow-[0_0_10px_rgba(94,124,255,0.2)]">
+            <div className="w-8 h-8 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center font-bold mb-3">
               3
             </div>
             <h4 className="text-[17px] font-semibold mb-2 text-[var(--ink)]">Compare your options</h4>
@@ -91,7 +91,7 @@ export const ChapterBill: React.FC<ChapterBillProps> = ({ onNext, mode = "simple
       <div className="flex justify-end items-center mt-7 gap-3">
         <button
           onClick={onNext}
-          className="btn-neon-primary flex items-center gap-2 bg-[var(--accent)] text-white font-semibold text-[16.5px] px-6 py-3.5 rounded-full transition-all shadow-[0_0_14px_rgba(94,124,255,0.3)] hover:shadow-[0_0_22px_rgba(94,124,255,0.55)] cursor-pointer"
+          className="primary flex items-center gap-2 bg-[var(--accent)] text-white font-semibold text-[16.5px] px-6 py-3.5 rounded-full transition-all cursor-pointer"
         >
           <span>Run the attacks</span>
           <ArrowRight className="w-4 h-4" />

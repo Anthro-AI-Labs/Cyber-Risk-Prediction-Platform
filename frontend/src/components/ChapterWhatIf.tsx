@@ -57,7 +57,7 @@ export const ChapterWhatIf: React.FC<ChapterWhatIfProps> = ({
               onClick={() => onSelectPreset(p.id)}
               className={`border rounded-full px-4 py-2 font-medium text-[15.5px] transition-all cursor-pointer ${
                 isActive
-                  ? "bg-[var(--accent)] text-white border-[var(--accent)] shadow-[0_0_14px_rgba(94,124,255,0.4)]"
+                  ? "bg-[var(--accent)] text-white border-[var(--accent)]"
                   : "bg-[var(--surface)] border-[var(--line)] text-[var(--ink)] hover:border-[var(--accent)]"
               }`}
             >
@@ -95,7 +95,7 @@ export const ChapterWhatIf: React.FC<ChapterWhatIfProps> = ({
             </div>
 
             {/* 2. WHAT IF? */}
-            <div className="card bg-[var(--surface)] border-2 border-[var(--accent)]/50 shadow-[0_0_16px_rgba(94,124,255,0.15)] rounded-[14px] p-5 flex flex-col justify-between text-center relative overflow-hidden">
+            <div className="card bg-[var(--surface)] border-2 border-[var(--accent)]/50 rounded-[14px] p-5 flex flex-col justify-between text-center relative overflow-hidden">
               <div className="flex items-center justify-center gap-1.5 text-xs uppercase font-bold tracking-wider text-[var(--accent)] mb-1">
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>2. WHAT IF?</span>
@@ -120,9 +120,9 @@ export const ChapterWhatIf: React.FC<ChapterWhatIfProps> = ({
             {/* 3. NEW RESULT */}
             <div className={`card bg-[var(--surface)] border rounded-[14px] p-5 flex flex-col justify-between ${
               aleDelta > 0
-                ? "border-[var(--stop)]/60 shadow-[0_0_16px_rgba(0,240,159,0.15)]"
+                ? "border-[var(--stop)]/60"
                 : aleDelta < 0
-                ? "border-[var(--miss)]/60 shadow-[0_0_16px_rgba(255,71,87,0.15)]"
+                ? "border-[var(--miss)]/60"
                 : "border-[var(--line)]"
             }`}>
               <div>
@@ -238,7 +238,7 @@ export const ChapterWhatIf: React.FC<ChapterWhatIfProps> = ({
         </button>
         <button
           onClick={onNext}
-          className="btn-neon-primary flex items-center gap-2 font-semibold text-[16.5px] px-6 py-3.5 rounded-full transition-all cursor-pointer"
+          className="primary flex items-center gap-2 font-semibold text-[16.5px] px-6 py-3.5 rounded-full transition-all cursor-pointer"
         >
           <span>Find the best plan</span>
           <ArrowRight className="w-4 h-4" />

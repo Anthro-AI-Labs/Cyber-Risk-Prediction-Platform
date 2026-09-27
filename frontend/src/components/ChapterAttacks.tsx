@@ -133,7 +133,7 @@ export const ChapterAttacks: React.FC<ChapterAttacksProps> = ({
               onClick={() => onSelectScenario(sc.id)}
               className={`border rounded-[10px] p-2.5 sm:px-3.5 sm:py-2.5 text-left flex gap-2.5 items-center min-w-[180px] bg-[var(--surface)] transition-all ${
                 isSelected
-                  ? "border-[var(--accent)] ring-1 ring-[var(--accent)] shadow-[0_0_12px_rgba(94,124,255,0.3)] font-semibold"
+                  ? "border-[var(--accent)] ring-1 ring-[var(--accent)] font-semibold"
                   : "border-[var(--line)] hover:border-[var(--muted)]"
               }`}
             >
@@ -433,7 +433,7 @@ export const ChapterAttacks: React.FC<ChapterAttacksProps> = ({
         </button>
         <button
           onClick={onNext}
-          className="btn-neon-primary flex items-center gap-2 bg-[var(--accent)] text-white font-semibold text-[16.5px] px-6 py-3.5 rounded-full transition-all shadow-[0_0_14px_rgba(94,124,255,0.3)] hover:shadow-[0_0_22px_rgba(94,124,255,0.55)] cursor-pointer"
+          className="primary flex items-center gap-2 bg-[var(--accent)] text-white font-semibold text-[16.5px] px-6 py-3.5 rounded-full transition-all cursor-pointer"
         >
           <span>See what each tool returns</span>
           <ArrowRight className="w-4 h-4" />

@@ -25,6 +25,7 @@ import {
   resetAssumptionsApi,
 } from "../lib/api";
 import { RiskAssumptions, SimulationResponse, OptimizerPlan, WhatIfDiff, PresentationMode } from "../lib/types";
+import { useTheme } from "../lib/useTheme";
 
 const BASELINE_TOOL_IDS = ["email_security", "edr", "firewall", "siem", "tool_x"];
 
@@ -70,21 +71,9 @@ export default function HomePage() {
   const [budget, setBudget] = useState<number>(345000);
   const [allowRemoveBaseline, setAllowRemoveBaseline] = useState<boolean>(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
-  const [isDark, setIsDark] = useState<boolean>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const stored = localStorage.getItem("cyber_validator_theme");
-        if (stored === "light") return false;
-      } catch {}
-    }
-    return true; // dark-first default for LCD presentation
-  });
+  const { isDark, toggleTheme } = useTheme();
   const [isOffline, setIsOffline] = useState<boolean>(false);
 
-  // Sync theme attribute with DOM
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
-  }, [isDark]);
 
   // Mode switcher handler with persistence
   const handleSelectPresentationMode = useCallback((mode: PresentationMode) => {
@@ -110,17 +99,6 @@ export default function HomePage() {
     return () => window.removeEventListener("hashchange", handleHash);
   }, []);
 
-  // Theme toggle with persistence
-  const toggleTheme = useCallback(() => {
-    setIsDark((prev) => {
-      const next = !prev;
-      document.documentElement.setAttribute("data-theme", next ? "dark" : "light");
-      try {
-        localStorage.setItem("cyber_validator_theme", next ? "dark" : "light");
-      } catch {}
-      return next;
-    });
-  }, []);
 
   // Navigation helper
   const goToChapter = useCallback(

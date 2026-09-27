@@ -26,26 +26,26 @@ export const SEVERITY_CONFIG: Record<
 > = {
   critical: {
     label: "Critical",
-    dotClass: "bg-[var(--critical)] shadow-[0_0_8px_rgba(255,56,56,0.5)]",
-    pillClass: "bg-[var(--critical)] text-white shadow-[0_0_10px_rgba(255,56,56,0.3)]",
+    dotClass: "bg-[var(--critical)]",
+    pillClass: "bg-[var(--critical)] text-white",
     color: "var(--critical)",
   },
   high: {
     label: "High",
-    dotClass: "bg-[var(--high)] shadow-[0_0_8px_rgba(255,159,26,0.5)]",
-    pillClass: "bg-[var(--high)] text-white shadow-[0_0_10px_rgba(255,159,26,0.3)]",
+    dotClass: "bg-[var(--high)]",
+    pillClass: "bg-[var(--high)] text-white",
     color: "var(--high)",
   },
   medium: {
     label: "Medium",
-    dotClass: "bg-[var(--medium)] shadow-[0_0_8px_rgba(255,192,72,0.5)]",
-    pillClass: "bg-[var(--medium)] text-[#080D15] font-bold shadow-[0_0_10px_rgba(255,192,72,0.3)]",
+    dotClass: "bg-[var(--medium)]",
+    pillClass: "bg-[var(--medium)] text-white font-bold",
     color: "var(--medium)",
   },
   low: {
     label: "Low",
-    dotClass: "bg-[var(--low)] shadow-[0_0_8px_rgba(46,213,115,0.5)]",
-    pillClass: "bg-[var(--low)] text-[#080D15] font-bold shadow-[0_0_10px_rgba(46,213,115,0.3)]",
+    dotClass: "bg-[var(--low)]",
+    pillClass: "bg-[var(--low)] text-white font-bold",
     color: "var(--low)",
   },
 };
@@ -58,19 +58,19 @@ export const OUTCOME_CONFIG: Record<
     label: "Blocked",
     badgeClass: "b-stopped",
     icon: "✓",
-    nodeClass: "border-[var(--stop)] bg-[var(--stop)] text-[#080D15] font-black shadow-[0_0_14px_rgba(0,240,159,0.35)]",
+    nodeClass: "border-[var(--stop)] bg-[var(--stop)] text-white font-bold",
   },
   detected: {
     label: "Seen, not blocked",
     badgeClass: "b-detected",
     icon: "◉",
-    nodeClass: "border-[var(--det)] bg-[var(--det)] text-[#080D15] font-black shadow-[0_0_14px_rgba(255,186,8,0.35)]",
+    nodeClass: "border-[var(--det)] bg-[var(--det)] text-white font-bold",
   },
   missed: {
     label: "No tool reacted",
     badgeClass: "b-missed",
     icon: "✕",
-    nodeClass: "border-[var(--miss)] bg-[var(--miss)] text-white font-black shadow-[0_0_14px_rgba(255,71,87,0.35)]",
+    nodeClass: "border-[var(--miss)] bg-[var(--miss)] text-white font-bold",
   },
   starting_condition: {
     label: "Starting point",

@@ -206,7 +206,7 @@ export const ChapterPlan: React.FC<ChapterPlanProps> = ({
 
           <button
             onClick={onApplyPlan}
-            className="btn-neon-primary flex items-center gap-1.5 font-semibold text-[16px] px-6 py-3 rounded-full transition-all self-start mt-2 cursor-pointer"
+            className="primary flex items-center gap-1.5 font-semibold text-[16px] px-6 py-3 rounded-full transition-all self-start mt-2 cursor-pointer"
           >
             <Check className="w-4 h-4" />
             <span>Apply this plan</span>
@@ -219,7 +219,7 @@ export const ChapterPlan: React.FC<ChapterPlanProps> = ({
             In this sample model, the plan lowers estimated yearly loss by
           </div>
           {/* LCD-optimized Hero Risk Reduction Percentage with Neon Glow */}
-          <div className="hero-red text-[52px] sm:text-[60px] font-bold tracking-tight leading-none text-[var(--stop)] drop-shadow-[0_0_18px_rgba(0,240,159,0.38)] my-2.5">
+          <div className="hero-red text-[52px] sm:text-[60px] font-bold tracking-tight leading-none text-[var(--stop)] my-2.5">
             {plan ? `${plan.risk_reduction_pct.toFixed(1)}%` : "0.0%"}
           </div>
 
@@ -240,7 +240,7 @@ export const ChapterPlan: React.FC<ChapterPlanProps> = ({
               <span className="text-[var(--muted)]">Plan</span>
               <div className="track h-[26px] bg-[var(--soft)] rounded-[8px] overflow-hidden">
                 <div
-                  className="fill h-full bg-[var(--stop)] shadow-[0_0_12px_rgba(0,240,159,0.4)] rounded-[8px] transition-all duration-800"
+                  className="fill h-full bg-[var(--stop)] rounded-[8px] transition-all duration-800"
                   style={{ width: `${((plan ? plan.ale_after : 0) / maxAle) * 100}%` }}
                 />
               </div>

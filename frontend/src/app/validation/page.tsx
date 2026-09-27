@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, Check, X, AlertCircle } from "lucide-react";
 import { Header } from "../../components/Header";
@@ -11,6 +11,7 @@ import { RiskAssumptions } from "../../lib/types";
 import generated from "../../data/generated.json";
 import offlineReport from "../../data/validation-report.json";
 import { fetchValidationReport } from "../../lib/api";
+import { useTheme } from "../../lib/useTheme";
 
 interface ValidationDetail {
   status: string;
@@ -70,15 +71,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export default function ValidationPage() {
-  const [isDark, setIsDark] = useState<boolean>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const stored = localStorage.getItem("cyber_validator_theme");
-        if (stored === "light") return false;
-      } catch {}
-    }
-    return true;
-  });
+  const { isDark, toggleTheme } = useTheme();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [assumptions, setAssumptions] = useState<RiskAssumptions>(DEFAULT_ASSUMPTIONS);
   const [report, setReport] = useState<ValidationReport>(OFFLINE_REPORT);
@@ -100,20 +93,7 @@ export default function ValidationPage() {
   const scorecard = report.scorecard || [];
   const tornado = report.d5_decision_robustness?.tornado || [];
 
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
-  }, [isDark]);
 
-  const toggleTheme = useCallback(() => {
-    setIsDark((prev) => {
-      const next = !prev;
-      document.documentElement.setAttribute("data-theme", next ? "dark" : "light");
-      try {
-        localStorage.setItem("cyber_validator_theme", next ? "dark" : "light");
-      } catch {}
-      return next;
-    });
-  }, []);
 
   const maxSwing = Math.max(...tornado.map((t) => t.swing), 1);
 

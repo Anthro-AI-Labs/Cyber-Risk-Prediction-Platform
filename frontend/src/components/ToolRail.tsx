@@ -85,7 +85,7 @@ export const ToolRail: React.FC<ToolRailProps> = ({
         id={`tc-${tool.id}`}
         className={`flex gap-3 items-start p-3 border rounded-[10px] bg-[var(--surface)] mb-2 transition-all duration-200 ${
           isOn
-            ? "border-[var(--accent)] shadow-[0_0_12px_rgba(94,124,255,0.18)]"
+            ? "border-[var(--accent)]"
             : "border-[var(--line)]"
         } ${isFlashing ? "!bg-[var(--accent-soft)]" : ""}`}
       >

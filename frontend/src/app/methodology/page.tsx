@@ -8,12 +8,13 @@ import { Footer } from "../../components/Footer";
 import { EvidenceReport } from "../../lib/types";
 import { DEFAULT_ASSUMPTIONS } from "../../lib/engine";
 import { RANGE_EXPLANATION } from "../../lib/copy";
+import { useTheme } from "../../lib/useTheme";
 
 const MC = DEFAULT_ASSUMPTIONS.monte_carlo;
 
 export default function MethodologyPage() {
   const [report, setReport] = useState<EvidenceReport | null>(null);
-  const [isDark, setIsDark] = useState(false);
+  const { isDark, toggleTheme } = useTheme();
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/meta/evidence-report`)
@@ -24,10 +25,6 @@ export default function MethodologyPage() {
       });
   }, []);
 
-  const toggleTheme = () => {
-    setIsDark(!isDark);
-    document.documentElement.setAttribute("data-theme", !isDark ? "dark" : "light");
-  };
 
   return (
     <div className="min-h-screen flex flex-col bg-[var(--paper)] text-[var(--ink)]">

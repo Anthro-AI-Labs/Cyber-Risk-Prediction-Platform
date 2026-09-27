@@ -77,7 +77,7 @@ export const ExposureBand: React.FC<ExposureBandProps> = ({
 
   return (
     <section
-      className="band bg-[var(--ink)] text-[var(--paper)] py-4 sm:py-5 transition-colors border-b border-[var(--line)] shadow-sm"
+      className="band bg-[var(--ink)] text-[var(--band-ink)] py-4 sm:py-5 transition-colors border-b border-[var(--line)] shadow-sm"
       aria-live="polite"
     >
       <div className="wrap grid grid-cols-1 md:grid-cols-[1.4fr_1fr_1.6fr] gap-6 sm:gap-7 items-end">
@@ -92,7 +92,7 @@ export const ExposureBand: React.FC<ExposureBandProps> = ({
               Estimate
             </span>
           </div>
-          <div className="text-[44px] sm:text-[54px] font-bold leading-none tracking-tight mt-1 text-[var(--paper)]">
+          <div className="text-[44px] sm:text-[54px] font-bold leading-none tracking-tight mt-1 text-[var(--band-ink)]">
             {fmt(animatedExpo)}
           </div>
 
@@ -112,8 +112,8 @@ export const ExposureBand: React.FC<ExposureBandProps> = ({
               <span
                 className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full ${
                   deltaExpo < 0
-                    ? "bg-[var(--stop)]/20 text-[var(--stop)] border border-[var(--stop)]/40 shadow-[0_0_14px_rgba(0,240,159,0.3)]"
-                    : "bg-[var(--miss)]/20 text-[var(--miss)] border border-[var(--miss)]/40 shadow-[0_0_14px_rgba(255,71,87,0.3)]"
+                    ? "bg-[var(--stop)]/20 text-[var(--stop)] border border-[var(--stop)]/40"
+                    : "bg-[var(--miss)]/20 text-[var(--miss)] border border-[var(--miss)]/40"
                 }`}
               >
                 <span>{deltaExpo < 0 ? "▼" : "▲"}</span>
@@ -129,7 +129,7 @@ export const ExposureBand: React.FC<ExposureBandProps> = ({
         {/* Security Spend */}
         <div>
           <div className="text-sm opacity-80 font-medium">Yearly security spend</div>
-          <div className="text-[28px] sm:text-[32px] font-semibold leading-tight mt-1 text-[var(--paper)]">
+          <div className="text-[28px] sm:text-[32px] font-semibold leading-tight mt-1 text-[var(--band-ink)]">
             {fmt(animatedSpend)}
           </div>
           <div className="mt-2 min-h-[26px] flex items-center">
@@ -157,22 +157,22 @@ export const ExposureBand: React.FC<ExposureBandProps> = ({
           <div className="text-sm opacity-80 font-medium mb-1.5">Tested attacks by severity</div>
           <div className="flex gap-2 flex-wrap">
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 text-sm border border-white/5">
-              <span className="w-2.5 h-2.5 rounded-full bg-[var(--critical)] inline-block flex-none shadow-[0_0_8px_rgba(255,56,56,0.6)]" />
+              <span className="w-2.5 h-2.5 rounded-full bg-[var(--critical)] inline-block flex-none" />
               <span>Critical</span>
               <b className="text-lg font-bold">{counts.critical}</b>
             </div>
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 text-sm border border-white/5">
-              <span className="w-2.5 h-2.5 rounded-full bg-[var(--high)] inline-block flex-none shadow-[0_0_8px_rgba(255,159,26,0.6)]" />
+              <span className="w-2.5 h-2.5 rounded-full bg-[var(--high)] inline-block flex-none" />
               <span>High</span>
               <b className="text-lg font-bold">{counts.high}</b>
             </div>
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 text-sm border border-white/5">
-              <span className="w-2.5 h-2.5 rounded-full bg-[var(--medium)] inline-block flex-none shadow-[0_0_8px_rgba(255,192,72,0.6)]" />
+              <span className="w-2.5 h-2.5 rounded-full bg-[var(--medium)] inline-block flex-none" />
               <span>Medium</span>
               <b className="text-lg font-bold">{counts.medium}</b>
             </div>
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 text-sm border border-white/5">
-              <span className="w-2.5 h-2.5 rounded-full bg-[var(--low)] inline-block flex-none shadow-[0_0_8px_rgba(46,213,115,0.6)]" />
+              <span className="w-2.5 h-2.5 rounded-full bg-[var(--low)] inline-block flex-none" />
               <span>Low</span>
               <b className="text-lg font-bold">{counts.low}</b>
             </div>
