@@ -70,12 +70,12 @@
     {
       "dimension": "Correctness",
       "metric": "automated tests (pytest + vitest) / Python–TS parity / Monte Carlo range agreement",
-      "result": "54/54 (100%) / 256/256 (100%) / 2/2 (100%)",
+      "result": "59/59 (100%) / 256/256 (100%) / 2/2 (100%)",
       "status": "PASS",
       "details": [
         {
           "status": "PASS",
-          "meaning": "54 of 54 automated tests passed (pytest: 46/46, vitest: 8/8)."
+          "meaning": "59 of 59 automated tests passed (pytest: 49/49, vitest: 10/10)."
         },
         {
           "status": "PASS",
@@ -363,29 +363,29 @@
   },
   "d4_correctness_reproducibility": {
     "acceptance_tests": {
-      "passed": 54,
-      "total": 54,
+      "passed": 59,
+      "total": 59,
       "pct": 100.0,
       "status": "PASS",
       "suites": {
         "pytest": {
-          "passed": 46,
+          "passed": 49,
           "failed": 0,
           "errors": 0,
           "skipped": 0,
-          "total": 46,
+          "total": 49,
           "exit_code": 0
         },
         "vitest": {
-          "passed": 8,
+          "passed": 10,
           "failed": 0,
           "errors": 0,
           "skipped": 0,
-          "total": 8,
+          "total": 10,
           "exit_code": 0
         }
       },
-      "meaning": "54 of 54 automated tests passed (pytest: 46/46, vitest: 8/8).",
+      "meaning": "59 of 59 automated tests passed (pytest: 49/49, vitest: 10/10).",
       "evidence": "pytest-json-report and vitest --reporter=json output"
     },
     "python_ts_parity": {
