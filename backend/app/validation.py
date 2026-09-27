@@ -47,88 +47,161 @@ def _fetch_or_cache(url: str, filename: str) -> Optional[bytes]:
         return None
 
 
-def run_d1_source_fidelity() -> Dict[str, Any]:
-    # a) MITRE fidelity
-    mitre_data_bytes = _fetch_or_cache(MITRE_URL, "enterprise-attack-19.2.json")
-    mitre_results = {
-        "field_checks_passed": 0,
-        "field_checks_total": 84,
-        "step_checks_passed": 0,
-        "step_checks_total": 34,
-        "total_checks_passed": 0,
-        "total_checks_total": 118,
-        "mode": "official_stix_online",
-        "evidence": "MITRE Enterprise v19.2 STIX (enterprise-attack-19.2.json)",
+MITRE_SUBSET_PATH = REPO_ROOT / "backend" / "data" / "mitre" / "MITRE_ATTACK_demo_subset.json"
+
+
+def _mitre_ref(obj: Dict[str, Any]) -> Dict[str, Any]:
+    for ref in obj.get("external_references", []):
+        if ref.get("source_name") == "mitre-attack":
+            return ref
+    return {}
+
+
+def _active(obj: Optional[Dict[str, Any]]) -> bool:
+    return bool(obj) and not obj.get("revoked", False) and not obj.get("x_mitre_deprecated", False)
+
+
+def check_mitre_fidelity(subset: Dict[str, Any], stix_objects: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Compare the MITRE demo subset against the official ATT&CK STIX bundle.
+
+    Three checks per technique:
+      1. identity  — the ID exists in STIX, is active, and the technique URL is identical;
+      2. name      — the technique name is identical;
+      3. references — the set of mitigation IDs is identical, every mitigation's name and URL is
+                      identical, and the detection-strategy IDs, names and URLs are identical.
+    Plus one check per scenario step reference (primary and alternative techniques): the ID exists,
+    is active, and the name used in the step is identical.
+
+    Returns counts plus a list of human-readable failures (empty when everything matches).
+    """
+    by_stix_id = {o.get("id"): o for o in stix_objects}
+    by_ext: Dict[str, Dict[str, Dict[str, Any]]] = {"attack-pattern": {}, "course-of-action": {}, "x-mitre-detection-strategy": {}}
+    for o in stix_objects:
+        kind = o.get("type")
+        if kind in by_ext:
+            ext_id = _mitre_ref(o).get("external_id")
+            if ext_id:
+                by_ext[kind][ext_id] = o
+    patterns = by_ext["attack-pattern"]
+    mitigations = by_ext["course-of-action"]
+    detections = by_ext["x-mitre-detection-strategy"]
+
+    related: Dict[Tuple[str, str], set] = {}
+    for o in stix_objects:
+        if o.get("type") != "relationship" or not _active(o):
+            continue
+        rel = o.get("relationship_type")
+        src = by_stix_id.get(o.get("source_ref"))
+        if rel not in ("mitigates", "detects") or not _active(src):
+            continue
+        ext_id = _mitre_ref(src).get("external_id")
+        if ext_id:
+            related.setdefault((rel, o.get("target_ref")), set()).add(ext_id)
+
+    failures: List[str] = []
+    field_passed = field_total = 0
+    for tech in subset.get("techniques", []):
+        tid = tech.get("id")
+        ap = patterns.get(tid)
+        field_total += 3
+
+        if _active(ap) and _mitre_ref(ap).get("url") == tech.get("url"):
+            field_passed += 1
+        elif not _active(ap):
+            failures.append(f"{tid}: technique missing, revoked or deprecated in STIX")
+        else:
+            failures.append(f"{tid}: technique url {tech.get('url')!r} != official {_mitre_ref(ap).get('url')!r}")
+
+        if ap and ap.get("name") == tech.get("name"):
+            field_passed += 1
+        else:
+            failures.append(f"{tid}: name {tech.get('name')!r} != official {ap.get('name') if ap else None!r}")
+
+        ref_problems: List[str] = []
+        stix_ref = ap.get("id") if ap else ""
+        ours_m = {m.get("id") for m in tech.get("mitigations", [])}
+        official_m = related.get(("mitigates", stix_ref), set())
+        if ours_m != official_m:
+            ref_problems.append(f"mitigation set differs (only ours: {sorted(ours_m - official_m)}, only official: {sorted(official_m - ours_m)})")
+        for m in tech.get("mitigations", []):
+            off = mitigations.get(m.get("id"))
+            if not off:
+                ref_problems.append(f"mitigation {m.get('id')} not in STIX")
+                continue
+            if off.get("name") != m.get("name"):
+                ref_problems.append(f"mitigation {m.get('id')} name {m.get('name')!r} != official {off.get('name')!r}")
+            if _mitre_ref(off).get("url") != m.get("url"):
+                ref_problems.append(f"mitigation {m.get('id')} url {m.get('url')!r} != official {_mitre_ref(off).get('url')!r}")
+        ours_d = {d.get("id") for d in tech.get("detection_strategies", [])}
+        official_d = related.get(("detects", stix_ref), set())
+        if ours_d != official_d:
+            ref_problems.append(f"detection-strategy set differs (only ours: {sorted(ours_d - official_d)}, only official: {sorted(official_d - ours_d)})")
+        for d in tech.get("detection_strategies", []):
+            off = detections.get(d.get("id"))
+            if not off:
+                ref_problems.append(f"detection strategy {d.get('id')} not in STIX")
+                continue
+            if off.get("name") != d.get("name") or _mitre_ref(off).get("url") != d.get("url"):
+                ref_problems.append(f"detection strategy {d.get('id')} name/url differs from official")
+        if ref_problems:
+            failures.extend(f"{tid}: {p}" for p in ref_problems)
+        else:
+            field_passed += 1
+
+    step_passed = step_total = 0
+    for sc in subset.get("scenarios", []):
+        for st in sc.get("steps", []):
+            refs = [(st.get("technique_id"), st.get("technique_name"))]
+            refs += [(a.get("id"), a.get("name")) for a in st.get("alternative_techniques", [])]
+            for ref_id, ref_name in refs:
+                step_total += 1
+                ap = patterns.get(ref_id)
+                if _active(ap) and ap.get("name") == ref_name:
+                    step_passed += 1
+                else:
+                    failures.append(f"{sc.get('id')} step {st.get('order')}: reference {ref_id} {ref_name!r} does not match STIX")
+
+    return {
+        "technique_count": len(subset.get("techniques", [])),
+        "field_checks_passed": field_passed,
+        "field_checks_total": field_total,
+        "step_checks_passed": step_passed,
+        "step_checks_total": step_total,
+        "passed": field_passed + step_passed,
+        "total": field_total + step_total,
+        "failures": failures,
     }
 
+
+def run_d1_source_fidelity() -> Dict[str, Any]:
+    # a) MITRE fidelity: always check the file hash, and compare content against the official STIX.
+    subset_bytes = MITRE_SUBSET_PATH.read_bytes()
+    subset_sha = hashlib.sha256(subset_bytes).hexdigest()
+    subset = json.loads(subset_bytes.decode("utf-8"))
+    mitre_data_bytes = _fetch_or_cache(MITRE_URL, "enterprise-attack-19.2.json")
     if mitre_data_bytes:
-        stix = json.loads(mitre_data_bytes.decode("utf-8"))
-        objects = stix.get("objects", [])
-
-        # Index attack-patterns and mitigations
-        ap_by_tid: Dict[str, Dict[str, Any]] = {}
-        coa_by_stix_id: Dict[str, Dict[str, Any]] = {}
-        for obj in objects:
-            t = obj.get("type")
-            if t == "attack-pattern":
-                for ref in obj.get("external_references", []):
-                    if ref.get("source_name") == "mitre-attack":
-                        ap_by_tid[ref.get("external_id")] = obj
-                        break
-            elif t == "course-of-action":
-                coa_by_stix_id[obj.get("id")] = obj
-
-        # Map mitigates relationships: target (attack-pattern stix ID) -> list of mitigation external IDs
-        mitigates_by_target: Dict[str, set] = {}
-        for obj in objects:
-            if obj.get("type") == "relationship" and obj.get("relationship_type") == "mitigates":
-                source_coa = coa_by_stix_id.get(obj.get("source_ref"))
-                if source_coa:
-                    if source_coa.get("revoked", False) or source_coa.get("x_mitre_deprecated", False):
-                        continue
-                    m_id = None
-                    for ref in source_coa.get("external_references", []):
-                        if ref.get("source_name") == "mitre-attack":
-                            m_id = ref.get("external_id")
-                            break
-                    if m_id:
-                        mitigates_by_target.setdefault(obj.get("target_ref"), set()).add(m_id)
-
-        field_passed = 0
-        for tid, tech in data_loader.techniques.items():
-            ap = ap_by_tid.get(tid)
-            if ap and not ap.get("revoked", False) and not ap.get("x_mitre_deprecated", False):
-                field_passed += 1  # Check 1: exists and active
-            if ap and ap.get("name") == tech.name:
-                field_passed += 1  # Check 2: name identical
-            our_mit_ids = {m.id for m in tech.mitigations}
-            official_mit_ids = mitigates_by_target.get(ap.get("id") if ap else "", set())
-            if our_mit_ids == official_mit_ids:
-                field_passed += 1  # Check 3: mitigation IDs identical
-
-        step_passed = 0
-        for sc in data_loader.scenarios.values():
-            for st in sc.steps:
-                # Primary technique
-                if st.technique_id in ap_by_tid:
-                    step_passed += 1
-                for alt in st.alternative_techniques:
-                    if alt.id in ap_by_tid:
-                        step_passed += 1
-
-        mitre_results["field_checks_passed"] = field_passed
-        mitre_results["step_checks_passed"] = step_passed
-        mitre_results["total_checks_passed"] = field_passed + step_passed
+        mitre_results = check_mitre_fidelity(subset, json.loads(mitre_data_bytes.decode("utf-8")).get("objects", []))
+        mitre_results["mode"] = "compared against official STIX"
     else:
-        # Fallback to checksum
-        demo_file = REPO_ROOT / "backend" / "data" / "mitre" / "MITRE_ATTACK_demo_subset.json"
-        actual_sha = hashlib.sha256(demo_file.read_bytes()).hexdigest()
-        if actual_sha == EXPECTED_MITRE_SHA256:
-            mitre_results["field_checks_passed"] = 84
-            mitre_results["step_checks_passed"] = 34
-            mitre_results["total_checks_passed"] = 118
-            mitre_results["mode"] = "verified by reference checksum (network unavailable)"
-            mitre_results["evidence"] = f"SHA-256 {actual_sha} (network unavailable)"
+        # Offline: content cannot be compared; only the hash of the provided original can vouch for it.
+        n_tech = len(subset.get("techniques", []))
+        n_steps = sum(1 + len(st.get("alternative_techniques", [])) for sc in subset.get("scenarios", []) for st in sc.get("steps", []))
+        ok = subset_sha == EXPECTED_MITRE_SHA256
+        total = 3 * n_tech + n_steps
+        mitre_results = {
+            "technique_count": n_tech,
+            "field_checks_passed": 3 * n_tech if ok else 0, "field_checks_total": 3 * n_tech,
+            "step_checks_passed": n_steps if ok else 0, "step_checks_total": n_steps,
+            "passed": total if ok else 0, "total": total,
+            "failures": [] if ok else ["official STIX unavailable and subset hash does not match the provided original"],
+            "mode": "verified by reference checksum only (official STIX unavailable)",
+        }
+    mitre_results["sha256"] = subset_sha
+    mitre_results["sha256_expected"] = EXPECTED_MITRE_SHA256
+    mitre_results["sha256_ok"] = subset_sha == EXPECTED_MITRE_SHA256
+    if not mitre_results["sha256_ok"]:
+        mitre_results["failures"].append(f"subset SHA-256 {subset_sha} != provided original {EXPECTED_MITRE_SHA256}")
+    mitre_results["evidence"] = f"MITRE Enterprise v{subset.get('source', {}).get('version', '?')} STIX (enterprise-attack-19.2.json); {mitre_results['mode']}"
 
     # b) CTID fidelity
     ctid_data_bytes = _fetch_or_cache(CTID_URL, "m365-07.18.2025_attack-16.1-enterprise.json")
@@ -187,14 +260,23 @@ def run_d1_source_fidelity() -> Dict[str, Any]:
 
     return {
         "mitre_fidelity": {
-            "passed": mitre_results["total_checks_passed"],
-            "total": mitre_results["total_checks_total"],
-            "pct": (mitre_results["total_checks_passed"] / mitre_results["total_checks_total"]) * 100.0,
+            "passed": mitre_results["passed"],
+            "total": mitre_results["total"],
+            "pct": (mitre_results["passed"] / mitre_results["total"]) * 100.0 if mitre_results["total"] else 0.0,
             "field_passed": mitre_results["field_checks_passed"],
             "field_total": mitre_results["field_checks_total"],
             "step_passed": mitre_results["step_checks_passed"],
             "step_total": mitre_results["step_checks_total"],
-            "meaning": "All 28 ATT&CK techniques match official MITRE v19.2 STIX data identically in ID, name, status, and associated mitigations.",
+            "sha256": mitre_results["sha256"],
+            "sha256_expected": mitre_results["sha256_expected"],
+            "sha256_ok": mitre_results["sha256_ok"],
+            "failures": mitre_results["failures"],
+            "status": "PASS" if mitre_results["passed"] == mitre_results["total"] and not mitre_results["failures"] else "FAIL",
+            "meaning": (
+                f"Each of the {mitre_results['technique_count']} ATT&CK techniques is checked against the official STIX for ID and URL, name, "
+                f"and mitigation / detection-strategy references (IDs, names, URLs); every scenario step reference is checked for ID and name. "
+                f"The subset file hash is also checked against the provided original."
+            ),
             "evidence": mitre_results["evidence"],
         },
         "ctid_fidelity": {
