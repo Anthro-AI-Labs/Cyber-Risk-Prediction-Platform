@@ -120,21 +120,25 @@ export function syncData() {
     }
   }
 
+  // Limitations text is computed from the data so it cannot drift from it.
+  const ctidTechniques = new Set((ctidData.mapping_objects || []).map((r) => r.attack_object_id));
+  const techniqueIds = Object.keys(techniques);
+  const noCtid = techniqueIds.filter((id) => !ctidTechniques.has(id)).sort();
+  const teamAssumptions = mappings.filter((m) => m.evidence_type === "team_assumption").length;
+  const vendorClaims = mappings.filter((m) => m.evidence_type === "vendor_claim").length;
+  const mc = assumptions.monte_carlo || {};
   const limitations = [
     {
       title: "Dataset version gap",
-      description:
-        "CTID mappings use ATT&CK v16.1 while the attack scenarios use v19.2 (T1684.001 has no CTID mapping row).",
+      description: `CTID mappings use ATT&CK v${ctidData.source?.attack_version_of_mapping} while the attack scenarios use v${mitreData.source?.version}; ${noCtid.length} of ${techniqueIds.length} techniques have no CTID Microsoft 365 row (${noCtid.join(", ")}).`,
     },
     {
       title: "Coverage gap",
-      description:
-        "4 tool-technique pairs rely on team assumptions where official mappings don't exist.",
+      description: `${teamAssumptions} of ${mappings.length} tool-technique mappings rely on team assumptions and ${vendorClaims} on vendor descriptions, because no official mapping exists for them.`,
     },
     {
       title: "Monte Carlo",
-      description:
-        "10,000 iterations give ±$15K stability, not zero-variance determinism.",
+      description: `Ranges use ${Number(mc.iterations).toLocaleString("en-US")} iterations with a fixed seed (${mc.seed}), so they repeat exactly on every run; they describe uncertainty in the assumptions, not measured variability.`,
     },
     {
       title: "Independent steps",

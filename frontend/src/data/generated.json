@@ -2465,15 +2465,15 @@
   "limitations": [
     {
       "title": "Dataset version gap",
-      "description": "CTID mappings use ATT&CK v16.1 while the attack scenarios use v19.2 (T1684.001 has no CTID mapping row)."
+      "description": "CTID mappings use ATT&CK v16.1 while the attack scenarios use v19.2; 6 of 28 techniques have no CTID Microsoft 365 row (T1021.001, T1041, T1190, T1490, T1570, T1684.001)."
     },
     {
       "title": "Coverage gap",
-      "description": "4 tool-technique pairs rely on team assumptions where official mappings don't exist."
+      "description": "3 of 31 tool-technique mappings rely on team assumptions and 5 on vendor descriptions, because no official mapping exists for them."
     },
     {
       "title": "Monte Carlo",
-      "description": "10,000 iterations give ±$15K stability, not zero-variance determinism."
+      "description": "Ranges use 10,000 iterations with a fixed seed (42), so they repeat exactly on every run; they describe uncertainty in the assumptions, not measured variability."
     },
     {
       "title": "Independent steps",

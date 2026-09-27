@@ -1,6 +1,9 @@
 import React from "react";
 import { ArrowRight, BookOpen } from "lucide-react";
 import { PresentationMode } from "../lib/types";
+import generated from "../data/generated.json";
+
+const MITRE_VERSION = (generated as { source: { version: string } }).source.version;
 
 interface ChapterBillProps {
   onNext: () => void;
@@ -50,7 +53,7 @@ export const ChapterBill: React.FC<ChapterBillProps> = ({ onNext, mode = "simple
             <h4 className="text-[17px] font-semibold mb-2 text-[var(--ink)]">Estimate the cost</h4>
             <p className="text-[15.5px] text-[var(--muted)] leading-relaxed">
               {isSimple
-                ? "Blocked steps lower the probability of attack success to calculate an exact estimated yearly loss in dollars."
+                ? "Blocked steps lower the chance an attack succeeds, which lowers the estimated yearly loss in dollars."
                 : "Blocked steps lower the chance an attack succeeds. That chance, times how often it's tried and what it costs, gives a yearly estimate."}
             </p>
           </div>
@@ -80,7 +83,7 @@ export const ChapterBill: React.FC<ChapterBillProps> = ({ onNext, mode = "simple
             <span>How this model works (FAIR + ROSI + MITRE ATT&CK)</span>
           </summary>
           <div className="mt-2.5 p-3.5 bg-[var(--soft)] border border-[var(--line)] rounded-lg text-[13.5px] text-[var(--muted)] leading-relaxed max-w-[65ch]">
-            Financial risk is modeled using the FAIR ontology (Frequency × Probability × Magnitude). Return on Security Investment (ROSI) calculates loss reduction minus tool cost. Every attack step maps directly to MITRE Enterprise ATT&CK v14.
+            Financial risk is modeled using the FAIR ontology (Frequency × Probability × Magnitude). Return on Security Investment (ROSI) is the estimated loss reduction minus the tool cost, divided by the tool cost. Every attack step maps to a technique in MITRE Enterprise ATT&CK v{MITRE_VERSION}.
           </div>
         </details>
       </div>

@@ -820,7 +820,8 @@ def generate_full_validation_report(
         },
     ]
 
-    ctid_techniques = {row.get("attack_object_id") for row in json.loads(CTID_SUBSET_PATH.read_text(encoding="utf-8")).get("mapping_objects", [])}
+    ctid_file = json.loads(CTID_SUBSET_PATH.read_text(encoding="utf-8"))
+    ctid_techniques = {row.get("attack_object_id") for row in ctid_file.get("mapping_objects", [])}
     subset_techniques = sorted(data_loader.techniques)
     no_ctid = [t for t in subset_techniques if t not in ctid_techniques]
     details = {
@@ -837,7 +838,7 @@ def generate_full_validation_report(
 
     limitations = [
         "No predictive validation is possible without real incident data for the fictional company.",
-        f"CTID mappings use ATT&CK v16.1 while the scenarios use v{data_loader.mitre_source.version}; "
+        f"CTID mappings use ATT&CK v{ctid_file.get('source', {}).get('attack_version_of_mapping', '?')} while the scenarios use v{data_loader.mitre_source.version}; "
         f"{len(no_ctid)} of {len(subset_techniques)} techniques have no CTID Microsoft 365 row ({', '.join(no_ctid) or 'none'}).",
         "Published loss figures are averages across organizations of all sizes; a few very large losses pull the mean up.",
         "Tool costs and attack frequencies are sample assumptions (labelled in the app and editable in the Assumptions drawer).",
