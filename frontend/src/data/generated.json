@@ -970,7 +970,7 @@
           "id": "M1041",
           "name": "Encrypt Sensitive Information",
           "how": "Use of encryption provides an added layer of security to sensitive information sent over email. Encryption using public key cryptography requires the adversary to obtain the private certificate along with an encryption key to decrypt messages.",
-          "url": "https://attack.mitre.org/mitigations/M1042"
+          "url": "https://attack.mitre.org/mitigations/M1041"
         },
         {
           "id": "M1042",

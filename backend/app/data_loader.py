@@ -1,3 +1,4 @@
+import hashlib
 import json
 import logging
 import os
@@ -31,9 +32,54 @@ EVIDENCE_LABELS = {
     "vendor_claim": "Vendor description — not tested",
 }
 
+MANIFEST_NAME = "MANIFEST.sha256"
+
+
+class DataIntegrityError(RuntimeError):
+    """Raised when a provided data file does not match data/MANIFEST.sha256."""
+
+
+def verify_data_manifest(data_dir: Path) -> Dict[str, str]:
+    """Check every file listed in MANIFEST.sha256 (sha256sum format) and return {path: sha}.
+
+    Raises DataIntegrityError listing every missing or mismatched file.
+    """
+    manifest_path = data_dir / MANIFEST_NAME
+    if not manifest_path.exists():
+        raise DataIntegrityError(f"Data manifest missing: {manifest_path}")
+
+    expected: Dict[str, str] = {}
+    for line in manifest_path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        sha, rel = line.split(None, 1)
+        expected[rel.strip()] = sha.lower()
+    if not expected:
+        raise DataIntegrityError(f"Data manifest is empty: {manifest_path}")
+
+    problems = []
+    for rel, sha in expected.items():
+        path = data_dir / rel
+        if not path.exists():
+            problems.append(f"  {rel}: file missing")
+            continue
+        actual = hashlib.sha256(path.read_bytes()).hexdigest()
+        if actual != sha:
+            problems.append(f"  {rel}: expected {sha}, got {actual}")
+    if problems:
+        raise DataIntegrityError(
+            "Provided data files do not match data/MANIFEST.sha256 — do not edit them; "
+            "restore the originals:\n" + "\n".join(problems)
+        )
+    return expected
+
+
 class DataLoader:
-    def __init__(self, data_dir: Optional[Path] = None):
+    def __init__(self, data_dir: Optional[Path] = None, verify_integrity: bool = True):
         self.data_dir = data_dir or DATA_DIR
+        if verify_integrity:
+            verify_data_manifest(self.data_dir)
         self.mitre_source: Optional[MITRESource] = None
         self.ctid_source: Optional[Dict[str, Any]] = None
         self.ctid_index: Dict[tuple, Dict[str, Any]] = {}

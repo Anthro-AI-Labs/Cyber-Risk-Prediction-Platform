@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-09-27T05:46:35.684Z",
+  "timestamp": "2026-09-27T06:34:41.045Z",
   "files": {
-    "backend/data/mitre/MITRE_ATTACK_demo_subset.json": "a55e552dc595d12d2c304fe425542ae3a78f455e0594dfbd93c29821f1ea1d18",
+    "backend/data/mitre/MITRE_ATTACK_demo_subset.json": "2725bd45060e1f9bb6cad0fedf55102f76c65d0a8bcfbba1e678e32ca6128eb3",
     "backend/data/tools.json": "72d9f75fd92197686ecab2231e7bd1a35175234bb9e146df2b7001812d3b34ee",
     "backend/data/mappings.json": "0b5414f94ba1969f6fff108b06368761e935d38fb498351b68a98ccac0c2f1b9",
     "backend/data/risk_assumptions.json": "58a338ce7f6bbf2f2de19adbb1dedd6bfb5b2c8012688470e6546f9934532ff5",
