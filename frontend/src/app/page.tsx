@@ -221,6 +221,8 @@ export default function HomePage() {
     setActivePreset(null);
     setBudget(BASELINE_SPEND);
     setAllowRemoveBaseline(false);
+    setSelectedScenarioId("S1");
+    setVisitedChapters(new Set([1]));
     goToChapter(1);
   }, [goToChapter]);
 

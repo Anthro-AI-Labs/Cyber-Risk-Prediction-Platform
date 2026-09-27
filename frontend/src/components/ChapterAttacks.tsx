@@ -36,6 +36,7 @@ export const ChapterAttacks: React.FC<ChapterAttacksProps> = ({
   const isSimple = mode === "simple";
   const [revealedStepCount, setRevealedStepCount] = useState<number>(0);
   const [currentStepIndex, setCurrentStepIndex] = useState<number | null>(null);
+  const [isAnimating, setIsAnimating] = useState<boolean>(false);
   const [narrativeSteps, setNarrativeSteps] = useState<AgentNarrativeStep[]>([]);
   const [agentMode, setAgentMode] = useState<string>("heuristic");
 
@@ -61,33 +62,31 @@ export const ChapterAttacks: React.FC<ChapterAttacksProps> = ({
   const animTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const startAnimation = React.useCallback(() => {
-    if (animTimerRef.current) clearTimeout(animTimerRef.current);
-
-    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReduced) {
-      setRevealedStepCount(scenario.steps.length);
-      setCurrentStepIndex(null);
-      return;
+    if (animTimerRef.current) {
+      clearTimeout(animTimerRef.current);
+      animTimerRef.current = null;
     }
 
+    setIsAnimating(true);
     setRevealedStepCount(0);
     setCurrentStepIndex(0);
 
-    let idx = 0;
+    let current = 0;
     const total = scenario.steps.length;
 
     const tick = () => {
-      if (idx < total) {
-        setCurrentStepIndex(idx);
-        idx++;
-        setRevealedStepCount(idx);
+      current++;
+      setRevealedStepCount(current);
+      if (current < total) {
+        setCurrentStepIndex(current);
         animTimerRef.current = setTimeout(tick, 650);
       } else {
         setCurrentStepIndex(null);
+        setIsAnimating(false);
       }
     };
 
-    tick();
+    animTimerRef.current = setTimeout(tick, 650);
   }, [scenario.steps.length]);
 
   useEffect(() => {
@@ -96,12 +95,15 @@ export const ChapterAttacks: React.FC<ChapterAttacksProps> = ({
     }, 0);
     return () => {
       clearTimeout(startTimer);
-      if (animTimerRef.current) clearTimeout(animTimerRef.current);
+      if (animTimerRef.current) {
+        clearTimeout(animTimerRef.current);
+        animTimerRef.current = null;
+      }
     };
   }, [selectedScenarioId, currentSim.active_tool_ids, startAnimation]);
 
   const sevCfg = SEVERITY_CONFIG[scenRisk.severity] || SEVERITY_CONFIG.medium;
-  const isFinishedRevealing = revealedStepCount >= scenario.steps.length;
+  const isFinishedRevealing = !isAnimating && revealedStepCount >= scenario.steps.length;
 
   // Calculation multiplication breakdown
   const factors = scenRisk.steps.map((st) => {
@@ -322,8 +324,10 @@ export const ChapterAttacks: React.FC<ChapterAttacksProps> = ({
           {/* Replay Button */}
           <div className="mt-3.5 flex gap-2.5 flex-wrap">
             <button
+              id="replay"
               onClick={startAnimation}
-              className="flex items-center gap-1.5 border border-[var(--line)] bg-[var(--surface)] hover:bg-[var(--soft)] px-3.5 py-2 rounded-full text-sm font-medium text-[var(--ink)] transition-colors"
+              aria-label="Replay attack animation"
+              className="flex items-center gap-1.5 border border-[var(--line)] bg-[var(--surface)] hover:bg-[var(--soft)] px-3.5 py-2 rounded-full text-sm font-medium text-[var(--ink)] transition-colors cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Replay attack</span>
@@ -333,91 +337,102 @@ export const ChapterAttacks: React.FC<ChapterAttacksProps> = ({
 
         {/* Right: Sticky Side Card with Math & Attacker View */}
         <div className="side">
-          <div className="card bg-[var(--surface)] border border-[var(--line)] rounded-[14px] p-[22px] sticky top-24">
-            <div className="text-[var(--muted)] text-sm flex items-center gap-1.5">
-              <span>Chance this attack succeeds</span>
-              <span className="text-[11.5px] font-semibold border border-current rounded-full px-2 py-0.5">
-                Estimate
-              </span>
-            </div>
-
-            <div className="flex items-center gap-3 my-2 mb-3.5">
-              <div className="text-[44px] font-bold leading-none tracking-tight text-[var(--ink)]">
-                {pctS(scenRisk.probability)}
-              </div>
-              <span
-                className={`inline-flex items-center gap-1.5 font-bold text-sm px-3 py-1 rounded-full ${sevCfg.pillClass}`}
-              >
-                {sevCfg.label}
-              </span>
-            </div>
-
-            <div className="kv flex justify-between gap-2 py-3 border-t border-[var(--line)] text-[15.5px]">
-              <span className="text-[var(--muted)]">Blocked steps</span>
-              <b className="text-[var(--ink)]">
-                {scenRisk.stopping_points} of{" "}
-                {scenRisk.steps.filter((s) => s.outcome !== "starting_condition").length}
-              </b>
-            </div>
-
-            <div className="kv flex justify-between gap-2 py-3 border-t border-[var(--line)] text-[15.5px]">
-              <span className="text-[var(--muted)]">Tries per year</span>
-              <b className="text-[var(--ink)]">{scenAssump?.attempts_per_year.likely}</b>
-            </div>
-
-            <div className="kv flex justify-between gap-2 py-3 border-t border-[var(--line)] text-[15.5px]">
-              <span className="text-[var(--muted)]">Cost if it succeeds</span>
-              <b className="text-[var(--ink)]">{fmt(scenAssump?.loss_per_success.likely || 0)}</b>
-            </div>
-
-            <div className="kv flex justify-between gap-2 py-3 border-t border-[var(--line)] text-[15.5px]">
-              <span className="text-[var(--muted)]">Estimated yearly loss</span>
-              <b className="text-[var(--ink)]">{fmt(scenRisk.ale_point)}</b>
-            </div>
-
-            {/* Expander: How we calculated this */}
-            <details className="ev mt-3 text-sm">
-              <summary className="cursor-pointer text-[var(--accent)] font-medium list-none outline-none">
-                How we calculated this
-              </summary>
-              <div className="math text-sm text-[var(--muted)] bg-[var(--soft)] rounded-md p-3 mt-2 leading-relaxed font-mono">
-                <div>
-                  Each blocked step leaves a {Math.round(assumptions.step_pass_probability.stopped * 100)}% chance to get past (controls can fail), a seen step {Math.round(assumptions.step_pass_probability.detected * 100)}%, an uncovered step {Math.round(assumptions.step_pass_probability.missed * 100)}%.
-                </div>
-                <div className="mt-2 text-[var(--ink)] font-semibold">
-                  Chance = {factors.join(" × ")} = {pctS(scenRisk.probability)}
-                </div>
-                <div className="mt-1 text-[var(--ink)] font-semibold">
-                  Yearly loss = {scenAssump?.attempts_per_year.likely} tries × {pctS(scenRisk.probability)} × {fmt(scenAssump?.loss_per_success.likely || 0)} = {fmt(scenRisk.ale_point)}
+          <div className="card bg-[var(--surface)] border border-[var(--line)] rounded-[14px] p-[22px] sticky top-24 min-h-[240px]">
+            {isAnimating ? (
+              <div className="py-14 flex flex-col items-center justify-center text-center">
+                <div className="w-7 h-7 rounded-full border-2 border-[var(--accent)] border-t-transparent animate-spin mb-3" />
+                <div className="text-[15px] font-medium text-[var(--muted)] animate-pulse">
+                  Running the attack…
                 </div>
               </div>
-            </details>
-
-            {/* Expander: Attacker's view (AI Attacker Agent safe virtual simulation) */}
-            <details className="ev mt-3 text-sm" open={!isSimple}>
-              <summary className="cursor-pointer text-[var(--accent)] font-medium list-none outline-none flex items-center gap-1.5 hover:underline">
-                <Bot className="w-3.5 h-3.5 inline" />
-                <span>Attacker&apos;s view (virtual path simulation)</span>
-              </summary>
-              <div className="mt-2 p-3 bg-[var(--soft)] rounded-md text-xs leading-relaxed text-[var(--ink)]">
-                <div className="mb-2">
-                  <span data-mode={agentMode} className="inline-block text-[11px] font-semibold px-2.5 py-1 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent)]/30">
-                    AI attack simulation — results computed by the rule engine
+            ) : (
+              <>
+                <div className="text-[var(--muted)] text-sm flex items-center gap-1.5">
+                  <span>Chance this attack succeeds</span>
+                  <span className="text-[11.5px] font-semibold border border-current rounded-full px-2 py-0.5">
+                    Estimate
                   </span>
                 </div>
-                {narrativeSteps.length > 0 ? (
-                  <div className="space-y-1.5">
-                    {narrativeSteps.map((ns) => (
-                      <div key={ns.order} className="border-l-2 border-[var(--accent)] pl-2 py-0.5">
-                        <span className="font-semibold">Step {ns.order}:</span> {ns.narration}
-                      </div>
-                    ))}
+
+                <div className="flex items-center gap-3 my-2 mb-3.5">
+                  <div className="text-[44px] font-bold leading-none tracking-tight text-[var(--ink)]">
+                    {pctS(scenRisk.probability)}
                   </div>
-                ) : (
-                  <p className="text-[var(--muted)]">Generating safe virtual path narrative…</p>
-                )}
-              </div>
-            </details>
+                  <span
+                    className={`inline-flex items-center gap-1.5 font-bold text-sm px-3 py-1 rounded-full ${sevCfg.pillClass}`}
+                  >
+                    {sevCfg.label}
+                  </span>
+                </div>
+
+                <div className="kv flex justify-between gap-2 py-3 border-t border-[var(--line)] text-[15.5px]">
+                  <span className="text-[var(--muted)]">Blocked steps</span>
+                  <b className="text-[var(--ink)]">
+                    {scenRisk.stopping_points} of{" "}
+                    {scenRisk.steps.filter((s) => s.outcome !== "starting_condition").length}
+                  </b>
+                </div>
+
+                <div className="kv flex justify-between gap-2 py-3 border-t border-[var(--line)] text-[15.5px]">
+                  <span className="text-[var(--muted)]">Tries per year</span>
+                  <b className="text-[var(--ink)]">{scenAssump?.attempts_per_year.likely}</b>
+                </div>
+
+                <div className="kv flex justify-between gap-2 py-3 border-t border-[var(--line)] text-[15.5px]">
+                  <span className="text-[var(--muted)]">Cost if it succeeds</span>
+                  <b className="text-[var(--ink)]">{fmt(scenAssump?.loss_per_success.likely || 0)}</b>
+                </div>
+
+                <div className="kv flex justify-between gap-2 py-3 border-t border-[var(--line)] text-[15.5px]">
+                  <span className="text-[var(--muted)]">Estimated yearly loss</span>
+                  <b className="text-[var(--ink)]">{fmt(scenRisk.ale_point)}</b>
+                </div>
+
+                {/* Expander: How we calculated this */}
+                <details className="ev mt-3 text-sm">
+                  <summary className="cursor-pointer text-[var(--accent)] font-medium list-none outline-none">
+                    How we calculated this
+                  </summary>
+                  <div className="math text-sm text-[var(--muted)] bg-[var(--soft)] rounded-md p-3 mt-2 leading-relaxed font-mono">
+                    <div>
+                      Each blocked step leaves a {Math.round(assumptions.step_pass_probability.stopped * 100)}% chance to get past (controls can fail), a seen step {Math.round(assumptions.step_pass_probability.detected * 100)}%, an uncovered step {Math.round(assumptions.step_pass_probability.missed * 100)}%.
+                    </div>
+                    <div className="mt-2 text-[var(--ink)] font-semibold">
+                      Chance = {factors.join(" × ")} = {pctS(scenRisk.probability)}
+                    </div>
+                    <div className="mt-1 text-[var(--ink)] font-semibold">
+                      Yearly loss = {scenAssump?.attempts_per_year.likely} tries × {pctS(scenRisk.probability)} × {fmt(scenAssump?.loss_per_success.likely || 0)} = {fmt(scenRisk.ale_point)}
+                    </div>
+                  </div>
+                </details>
+
+                {/* Expander: Attacker's view (AI Attacker Agent safe virtual simulation) */}
+                <details className="ev mt-3 text-sm" open={!isSimple}>
+                  <summary className="cursor-pointer text-[var(--accent)] font-medium list-none outline-none flex items-center gap-1.5 hover:underline">
+                    <Bot className="w-3.5 h-3.5 inline" />
+                    <span>Attacker&apos;s view (virtual path simulation)</span>
+                  </summary>
+                  <div className="mt-2 p-3 bg-[var(--soft)] rounded-md text-xs leading-relaxed text-[var(--ink)]">
+                    <div className="mb-2">
+                      <span data-mode={agentMode} className="inline-block text-[11px] font-semibold px-2.5 py-1 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent)]/30">
+                        AI attack simulation — results computed by the rule engine
+                      </span>
+                    </div>
+                    {narrativeSteps.length > 0 ? (
+                      <div className="space-y-1.5">
+                        {narrativeSteps.map((ns) => (
+                          <div key={ns.order} className="border-l-2 border-[var(--accent)] pl-2 py-0.5">
+                            <span className="font-semibold">Step {ns.order}:</span> {ns.narration}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-[var(--muted)]">Generating safe virtual path narrative…</p>
+                    )}
+                  </div>
+                </details>
+              </>
+            )}
           </div>
         </div>
       </div>
