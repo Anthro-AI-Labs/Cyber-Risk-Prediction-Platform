@@ -7,6 +7,7 @@ import {
   DEFAULT_ASSUMPTIONS,
   DEFAULT_MC_ITERATIONS,
   TOOLS,
+  REQUIRED_SPEND,
 } from "./engine";
 
 describe("TypeScript Engine — Exact Section 8 Assertions (v3.2)", () => {
@@ -254,5 +255,12 @@ describe("TypeScript Engine — Exact Section 8 Assertions (v3.2)", () => {
     expect(plan.spend_after).toBe(sim.total_spend);
     expect(plan.ale_after).toBe(sim.total_ale_point_rounded);
     expect(Number.isFinite(plan.risk_reduction_pct)).toBe(true);
+  });
+
+  it("derives the smallest plannable budget from the required tools in the data", () => {
+    const required = TOOLS.filter((t) => t.baseline_required);
+    expect(REQUIRED_SPEND).toBe(required.reduce((sum, t) => sum + t.annual_cost, 0));
+    expect(REQUIRED_SPEND).toBe(195000);
+    expect(computeOptimizer(REQUIRED_SPEND, false, DEFAULT_ASSUMPTIONS).fits_budget).toBe(true);
   });
 });

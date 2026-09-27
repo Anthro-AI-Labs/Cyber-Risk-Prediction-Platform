@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { ArrowLeft, RotateCcw, Check, ChevronDown, ChevronRight, SlidersHorizontal, ShieldAlert } from "lucide-react";
 import { fmt, fmtK } from "../lib/format";
 import { OptimizerPlan, PresentationMode, SimulationResponse } from "../lib/types";
+import { REQUIRED_SPEND } from "../lib/engine";
 
 interface ChapterPlanProps {
   plan: OptimizerPlan | null;
@@ -53,7 +54,7 @@ export const ChapterPlan: React.FC<ChapterPlanProps> = ({
             <input
               id="budgetSlider"
               type="range"
-              min={150000}
+              min={REQUIRED_SPEND}
               max={450000}
               step={5000}
               value={budget}

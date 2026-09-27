@@ -42,6 +42,8 @@ export const TOOL_MAP: Record<string, Tool> = Object.fromEntries(
 export const BASELINE_TOOLS: string[] = TOOLS.filter((t) => t.status === "active").map((t) => t.id);
 /** What today's setup costs per year; the optimizer's default budget. */
 export const BASELINE_SPEND: number = BASELINE_TOOLS.reduce((sum, id) => sum + (TOOL_MAP[id]?.annual_cost || 0), 0);
+/** Cost of the required baseline tools (baseline_required in tools.json): the smallest budget any plan can fit. */
+export const REQUIRED_SPEND: number = TOOLS.filter((t) => t.baseline_required).reduce((sum, t) => sum + t.annual_cost, 0);
 
 export const TECHNIQUES: Record<
   string,
