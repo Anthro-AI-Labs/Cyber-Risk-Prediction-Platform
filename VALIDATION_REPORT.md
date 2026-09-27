@@ -1,102 +1,131 @@
-# Data Validation Report — ROI Cyber-Validator (v3.2)
+# ROI Cyber-Validator Data Validation Report
 
 > This project has no historical incident data for the fictional company, so predictive accuracy cannot be measured. Following data-quality best practice (dimensions used by ISO/IEC 25012 and DAMA-DMBOK), we measure (1) how faithfully our data reproduces its official sources, (2) completeness, validity and consistency, (3) traceability of every number, (4) correctness and reproducibility of the calculation engine, and (5) how stable the recommendations are when assumptions change.
+
+**Overall: FAIL**
 
 ## Executive Scorecard
 
 | Dimension | Metric | Result | Status |
 |---|---|---|---|
-| Accuracy vs. source | MITRE fidelity / CTID fidelity / published figures | **118/118 (100%) / 179/179 (100%) / 2/2 (100%)** | PASS ✓ |
-| Completeness & validity | schema validity / referential integrity / completeness | **7/7 / 100/100 / 49/49** | PASS ✓ |
-| Traceability | mappings backed by official sources / model inputs from published figures | **74.2% (23/31) / 18.2% (2/11)** | PASS ✓ |
-| Correctness | acceptance tests (Python + TS) / Python–TS parity (256 configs) | **34/34 (100%) / 256/256 (100%)** | PASS ✓ |
-| Reproducibility | determinism checks (simulation & Monte Carlo) | **2/2 (100%)** | PASS ✓ |
-| Robustness | plan unchanged under ±50% (one-at-a-time / joint 500-run) | **22/22 (100%) / 500/500 (100%)** | PASS ✓ |
-| Compliance | banned-phrase violations | **2 violations** | PASS ✓ |
+| Accuracy vs. source | MITRE fidelity / CTID fidelity / published figures | **118/118 (100%) / 179/179 (100%) / 2/2 (100%)** | PASS |
+| Completeness & validity | schema validity / referential integrity / completeness | **7/7 (100%) / 100/100 (100%) / 49/49 (100%)** | PASS |
+| Traceability | mappings with evidence labels / inputs with source labels (backed by official sources; from published figures) | **31/31 (100%) / 11/11 (100%) (74.2% = 23/31; 18.2% = 2/11)** | PASS |
+| Correctness | automated tests (pytest + vitest) / Python–TS parity / Monte Carlo range agreement | **45/45 (100%) / 256/256 (100%) / 2/2 (100%)** | PASS |
+| Reproducibility | determinism checks (simulation & Monte Carlo) | **2/2 (100%)** | PASS |
+| Robustness | plan and Tool X finding unchanged under ±50% (one-at-a-time / joint) | **22/22 (100%) / 500/500 (100%)** | PASS |
+| Compliance | banned-phrase violations | **2 violations** | FAIL |
 
----
+## D1. Source Fidelity
 
-## D1. Source Fidelity (Accuracy Against Official Sources)
-
-### a) MITRE ATT&CK Fidelity
-- **Result:** 118 / 118 (100.0%)
-- **Meaning:** All 28 ATT&CK techniques match official MITRE v19.2 STIX data identically in ID, name, status, and associated mitigations.
-- **Evidence:** MITRE Enterprise v19.2 STIX (enterprise-attack-19.2.json) (84/84 technique field checks + 34/34 scenario step references = 118/118 total)
-
-### b) CTID M365 Mapping Fidelity
-- **Result:** 179 / 179 (100.0%)
-- **Meaning:** Every row of our Microsoft 365 capability mapping subset exists identically in the official CTID Mappings Explorer dataset.
-- **Evidence:** CTID Mappings Explorer M365 v07.18.2025 (179 rows validated against Center for Threat-Informed Defense)
-
-### c) Published Loss Figures
-- **Result:** 2 / 2 (100.0%)
-- **Meaning:** Published loss figures reproduce cited source equations exactly from FBI IC3 2025 ($123,005) and Sophos 2026 ($1,700,200).
-- **Evidence:** FBI IC3 2025 Internet Crime Report, Sophos State of Ransomware 2026:
-  - FBI IC3 2025: $3,046,598,558 ÷ 24,768 complaints = $123,005 (rounded) ✓
-  - Sophos 2026: Mean recovery cost excluding ransom = $1,700,200 (n = 2,158) ✓
+- **MITRE ATT&CK fidelity:** 118 / 118 (100.0%) — **PASS**
+  - Each of the 28 ATT&CK techniques is checked against the official STIX for ID and URL, name, and mitigation / detection-strategy references (IDs, names, URLs) — 84/84 technique checks; every scenario step reference is checked for ID and name — 34/34 step checks. The file hash is checked against the provided original.
+  - Evidence: MITRE Enterprise v19.2 STIX (enterprise-attack-19.2.json); compared against official STIX
+  - Technique checks 84/84; step reference checks 34/34; SHA-256 `2725bd45060e1f9bb6cad0fedf55102f76c65d0a8bcfbba1e678e32ca6128eb3` (matches the provided original)
+- **CTID M365 mapping fidelity:** 179 / 179 (100.0%) — **PASS**
+  - 179 of 179 Microsoft 365 mapping rows appear identically in the official CTID Mappings Explorer file (compared on 9 fields); the file hash is checked against the provided original.
+  - Evidence: CTID Mappings Explorer M365 07/18/2025 (ATT&CK v16.1); compared against official CTID file
+- **Published loss figures:** 2 / 2 (100.0%) — **PASS**
+  - 2 of 2 published loss figures used by the model reproduce their cited values.
+  - Evidence: risk_assumptions.json source labels; FBI IC3 2025 Internet Crime Report; Sophos State of Ransomware 2026
+  - ✓ FBI IC3 2025 — average loss per business email compromise complaint: $3,046,598,558 ÷ 24,768 = $123,005.43 → $123,005; model value $123,005
+  - ✓ Sophos State of Ransomware 2026 — mean recovery cost excluding ransom: value as published; model value $1,700,200
 
 ## D2. Completeness and Validity
 
-- **Schema Validity:** 7 / 7 (100%) — All 7 data files validate against strict Pydantic schemas with no missing or unknown fields.
-- **Referential Integrity:** 100 / 100 (100%) — All technique IDs, tool IDs, scenario definitions, and alternative routes resolve with 100% integrity.
-- **Completeness:** 49 / 49 (100%) — Every scenario step has descriptive text, names and URLs, and every technique has full descriptions and links.
+- **Schema validity:** 7 / 7 (100.0%) — **PASS**
+  - 7 of 7 data files validate against their strict Pydantic schemas.
+  - Evidence: Pydantic v2 validation of backend/data JSON files
+- **Referential integrity:** 100 / 100 (100.0%) — **PASS**
+  - 100 of 100 cross-references (mapping techniques and tools, scenario assumptions, step and alternative techniques) resolve.
+  - Evidence: cross-checks across backend data files
+- **Completeness:** 49 / 49 (100.0%) — **PASS**
+  - 49 of 49 scenario steps and techniques have their text, names and links.
+  - Evidence: step narrative and technique metadata checks
 
-## D3. Traceability (Provenance of Every Input)
+## D3. Traceability
 
-### Tool → Technique Mappings (31 Total)
+- **Mappings with evidence labels:** 31 / 31 (100.0%) — **PASS**
+  - 31 of 31 tool-to-technique mappings carry an evidence type and a visible evidence label.
+  - Evidence: backend/data/mappings.json via data_loader
 
-| Evidence Type | Count | Share | Backed by Official Source |
+### Tool → technique mappings (31)
+
+| Evidence type | Count | Share | Official source |
 |---|---|---|---|
-| `mitre_mitigation` | 10 | 32.3% | Yes (MITRE/CTID) |
-| `mitre_detection` | 8 | 25.8% | Yes (MITRE/CTID) |
-| `ctid_mapping` | 5 | 16.1% | Yes (MITRE/CTID) |
-| `team_assumption` | 3 | 9.7% | No (Sample/Vendor) |
-| `vendor_claim` | 5 | 16.1% | No (Sample/Vendor) |
+| `mitre_mitigation` | 10 | 32.3% | Yes |
+| `mitre_detection` | 8 | 25.8% | Yes |
+| `ctid_mapping` | 5 | 16.1% | Yes |
+| `team_assumption` | 3 | 9.7% | No |
+| `vendor_claim` | 5 | 16.1% | No |
 
-- **Backed by official sources:** 23 / 31 = **74.2%**
-- **Downgrades:** 0 mapping rows downgraded at runtime.
+- Backed by official sources: 23 / 31 = **74.2%**; mappings with CTID support: 7; runtime downgrades: 0.
 
-### Risk-Model Inputs (11 Key Model Parameters)
+### Risk-model inputs (11)
 
-- **Published figures:** 2 / 11 (18.2%)
-- **Sample assumptions:** 6 / 11 (54.5%)
-- **Model parameters:** 3 / 11 (27.3%)
-- *Note:* The remaining inputs are labeled, editable assumptions because no public per-company source exists.
-- **UI Source Labels:** 11 / 11 (100%) of all inputs in the Assumptions drawer display explicit source labels and badges.
+- `model_parameter`: 3 / 11 (27.3%)
+- `published_figure`: 2 / 11 (18.2%)
+- `sample_assumption`: 6 / 11 (54.5%)
+- **Inputs with source labels:** 11 / 11 (100.0%) — **PASS**
+  - 11 of 11 model inputs shown in the Assumptions drawer carry a source type and label.
+  - Evidence: source fields in backend/data/risk_assumptions.json
 
 ## D4. Engine Correctness and Reproducibility
 
-- **Acceptance Tests:** 34 / 34 (100%) — All Part C / Section 8 baseline, ROSI, what-if, and optimizer acceptance tests pass identically in Python and TypeScript. (Evidence: 28 pytest passed + 6 vitest passed)
-- **Python–TypeScript Parity:** 256 / 256 (100%) — All 2⁸ (256) tool configurations produce bit-for-bit identical rounded ALE and step outcomes across Python and TypeScript engines. (Evidence: backend/tests/fixtures/parity.json (verified in frontend/src/lib/engine.test.ts))
-- **Determinism:** 2 / 2 (100%) — Repeated evaluations of baseline ALE and Monte Carlo distributions (seed 42) yield identical numbers.
-- **Copy Compliance:** 2 violations — Zero banned marketing claims ('100% secure', 'guaranteed', 'hack-proof') detected in code or user-facing copy.
+- **Automated tests:** 45 / 45 (100.0%) — **PASS**
+  - 45 of 45 automated tests passed (pytest: 38/38, vitest: 7/7).
+  - Evidence: pytest-json-report and vitest --reporter=json output
+  - pytest: 38 passed, 0 failed, 0 errors, 0 skipped (of 38)
+  - vitest: 7 passed, 0 failed, 0 errors, 0 skipped (of 7)
+- **Python–TypeScript parity:** 256 / 256 (100.0%) — **PASS**
+  - 256 of 256 tool combinations give identical rounded ALE, risk score, severity and step outcomes in the Python and TypeScript engines.
+  - Evidence: Python engine vs frontend/scripts/engine-dump.mjs (TypeScript engine), all 2^n combinations
+- **Monte Carlo range agreement:** 2 / 2 (100.0%) — **PASS**
+  - Baseline P10 and P90 from the TypeScript engine are within ±3% of the Python engine (P10 0.51%, P90 0.32%). The two engines use different random number generators, so ranges are close but not identical.
+  - Evidence: Python risk.run_monte_carlo vs frontend/scripts/engine-dump.mjs, baseline tools
+  - Iterations: Python 10,000, TypeScript 4,000
+  - P10: Python $654,043 vs TypeScript $657,356 (0.51%, tolerance ±3%)
+  - P90: Python $1,306,454 vs TypeScript $1,302,274 (0.32%, tolerance ±3%)
+- **Determinism:** 2 / 2 (100.0%) — **PASS**
+  - Repeated runs give identical point ALE and Monte Carlo percentiles (seed 42, 10,000 iterations).
+  - Evidence: double run of the baseline simulation
+- **Copy compliance:** 2 violations — **FAIL**
+  - 2 occurrence(s) of a banned phrase found in code or user-facing copy; see violations.
+  - ✗ frontend/src/app/validation/page.tsx:78
+  - ✗ frontend/src/app/validation/page.tsx:78
 
 ## D5. Decision Robustness (Sensitivity Analysis)
 
-- **One-At-A-Time Sensitivity (22 runs):** Recommended plan unchanged in **22 / 22** (100%); Tool X remains low-return in **22 / 22** (100%).
-- **Joint Random Perturbation (500 runs, ±50% Uniform, seed 7):** Recommended plan unchanged in **500 / 500** (100%); Tool X remains low-return in **500 / 500** (100%).
+Reference plan: edr, email_security, firewall, identity_suite, mfa_owned, payment_process, siem
 
-> **Plain-language conclusion:** "Even if every assumption is off by up to ±50%, the recommended plan and the Tool X finding do not change."
+- **One-at-a-time:** 22 / 22 (100.0%) — **PASS**
+  - Each of the 11 inputs is multiplied by 0.5 and 1.5 one at a time (probabilities capped at 1.0); plan unchanged in 22/22, Tool X low return in 22/22.
+  - Evidence: 22 one-at-a-time simulation and optimizer runs
+- **Joint random perturbation:** 500 / 500 (100.0%) — **PASS**
+  - All 11 inputs multiplied together by Uniform(0.5, 1.5) (±50%), seed 7; plan unchanged in 500/500, Tool X low return in 500/500.
+  - Evidence: 500-run joint perturbation
 
-### Tornado Table (Inputs Ranked by Impact on Baseline Total ALE)
+> **Plain-language conclusion:** Even if every assumption is off by up to ±50%, the recommended plan and the Tool X finding do not change in the tested runs.
 
-| Rank | Input Parameter | Description | ×0.5 ALE | ×1.5 ALE | Total ALE Swing |
+### Tornado table (inputs ranked by impact on baseline total ALE)
+
+| Rank | Input | Description | Low ALE | High ALE | Swing |
 |---|---|---|---|---|---|
-| 1 | `pass.missed` | Missed step pass probability | $93,902 | $830,520 | **$736,618** |
-| 2 | `S3.attempts` | S3 (BEC / Invoice fraud) attempts/year | $549,427 | $865,811 | **$316,384** |
-| 3 | `S3.loss` | S3 (BEC / Invoice fraud) loss/success | $549,427 | $865,811 | **$316,384** |
-| 4 | `pass.detected` | Detected step pass probability | $590,038 | $904,234 | **$314,196** |
-| 5 | `pass.stopped` | Stopped step pass probability | $589,647 | $829,557 | **$239,910** |
-| 6 | `S1.attempts` | S1 (Phishing) attempts/year | $590,330 | $824,908 | **$234,578** |
-| 7 | `S1.loss` | S1 (Phishing) loss/success | $590,330 | $824,908 | **$234,578** |
-| 8 | `S2.attempts` | S2 (Password spray) attempts/year | $629,643 | $785,595 | **$155,952** |
-| 9 | `S2.loss` | S2 (Password spray) loss/success | $629,643 | $785,595 | **$155,952** |
-| 10 | `S4.attempts` | S4 (Ransomware) attempts/year | $707,267 | $707,972 | **$705** |
-| 11 | `S4.loss` | S4 (Ransomware) loss/success | $707,267 | $707,972 | **$705** |
+| 1 | `pass.missed` | Missed step pass probability | ×0.5: $93,902 | ×1.5: $830,520 | **$736,618** |
+| 2 | `S3.attempts` | S3 (Business email compromise / invoice fraud) attempts/year | ×0.5: $549,427 | ×1.5: $865,811 | **$316,384** |
+| 3 | `S3.loss` | S3 (Business email compromise / invoice fraud) loss/success | ×0.5: $549,427 | ×1.5: $865,811 | **$316,384** |
+| 4 | `pass.detected` | Detected step pass probability | ×0.5: $590,038 | ×1.5: $904,234 | **$314,196** |
+| 5 | `pass.stopped` | Stopped step pass probability | ×0.5: $589,647 | ×1.5: $829,557 | **$239,910** |
+| 6 | `S1.attempts` | S1 (Phishing & credential theft (fake login page)) attempts/year | ×0.5: $590,330 | ×1.5: $824,908 | **$234,578** |
+| 7 | `S1.loss` | S1 (Phishing & credential theft (fake login page)) loss/success | ×0.5: $590,330 | ×1.5: $824,908 | **$234,578** |
+| 8 | `S2.attempts` | S2 (Account compromise via password guessing) attempts/year | ×0.5: $629,643 | ×1.5: $785,595 | **$155,952** |
+| 9 | `S2.loss` | S2 (Account compromise via password guessing) loss/success | ×0.5: $629,643 | ×1.5: $785,595 | **$155,952** |
+| 10 | `S4.attempts` | S4 (Ransomware) attempts/year | ×0.5: $707,267 | ×1.5: $707,972 | **$705** |
+| 11 | `S4.loss` | S4 (Ransomware) loss/success | ×0.5: $707,267 | ×1.5: $707,972 | **$705** |
 
 ## Limitations
 
 - No predictive validation is possible without real incident data for the fictional company.
-- CTID mappings use ATT&CK v16.1 while the scenarios use v19.2 (T1684.001 has no CTID row).
-- Published loss figures are averages across organizations of all sizes; large enterprise breach losses skew the mean.
-- Tool costs and attack frequencies are sample assumptions (clearly labeled in the app and editable in the Assumptions drawer).
+- CTID mappings use ATT&CK v16.1 while the scenarios use v19.2; 6 of 28 techniques have no CTID Microsoft 365 row (T1021.001, T1041, T1190, T1490, T1570, T1684.001).
+- Published loss figures are averages across organizations of all sizes; a few very large losses pull the mean up.
+- Tool costs and attack frequencies are sample assumptions (labelled in the app and editable in the Assumptions drawer).

@@ -210,10 +210,12 @@ function samplePert(a: number, m: number, c: number, rnd: () => number): number 
   return a + (x / (x + y)) * (c - a);
 }
 
+export const DEFAULT_MC_ITERATIONS = 4000;
+
 export function computeRisk(
   tools: string[],
   assumptions: RiskAssumptions = DEFAULT_ASSUMPTIONS,
-  mcIterations: number = 4000
+  mcIterations: number = DEFAULT_MC_ITERATIONS
 ): SimulationResponse {
   const outcomes = computeOutcomes(tools);
   const pass = assumptions.step_pass_probability;

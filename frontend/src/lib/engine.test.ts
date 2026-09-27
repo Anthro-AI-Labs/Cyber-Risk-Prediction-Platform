@@ -202,26 +202,27 @@ describe("TypeScript Engine — Exact Section 8 Assertions (v3.2)", () => {
     const fixtures: {
       active_tool_ids: string[];
       total_ale_point_rounded: number;
-      scenario_outcomes: Record<string, string[]>;
+      scenarios: Record<
+        string,
+        { ale_point_rounded: number; risk_score_display: string; severity: string; outcomes: string[] }
+      >;
     }[] = JSON.parse(fs.readFileSync(parityPath, "utf-8"));
 
     expect(fixtures.length).toBe(256);
 
     for (let i = 0; i < fixtures.length; i++) {
       const fix = fixtures[i];
-      const sim = computeRisk(fix.active_tool_ids, DEFAULT_ASSUMPTIONS);
+      const sim = computeRisk(fix.active_tool_ids, DEFAULT_ASSUMPTIONS, 0);
+      const label = `config #${i}: [${fix.active_tool_ids.join(", ")}]`;
 
-      expect(
-        sim.total_ale_point_rounded,
-        `Total ALE mismatch for config #${i}: [${fix.active_tool_ids.join(", ")}]`
-      ).toBe(fix.total_ale_point_rounded);
+      expect(sim.total_ale_point_rounded, `Total ALE mismatch for ${label}`).toBe(fix.total_ale_point_rounded);
 
-      for (const [scId, expectedOutcomes] of Object.entries(fix.scenario_outcomes)) {
-        const actualOutcomes = sim.scenarios[scId].steps.map((s) => s.outcome);
-        expect(
-          actualOutcomes,
-          `Scenario ${scId} outcome mismatch for config #${i}: [${fix.active_tool_ids.join(", ")}]`
-        ).toEqual(expectedOutcomes);
+      for (const [scId, expected] of Object.entries(fix.scenarios)) {
+        const sc = sim.scenarios[scId];
+        expect(sc.steps.map((s) => s.outcome), `${scId} outcomes for ${label}`).toEqual(expected.outcomes);
+        expect(sc.ale_point_rounded, `${scId} ALE for ${label}`).toBe(expected.ale_point_rounded);
+        expect(sc.risk_score_display, `${scId} risk score for ${label}`).toBe(expected.risk_score_display);
+        expect(sc.severity, `${scId} severity for ${label}`).toBe(expected.severity);
       }
     }
   });

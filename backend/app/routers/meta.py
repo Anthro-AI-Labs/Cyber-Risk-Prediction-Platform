@@ -1,4 +1,7 @@
-from fastapi import APIRouter
+import json
+from pathlib import Path
+
+from fastapi import APIRouter, HTTPException
 from app.data_loader import data_loader
 from app.models import EvidenceReport
 
@@ -94,6 +97,9 @@ def get_evidence_report():
 
 @router.get("/meta/validation")
 def get_validation_report():
-    from app.validation import generate_full_validation_report
-    return generate_full_validation_report()
-
+    """The report written by the last `scripts/validate.py` run (it runs the test suites and both
+    engines, so it is not re-computed per request)."""
+    report_path = Path(__file__).resolve().parents[3] / "validation_report.json"
+    if not report_path.exists():
+        raise HTTPException(status_code=404, detail="validation_report.json not found — run scripts/validate.py")
+    return json.loads(report_path.read_text(encoding="utf-8"))

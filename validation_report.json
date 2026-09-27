@@ -1,6 +1,7 @@
 {
   "title": "ROI Cyber-Validator Data Validation Report",
   "framing": "This project has no historical incident data for the fictional company, so predictive accuracy cannot be measured. Following data-quality best practice (dimensions used by ISO/IEC 25012 and DAMA-DMBOK), we measure (1) how faithfully our data reproduces its official sources, (2) completeness, validity and consistency, (3) traceability of every number, (4) correctness and reproducibility of the calculation engine, and (5) how stable the recommendations are when assumptions change.",
+  "all_passed": false,
   "scorecard": [
     {
       "dimension": "Accuracy vs. source",
@@ -11,19 +12,19 @@
     {
       "dimension": "Completeness & validity",
       "metric": "schema validity / referential integrity / completeness",
-      "result": "7/7 / 100/100 / 49/49",
+      "result": "7/7 (100%) / 100/100 (100%) / 49/49 (100%)",
       "status": "PASS"
     },
     {
       "dimension": "Traceability",
-      "metric": "mappings backed by official sources / model inputs from published figures",
-      "result": "74.2% (23/31) / 18.2% (2/11)",
+      "metric": "mappings with evidence labels / inputs with source labels (backed by official sources; from published figures)",
+      "result": "31/31 (100%) / 11/11 (100%) (74.2% = 23/31; 18.2% = 2/11)",
       "status": "PASS"
     },
     {
       "dimension": "Correctness",
-      "metric": "acceptance tests (Python + TS) / Python\u2013TS parity (256 configs)",
-      "result": "34/34 (100%) / 256/256 (100%)",
+      "metric": "automated tests (pytest + vitest) / Python–TS parity / Monte Carlo range agreement",
+      "result": "45/45 (100%) / 256/256 (100%) / 2/2 (100%)",
       "status": "PASS"
     },
     {
@@ -34,7 +35,7 @@
     },
     {
       "dimension": "Robustness",
-      "metric": "plan unchanged under \u00b150% (one-at-a-time / joint 500-run)",
+      "metric": "plan and Tool X finding unchanged under ±50% (one-at-a-time / joint)",
       "result": "22/22 (100%) / 500/500 (100%)",
       "status": "PASS"
     },
@@ -42,7 +43,7 @@
       "dimension": "Compliance",
       "metric": "banned-phrase violations",
       "result": "2 violations",
-      "status": "PASS"
+      "status": "FAIL"
     }
   ],
   "d1_source_fidelity": {
@@ -50,26 +51,63 @@
       "passed": 118,
       "total": 118,
       "pct": 100.0,
+      "status": "PASS",
       "field_passed": 84,
       "field_total": 84,
       "step_passed": 34,
       "step_total": 34,
-      "meaning": "All 28 ATT&CK techniques match official MITRE v19.2 STIX data identically in ID, name, status, and associated mitigations.",
-      "evidence": "MITRE Enterprise v19.2 STIX (enterprise-attack-19.2.json)"
+      "sha256": "2725bd45060e1f9bb6cad0fedf55102f76c65d0a8bcfbba1e678e32ca6128eb3",
+      "sha256_expected": "2725bd45060e1f9bb6cad0fedf55102f76c65d0a8bcfbba1e678e32ca6128eb3",
+      "sha256_ok": true,
+      "failures": [],
+      "meaning": "Each of the 28 ATT&CK techniques is checked against the official STIX for ID and URL, name, and mitigation / detection-strategy references (IDs, names, URLs) — 84/84 technique checks; every scenario step reference is checked for ID and name — 34/34 step checks. The file hash is checked against the provided original.",
+      "evidence": "MITRE Enterprise v19.2 STIX (enterprise-attack-19.2.json); compared against official STIX"
     },
     "ctid_fidelity": {
       "passed": 179,
       "total": 179,
       "pct": 100.0,
-      "meaning": "Every row of our Microsoft 365 capability mapping subset exists identically in the official CTID Mappings Explorer dataset.",
-      "evidence": "CTID Mappings Explorer M365 v07.18.2025"
+      "status": "PASS",
+      "fields_compared": [
+        "attack_object_id",
+        "attack_object_name",
+        "capability_description",
+        "capability_group",
+        "capability_id",
+        "comments",
+        "references",
+        "score_category",
+        "score_value"
+      ],
+      "sha256": "f0742a06e782d6e808e6abb08beba61c14a7dd635a98edcb04b19349777ff059",
+      "sha256_ok": true,
+      "failures": [],
+      "meaning": "179 of 179 Microsoft 365 mapping rows appear identically in the official CTID Mappings Explorer file (compared on 9 fields); the file hash is checked against the provided original.",
+      "evidence": "CTID Mappings Explorer M365 07/18/2025 (ATT&CK v16.1); compared against official CTID file"
     },
     "published_figures": {
       "passed": 2,
       "total": 2,
       "pct": 100.0,
-      "meaning": "Published loss figures reproduce cited source equations exactly from FBI IC3 2025 ($123,005) and Sophos 2026 ($1,700,200).",
-      "evidence": "FBI IC3 2025 Internet Crime Report, Sophos State of Ransomware 2026"
+      "status": "PASS",
+      "figures": [
+        {
+          "name": "FBI IC3 2025 — average loss per business email compromise complaint",
+          "derivation": "$3,046,598,558 ÷ 24,768 = $123,005.43 → $123,005",
+          "model_value": 123005.0,
+          "source_label": "Average reported loss per business email compromise complaint, FBI IC3 2025: $3,046,598,558 ÷ 24,768 complaints = $123,005 (rounded).",
+          "ok": true
+        },
+        {
+          "name": "Sophos State of Ransomware 2026 — mean recovery cost excluding ransom",
+          "derivation": "value as published",
+          "model_value": 1700200.0,
+          "source_label": "Mean cost to recover from a ransomware attack, excluding any ransom paid: $1,700,200 (Sophos, The State of Ransomware 2026, n = 2,158).",
+          "ok": true
+        }
+      ],
+      "meaning": "2 of 2 published loss figures used by the model reproduce their cited values.",
+      "evidence": "risk_assumptions.json source labels; FBI IC3 2025 Internet Crime Report; Sophos State of Ransomware 2026"
     }
   },
   "d2_completeness_validity": {
@@ -77,127 +115,310 @@
       "passed": 7,
       "total": 7,
       "pct": 100.0,
-      "meaning": "All 7 data files validate against strict Pydantic schemas with no missing or unknown fields.",
-      "evidence": "Pydantic v2 validation of all backend/data JSON files"
+      "status": "PASS",
+      "failures": [],
+      "meaning": "7 of 7 data files validate against their strict Pydantic schemas.",
+      "evidence": "Pydantic v2 validation of backend/data JSON files"
     },
     "referential_integrity": {
       "passed": 100,
       "total": 100,
       "pct": 100.0,
-      "meaning": "All technique IDs, tool IDs, scenario definitions, and alternative routes resolve with 100% integrity.",
-      "evidence": "100/100 relational cross-checks across backend data files"
+      "status": "PASS",
+      "failures": [],
+      "meaning": "100 of 100 cross-references (mapping techniques and tools, scenario assumptions, step and alternative techniques) resolve.",
+      "evidence": "cross-checks across backend data files"
     },
     "completeness": {
       "passed": 49,
       "total": 49,
       "pct": 100.0,
-      "meaning": "Every scenario step has descriptive text, names and URLs, and every technique has full descriptions and links.",
-      "evidence": "49/49 step narrative and technique metadata completeness checks"
+      "status": "PASS",
+      "failures": [],
+      "meaning": "49 of 49 scenario steps and techniques have their text, names and links.",
+      "evidence": "step narrative and technique metadata checks"
     }
   },
   "d3_traceability": {
+    "mapping_evidence_labels": {
+      "passed": 31,
+      "total": 31,
+      "pct": 100.0,
+      "status": "PASS",
+      "downgrades_count": 0,
+      "meaning": "31 of 31 tool-to-technique mappings carry an evidence type and a visible evidence label.",
+      "evidence": "backend/data/mappings.json via data_loader"
+    },
     "mappings_backed_by_official_sources": {
       "passed": 23,
       "total": 31,
       "pct": 74.19354838709677,
+      "status": "INFO",
       "breakdown": [
         {
           "type": "mitre_mitigation",
           "count": 10,
-          "share": "32.3%"
+          "share": "32.3%",
+          "official": true
         },
         {
           "type": "mitre_detection",
           "count": 8,
-          "share": "25.8%"
+          "share": "25.8%",
+          "official": true
         },
         {
           "type": "ctid_mapping",
           "count": 5,
-          "share": "16.1%"
+          "share": "16.1%",
+          "official": true
         },
         {
           "type": "team_assumption",
           "count": 3,
-          "share": "9.7%"
+          "share": "9.7%",
+          "official": false
         },
         {
           "type": "vendor_claim",
           "count": 5,
-          "share": "16.1%"
+          "share": "16.1%",
+          "official": false
         }
       ],
       "downgrades_count": 0,
-      "meaning": "74.2% of tool-to-technique mappings are backed by official MITRE or CTID datasets; unbacked claims are explicitly labeled.",
-      "evidence": "backend/data/mappings.json (23/31 backed by MITRE/CTID)"
+      "ctid_support_count": 7,
+      "meaning": "23 of 31 mappings (74.2%) are backed by MITRE or CTID; the rest are labelled as team assumptions or vendor descriptions.",
+      "evidence": "evidence_type field of backend/data/mappings.json"
     },
     "model_inputs_from_published_figures": {
       "passed": 2,
       "total": 11,
       "pct": 18.181818181818183,
+      "status": "INFO",
       "breakdown": {
-        "published_figures": "2/11 (18.2%)",
-        "sample_assumptions": "6/11 (54.5%)",
-        "model_parameters": "3/11 (27.3%)"
+        "model_parameter": {
+          "count": 3,
+          "pct": 27.27272727272727
+        },
+        "published_figure": {
+          "count": 2,
+          "pct": 18.181818181818183
+        },
+        "sample_assumption": {
+          "count": 6,
+          "pct": 54.54545454545454
+        }
       },
-      "meaning": "Published figures are used where public empirical data exists; remaining inputs are labeled, editable assumptions because no public per-company source exists.",
-      "evidence": "backend/data/risk_assumptions.json, SOURCES.md"
+      "inputs": [
+        {
+          "input": "pass.stopped",
+          "type": "model_parameter",
+          "label": "Model parameter — editable. No public dataset gives per-step control-failure rates."
+        },
+        {
+          "input": "pass.detected",
+          "type": "model_parameter",
+          "label": "Model parameter — editable. No public dataset gives per-step control-failure rates."
+        },
+        {
+          "input": "pass.missed",
+          "type": "model_parameter",
+          "label": "Model parameter — editable. No public dataset gives per-step control-failure rates."
+        },
+        {
+          "input": "S1.attempts",
+          "type": "sample_assumption",
+          "label": "Sample assumption — no public per-company attempt rate exists."
+        },
+        {
+          "input": "S1.loss",
+          "type": "sample_assumption",
+          "label": "Sample assumption — cost of one mailbox takeover at a ~400-person company."
+        },
+        {
+          "input": "S2.attempts",
+          "type": "sample_assumption",
+          "label": "Sample assumption — no public per-company attempt rate exists."
+        },
+        {
+          "input": "S2.loss",
+          "type": "sample_assumption",
+          "label": "Sample assumption — cost of one account takeover."
+        },
+        {
+          "input": "S3.attempts",
+          "type": "sample_assumption",
+          "label": "Sample assumption."
+        },
+        {
+          "input": "S3.loss",
+          "type": "published_figure",
+          "label": "Average reported loss per business email compromise complaint, FBI IC3 2025: $3,046,598,558 ÷ 24,768 complaints = $123,005 (rounded)."
+        },
+        {
+          "input": "S4.attempts",
+          "type": "sample_assumption",
+          "label": "Sample assumption."
+        },
+        {
+          "input": "S4.loss",
+          "type": "published_figure",
+          "label": "Mean cost to recover from a ransomware attack, excluding any ransom paid: $1,700,200 (Sophos, The State of Ransomware 2026, n = 2,158)."
+        }
+      ],
+      "meaning": "Published figures are used where public data exists; the other inputs are labelled, editable assumptions.",
+      "evidence": "source.type of each input in backend/data/risk_assumptions.json"
     },
     "ui_source_labels": {
       "passed": 11,
       "total": 11,
       "pct": 100.0,
-      "meaning": "Every numeric parameter displayed in the Assumptions drawer carries an explicit source label and provenance badge.",
-      "evidence": "11/11 parameter labels verified programmatically in Assumptions model"
+      "status": "PASS",
+      "meaning": "11 of 11 model inputs shown in the Assumptions drawer carry a source type and label.",
+      "evidence": "source fields in backend/data/risk_assumptions.json"
     }
   },
   "d4_correctness_reproducibility": {
     "acceptance_tests": {
-      "passed": 34,
-      "total": 34,
+      "passed": 45,
+      "total": 45,
       "pct": 100.0,
-      "meaning": "All Part C / Section 8 baseline, ROSI, what-if, and optimizer acceptance tests pass identically in Python and TypeScript.",
-      "evidence": "28 pytest passed + 6 vitest passed"
+      "status": "PASS",
+      "suites": {
+        "pytest": {
+          "passed": 38,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0,
+          "total": 38,
+          "exit_code": 0
+        },
+        "vitest": {
+          "passed": 7,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0,
+          "total": 7,
+          "exit_code": 0
+        }
+      },
+      "meaning": "45 of 45 automated tests passed (pytest: 38/38, vitest: 7/7).",
+      "evidence": "pytest-json-report and vitest --reporter=json output"
     },
     "python_ts_parity": {
       "passed": 256,
       "total": 256,
       "pct": 100.0,
-      "meaning": "All 2\u2078 (256) tool configurations produce bit-for-bit identical rounded ALE and step outcomes across Python and TypeScript engines.",
-      "evidence": "backend/tests/fixtures/parity.json (verified in frontend/src/lib/engine.test.ts)"
+      "status": "PASS",
+      "failures": [],
+      "failure_count": 0,
+      "meaning": "256 of 256 tool combinations give identical rounded ALE, risk score, severity and step outcomes in the Python and TypeScript engines.",
+      "evidence": "Python engine vs frontend/scripts/engine-dump.mjs (TypeScript engine), all 2^n combinations"
     },
     "determinism": {
       "passed": 2,
       "total": 2,
       "pct": 100.0,
-      "meaning": "Repeated evaluations of baseline ALE and Monte Carlo distributions (seed 42) yield identical numbers.",
-      "evidence": "Double-run simulation check of point ALE and PERT range percentiles"
+      "status": "PASS",
+      "meaning": "Repeated runs give identical point ALE and Monte Carlo percentiles (seed 42, 10,000 iterations).",
+      "evidence": "double run of the baseline simulation"
     },
     "copy_compliance": {
       "passed": 0,
+      "total": 1,
+      "pct": 0.0,
+      "status": "FAIL",
       "violations_count": 2,
-      "meaning": "Zero banned marketing claims ('100% secure', 'guaranteed', 'hack-proof') detected in code or user-facing copy.",
-      "evidence": "Repository scan of user-facing strings against 11 banned phrases"
+      "violations": [
+        {
+          "file": "frontend/src/app/validation/page.tsx",
+          "line": 78,
+          "phrase_index": 0
+        },
+        {
+          "file": "frontend/src/app/validation/page.tsx",
+          "line": 78,
+          "phrase_index": 5
+        }
+      ],
+      "meaning": "2 occurrence(s) of a banned phrase found in code or user-facing copy; see violations.",
+      "evidence": "scan of backend/app and frontend/src against 11 banned phrases"
+    },
+    "monte_carlo_agreement": {
+      "passed": 2,
+      "total": 2,
+      "pct": 100.0,
+      "status": "PASS",
+      "tolerance_pct": 3.0,
+      "rows": [
+        {
+          "percentile": "p10",
+          "python": 654043,
+          "typescript": 657356,
+          "relative_difference_pct": 0.5065940700378095,
+          "ok": true
+        },
+        {
+          "percentile": "p90",
+          "python": 1306454,
+          "typescript": 1302274,
+          "relative_difference_pct": 0.31991771125674284,
+          "ok": true
+        }
+      ],
+      "python_iterations": 10000,
+      "typescript_iterations": 4000,
+      "meaning": "Baseline P10 and P90 from the TypeScript engine are within ±3% of the Python engine (P10 0.51%, P90 0.32%). The two engines use different random number generators, so ranges are close but not identical.",
+      "evidence": "Python risk.run_monte_carlo vs frontend/scripts/engine-dump.mjs, baseline tools"
     }
   },
   "d5_decision_robustness": {
+    "reference_plan": [
+      "edr",
+      "email_security",
+      "firewall",
+      "identity_suite",
+      "mfa_owned",
+      "payment_process",
+      "siem"
+    ],
     "one_at_a_time": {
-      "plan_unchanged": 22,
+      "passed": 22,
+      "total": 22,
+      "pct": 100.0,
+      "status": "PASS",
       "total_runs": 22,
+      "plan_unchanged": 22,
       "plan_unchanged_pct": 100.0,
       "tool_x_low_return": 22,
       "tool_x_low_return_pct": 100.0,
-      "meaning": "Varying each of the 11 assumptions by \u00b150% one-at-a-time never changes the recommended portfolio or Tool X finding.",
-      "evidence": "22 OAT simulation and optimization runs"
+      "multipliers": [
+        0.5,
+        1.5
+      ],
+      "inputs": 11,
+      "meaning": "Each of the 11 inputs is multiplied by 0.5 and 1.5 one at a time (probabilities capped at 1.0); plan unchanged in 22/22, Tool X low return in 22/22.",
+      "evidence": "22 one-at-a-time simulation and optimizer runs"
     },
     "joint_perturbation": {
-      "plan_unchanged": 500,
+      "passed": 500,
+      "total": 500,
+      "pct": 100.0,
+      "status": "PASS",
       "total_runs": 500,
+      "plan_unchanged": 500,
       "plan_unchanged_pct": 100.0,
       "tool_x_low_return": 500,
       "tool_x_low_return_pct": 100.0,
-      "meaning": "Even if every assumption is off by up to \u00b150%, the recommended plan and the Tool X finding do not change.",
-      "evidence": "500-run joint perturbation (Uniform(0.5, 1.5), seed 7)"
+      "range": [
+        0.5,
+        1.5
+      ],
+      "half_width_pct": 50,
+      "seed": 7,
+      "meaning": "All 11 inputs multiplied together by Uniform(0.5, 1.5) (±50%), seed 7; plan unchanged in 500/500, Tool X low return in 500/500.",
+      "evidence": "500-run joint perturbation"
     },
     "tornado": [
       {
@@ -211,7 +432,7 @@
       },
       {
         "param": "S3.attempts",
-        "label": "S3 (BEC / Invoice fraud) attempts/year",
+        "label": "S3 (Business email compromise / invoice fraud) attempts/year",
         "low_mult": 0.5,
         "low_ale": 549427,
         "high_mult": 1.5,
@@ -220,7 +441,7 @@
       },
       {
         "param": "S3.loss",
-        "label": "S3 (BEC / Invoice fraud) loss/success",
+        "label": "S3 (Business email compromise / invoice fraud) loss/success",
         "low_mult": 0.5,
         "low_ale": 549427,
         "high_mult": 1.5,
@@ -247,7 +468,7 @@
       },
       {
         "param": "S1.attempts",
-        "label": "S1 (Phishing) attempts/year",
+        "label": "S1 (Phishing & credential theft (fake login page)) attempts/year",
         "low_mult": 0.5,
         "low_ale": 590330,
         "high_mult": 1.5,
@@ -256,7 +477,7 @@
       },
       {
         "param": "S1.loss",
-        "label": "S1 (Phishing) loss/success",
+        "label": "S1 (Phishing & credential theft (fake login page)) loss/success",
         "low_mult": 0.5,
         "low_ale": 590330,
         "high_mult": 1.5,
@@ -265,7 +486,7 @@
       },
       {
         "param": "S2.attempts",
-        "label": "S2 (Password spray) attempts/year",
+        "label": "S2 (Account compromise via password guessing) attempts/year",
         "low_mult": 0.5,
         "low_ale": 629643,
         "high_mult": 1.5,
@@ -274,7 +495,7 @@
       },
       {
         "param": "S2.loss",
-        "label": "S2 (Password spray) loss/success",
+        "label": "S2 (Account compromise via password guessing) loss/success",
         "low_mult": 0.5,
         "low_ale": 629643,
         "high_mult": 1.5,
@@ -299,12 +520,13 @@
         "high_ale": 707972,
         "swing": 705
       }
-    ]
+    ],
+    "conclusion": "Even if every assumption is off by up to ±50%, the recommended plan and the Tool X finding do not change in the tested runs."
   },
   "limitations": [
     "No predictive validation is possible without real incident data for the fictional company.",
-    "CTID mappings use ATT&CK v16.1 while the scenarios use v19.2 (T1684.001 has no CTID row).",
-    "Published loss figures are averages across organizations of all sizes; large enterprise breach losses skew the mean.",
-    "Tool costs and attack frequencies are sample assumptions (clearly labeled in the app and editable in the Assumptions drawer)."
+    "CTID mappings use ATT&CK v16.1 while the scenarios use v19.2; 6 of 28 techniques have no CTID Microsoft 365 row (T1021.001, T1041, T1190, T1490, T1570, T1684.001).",
+    "Published loss figures are averages across organizations of all sizes; a few very large losses pull the mean up.",
+    "Tool costs and attack frequencies are sample assumptions (labelled in the app and editable in the Assumptions drawer)."
   ]
 }

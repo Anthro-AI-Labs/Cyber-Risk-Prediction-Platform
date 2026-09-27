@@ -151,3 +151,10 @@ def test_banned_phrases_scan_in_api_responses():
                 assert len(matches) == 0, f"Found banned word 'secure' in response: {body[:300]}"
             else:
                 assert banned not in body_lower, f"Found banned phrase '{banned}' in response: {body[:300]}"
+
+def test_validation_report_served_from_last_run():
+    res = client.get("/api/meta/validation")
+    assert res.status_code == 200
+    data = res.json()
+    assert {"scorecard", "all_passed", "d1_source_fidelity"} <= set(data)
+    assert all(row["status"] in {"PASS", "FAIL", "NOT_RUN"} for row in data["scorecard"])
