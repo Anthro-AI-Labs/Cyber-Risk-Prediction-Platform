@@ -9,14 +9,16 @@ const THEME_KEY = "cyber_validator_theme";
  * choice is remembered in localStorage; if storage is unavailable the page simply stays light.
  */
 export function useTheme() {
-  const [isDark, setIsDark] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
+  const [isDark, setIsDark] = useState<boolean>(false);
+
+  useEffect(() => {
     try {
-      return localStorage.getItem(THEME_KEY) === "dark";
-    } catch {
-      return false;
-    }
-  });
+      const stored = localStorage.getItem(THEME_KEY);
+      if (stored === "dark") {
+        setIsDark(true);
+      }
+    } catch {}
+  }, []);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");

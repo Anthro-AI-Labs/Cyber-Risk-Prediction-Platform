@@ -48,15 +48,16 @@ const HASH_TO_CHAPTER: Record<string, number> = {
 
 export default function HomePage() {
   // State
-  const [presentationMode, setPresentationMode] = useState<PresentationMode>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const stored = localStorage.getItem("cyber_validator_presentation_mode");
-        if (stored === "simple" || stored === "advanced") return stored;
-      } catch {}
-    }
-    return "simple";
-  });
+  const [presentationMode, setPresentationMode] = useState<PresentationMode>("simple");
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("cyber_validator_presentation_mode");
+      if (stored === "simple" || stored === "advanced") {
+        setPresentationMode(stored);
+      }
+    } catch {}
+  }, []);
   const [activeToolIds, setActiveToolIds] = useState<Set<string>>(
     () => new Set(BASELINE_TOOL_IDS)
   );
