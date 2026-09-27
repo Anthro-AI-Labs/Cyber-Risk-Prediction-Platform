@@ -17,11 +17,12 @@ interface HeaderProps {
 }
 
 const CHAPTERS = [
-  { n: 1, name: "The bill", hash: "#bill" },
-  { n: 2, name: "The attacks", hash: "#attacks" },
-  { n: 3, name: "Tool returns", hash: "#returns" },
+  // Short labels so the header fits on one row at projector widths (1280 and 1366 px).
+  { n: 1, name: "Bill", hash: "#bill" },
+  { n: 2, name: "Attacks", hash: "#attacks" },
+  { n: 3, name: "Returns", hash: "#returns" },
   { n: 4, name: "What if", hash: "#whatif" },
-  { n: 5, name: "Best plan", hash: "#plan" },
+  { n: 5, name: "Plan", hash: "#plan" },
 ];
 
 export const Header: React.FC<HeaderProps> = ({
@@ -37,9 +38,9 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   return (
     <header className="bg-[var(--surface)] border-b border-[var(--line)] sticky top-0 z-20 transition-colors shadow-xs">
-      <div className="wrap flex items-center justify-between min-h-[64px] py-2 gap-4 flex-wrap">
+      <div className="wrap flex items-center justify-between min-h-[64px] py-2 gap-3 flex-wrap lg:flex-nowrap">
         {/* Brand */}
-        <div className="flex items-center gap-2.5 font-bold text-lg whitespace-nowrap">
+        <div className="flex items-center gap-2.5 font-bold text-lg whitespace-nowrap shrink-0">
           <div className="w-[30px] h-[30px] rounded-lg bg-[var(--ink)] flex items-center justify-center text-[var(--surface)] shadow-sm">
             <ShieldCheck className="w-[18px] h-[18px]" strokeWidth={2.4} />
           </div>
@@ -54,7 +55,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Story Stepper */}
-        <nav className="flex items-center gap-1 flex-1 justify-center flex-wrap" aria-label="Story chapters">
+        <nav className="flex items-center gap-0.5 flex-1 justify-center flex-wrap lg:flex-nowrap" aria-label="Story chapters">
           {CHAPTERS.map((ch) => {
             const isCurrent = currentChapter === ch.n;
             const isVisited = visitedChapters.has(ch.n);
@@ -64,7 +65,7 @@ export const Header: React.FC<HeaderProps> = ({
                 key={ch.n}
                 onClick={() => onSelectChapter(ch.n)}
                 aria-current={isCurrent ? "step" : undefined}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[15px] font-medium transition-all ${
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[14.5px] font-medium whitespace-nowrap transition-all ${
                   isCurrent
                     ? "bg-[var(--ink)] text-[var(--surface)] shadow-sm font-semibold"
                     : isVisited
@@ -88,7 +89,7 @@ export const Header: React.FC<HeaderProps> = ({
         </nav>
 
         {/* Actions: Presentation Mode [ Simple | Advanced ] + Assumptions + Light/Dark */}
-        <div className="flex items-center gap-2.5 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap lg:flex-nowrap shrink-0">
           {/* Global Mode Toggle [ Simple | Advanced ] */}
           {onSelectPresentationMode && (
             <div
@@ -137,7 +138,7 @@ export const Header: React.FC<HeaderProps> = ({
             className="flex items-center gap-1.5 border border-[var(--line)] bg-[var(--surface)] hover:bg-[var(--soft)] px-3 py-1.5 rounded-full text-sm font-medium text-[var(--ink)] transition-colors"
           >
             {isDark ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5 text-[var(--muted)]" />}
-            <span className="hidden md:inline">{isDark ? "Light" : "Dark"}</span>
+            <span className="hidden 2xl:inline">{isDark ? "Light" : "Dark"}</span>
           </button>
         </div>
       </div>
