@@ -28,6 +28,9 @@ import {
 } from "../lib/api";
 import { RiskAssumptions, SimulationResponse, OptimizerPlan, WhatIfDiff, PresentationMode } from "../lib/types";
 import { useTheme } from "../lib/useTheme";
+import { useStoredChoice } from "../lib/useStoredChoice";
+
+const PRESENTATION_MODES = ["simple", "advanced"] as const;
 
 
 const CHAPTER_HASHES: Record<number, string> = {
@@ -48,16 +51,11 @@ const HASH_TO_CHAPTER: Record<string, number> = {
 
 export default function HomePage() {
   // State
-  const [presentationMode, setPresentationMode] = useState<PresentationMode>("simple");
-
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem("cyber_validator_presentation_mode");
-      if (stored === "simple" || stored === "advanced") {
-        setPresentationMode(stored);
-      }
-    } catch {}
-  }, []);
+  const [presentationMode, setPresentationMode] = useStoredChoice<PresentationMode>(
+    "cyber_validator_presentation_mode",
+    PRESENTATION_MODES,
+    "simple"
+  );
   const [activeToolIds, setActiveToolIds] = useState<Set<string>>(
     () => new Set(BASELINE_TOOL_IDS)
   );
@@ -78,12 +76,7 @@ export default function HomePage() {
 
 
   // Mode switcher handler with persistence
-  const handleSelectPresentationMode = useCallback((mode: PresentationMode) => {
-    setPresentationMode(mode);
-    try {
-      localStorage.setItem("cyber_validator_presentation_mode", mode);
-    } catch {}
-  }, []);
+  const handleSelectPresentationMode = setPresentationMode;
 
   // Synchronize hash on load and popstate
   useEffect(() => {

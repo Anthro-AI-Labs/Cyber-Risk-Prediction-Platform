@@ -1,38 +1,24 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
+import { useStoredChoice } from "./useStoredChoice";
 
 const THEME_KEY = "cyber_validator_theme";
+const THEMES = ["light", "dark"] as const;
 
 /**
  * Light is the default (as in the specification and the reference prototype). The viewer's toggle
- * choice is remembered in localStorage; if storage is unavailable the page simply stays light.
+ * choice is remembered in localStorage; if storage is unavailable the choice lasts for the session.
  */
 export function useTheme() {
-  const [isDark, setIsDark] = useState<boolean>(false);
+  const [theme, setTheme] = useStoredChoice(THEME_KEY, THEMES, "light");
+  const isDark = theme === "dark";
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(THEME_KEY);
-      if (stored === "dark") {
-        setIsDark(true);
-      }
-    } catch {}
-  }, []);
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
 
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
-  }, [isDark]);
-
-  const toggleTheme = useCallback(() => {
-    setIsDark((prev) => {
-      const next = !prev;
-      try {
-        localStorage.setItem(THEME_KEY, next ? "dark" : "light");
-      } catch {}
-      return next;
-    });
-  }, []);
+  const toggleTheme = useCallback(() => setTheme(isDark ? "light" : "dark"), [isDark, setTheme]);
 
   return { isDark, toggleTheme };
 }
