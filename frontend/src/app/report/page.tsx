@@ -7,7 +7,7 @@ import { Header } from "../../components/Header";
 import { Footer } from "../../components/Footer";
 import { SummaryResponse, SimulationResponse } from "../../lib/types";
 import { fetchSummary } from "../../lib/api";
-import { computeRisk, BASELINE_TOOLS as BASELINE_TOOL_IDS } from "../../lib/engine";
+import { computeRisk, BASELINE_TOOLS as BASELINE_TOOL_IDS, TOOL_MAP } from "../../lib/engine";
 import { fmt, fmtK, SEVERITY_CONFIG } from "../../lib/format";
 import { useTheme } from "../../lib/useTheme";
 
@@ -39,7 +39,7 @@ export default function ReportPage() {
             "Tool X provides script control that duplicates EDR protection in tested scenarios, providing no unique stops.",
           ],
           recommended_actions: [
-            "Enable Second Login Check (MFA) already owned in office license at $0 extra cost.",
+            `Enable ${TOOL_MAP.mfa_owned?.name} — already owned in the office license, at $0 extra cost.`,
             "Reallocate budget from low-return controls towards identity protection and payment verification.",
           ],
         });

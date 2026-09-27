@@ -11,7 +11,7 @@
 | Accuracy vs. source | MITRE fidelity / CTID fidelity / published figures | **118/118 (100%) / 179/179 (100%) / 2/2 (100%)** | PASS |
 | Completeness & validity | schema validity / referential integrity / completeness | **7/7 (100%) / 100/100 (100%) / 49/49 (100%)** | PASS |
 | Traceability | mappings with evidence labels / inputs with source labels (backed by official sources; from published figures) | **31/31 (100%) / 11/11 (100%) (74.2% = 23/31; 18.2% = 2/11)** | PASS |
-| Correctness | automated tests (pytest + vitest) / Python–TS parity / Monte Carlo range agreement | **59/59 (100%) / 256/256 (100%) / 2/2 (100%)** | PASS |
+| Correctness | automated tests (pytest + vitest) / Python–TS parity / Monte Carlo range agreement | **60/60 (100%) / 256/256 (100%) / 2/2 (100%)** | PASS |
 | Reproducibility | determinism checks (simulation & Monte Carlo) | **2/2 (100%)** | PASS |
 | Robustness | plan and Tool X finding unchanged under ±50% (one-at-a-time / joint) | **22/22 (100%) / 500/500 (100%)** | PASS |
 | Compliance | banned-phrase violations | **0 violations** | PASS |
@@ -72,11 +72,11 @@
 
 ## D4. Engine Correctness and Reproducibility
 
-- **Automated tests:** 59 / 59 (100.0%) — **PASS**
-  - 59 of 59 automated tests passed (pytest: 49/49, vitest: 10/10).
+- **Automated tests:** 60 / 60 (100.0%) — **PASS**
+  - 60 of 60 automated tests passed (pytest: 49/49, vitest: 11/11).
   - Evidence: pytest-json-report and vitest --reporter=json output
   - pytest: 49 passed, 0 failed, 0 errors, 0 skipped (of 49)
-  - vitest: 10 passed, 0 failed, 0 errors, 0 skipped (of 10)
+  - vitest: 11 passed, 0 failed, 0 errors, 0 skipped (of 11)
 - **Python–TypeScript parity:** 256 / 256 (100.0%) — **PASS**
   - 256 of 256 tool combinations give identical rounded ALE, risk score, severity and step outcomes in the Python and TypeScript engines.
   - Evidence: Python engine vs frontend/scripts/engine-dump.mjs (TypeScript engine), all 2^n combinations

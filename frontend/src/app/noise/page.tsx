@@ -28,6 +28,9 @@ const NORMAL_EVENTS = ((generated as { normal_day: { event_types: NormalDayEvent
   })
 );
 
+const TOOL_X_NOISE = NOISE_DATA.tool_x ?? 0;
+const BASELINE_NOISE = BASELINE_TOOL_IDS.reduce((sum, id) => sum + (NOISE_DATA[id] ?? 0), 0);
+
 // Per-tool false-alarm counts (NOISE_DATA is computed from normal_day.json by sync-data).
 const TOOL_SUMMARIES = TOOLS.map((t) => {
   const count = NOISE_DATA[t.id] ?? null;
@@ -218,7 +221,7 @@ export default function NoisePage() {
               <span>Noise &amp; Return Correlation</span>
             </h3>
             <p>
-              In our simulated baseline, <strong>Tool X (Script Control)</strong> generates 31 of the 68 daily false alarms (45.6% of all daily alert noise), while providing $0 in net risk reduction across tested attack scenarios because modern EDR already intercepts unapproved script interpreters.
+              In our simulated baseline, <strong>{TOOL_MAP.tool_x?.name}</strong> generates {TOOL_X_NOISE} of the {BASELINE_NOISE} daily false alarms ({((TOOL_X_NOISE / BASELINE_NOISE) * 100).toFixed(1)}% of all daily alert noise), while providing $0 in net risk reduction across tested attack scenarios because modern EDR already intercepts unapproved script interpreters.
             </p>
             <p>
               Retiring or tuning low-return controls directly reduces alert fatigue without increasing exposure to tested threats.

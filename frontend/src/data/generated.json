@@ -33,7 +33,7 @@
     },
     {
       "id": "edr",
-      "name": "EDR (Endpoint Protection)",
+      "name": "Endpoint Protection (EDR)",
       "category": "Endpoint",
       "annual_cost": 90000,
       "status": "active",
@@ -53,7 +53,7 @@
     },
     {
       "id": "siem",
-      "name": "SIEM (Log Monitoring)",
+      "name": "Log Monitoring (SIEM)",
       "category": "Monitoring",
       "annual_cost": 85000,
       "status": "active",
@@ -63,7 +63,7 @@
     },
     {
       "id": "tool_x",
-      "name": "Tool X (Script Control)",
+      "name": "Tool X — Script Control",
       "category": "Endpoint",
       "annual_cost": 60000,
       "status": "active",
@@ -73,7 +73,7 @@
     },
     {
       "id": "mfa_owned",
-      "name": "Second Login Check (MFA with number matching)",
+      "name": "Second login check (MFA)",
       "category": "Identity",
       "annual_cost": 0,
       "status": "owned_not_enabled",
@@ -93,7 +93,7 @@
     },
     {
       "id": "payment_process",
-      "name": "Payment Verification Procedure + Staff Training",
+      "name": "Payment check by phone",
       "category": "Process",
       "annual_cost": 8000,
       "status": "candidate",
