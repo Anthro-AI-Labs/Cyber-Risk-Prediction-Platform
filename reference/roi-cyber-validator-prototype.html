@@ -328,7 +328,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 
 <footer>
   <div class="wrap">
-    <span class="proto">Prototype — fictional company. Costs, attack frequencies and loss values are sample assumptions you can change.</span>
+    <span class="proto">Prototype — fictional company. Tool costs and attack frequencies are sample assumptions; invoice-fraud and ransomware losses use FBI IC3 2025 and Sophos 2026 figures. All editable.</span>
     <span>MITRE ATT&CK® Enterprise v19.2. © 2026 The MITRE Corporation. This work is reproduced and distributed with the permission of The MITRE Corporation.</span>
   </div>
 </footer>
@@ -361,20 +361,20 @@ const TOOLS=[
 ];
 const TOOLMAP=Object.fromEntries(TOOLS.map(t=>[t.id,t]));
 const MAP=[
- ["email_security","T1566.002","stop","MITRE mitigation: Restrict Web-Based Content"],["email_security","T1566.001","stop","MITRE mitigation: Antivirus/Antimalware"],
+ ["email_security","T1566.002","stop","MITRE mitigation: Restrict Web-Based Content · CTID M365 mapping: Anti-Phishing (protect, significant)"],["email_security","T1566.001","stop","MITRE mitigation: Antivirus/Antimalware · CTID M365 mapping: Anti-Phishing, Antimalware (protect, significant)"],
  ["edr","T1059.001","stop","MITRE mitigation: Execution Prevention"],["edr","T1059","stop","MITRE mitigation: Execution Prevention"],["edr","T1003","stop","MITRE mitigation: Credential Access Protection"],["edr","T1490","stop","Team assumption — to be validated"],["edr","T1486","stop","MITRE mitigation: Behavior Prevention on Endpoint"],
  ["edr","T1204.002","detect","MITRE detection strategy"],["edr","T1539","detect","MITRE detection strategy"],["edr","T1570","detect","MITRE detection strategy"],
  ["firewall","T1133","stop","MITRE mitigation: Limit Access to Resource Over Network"],["firewall","T1190","stop","MITRE mitigation: Network Segmentation"],["firewall","T1021.001","stop","MITRE mitigation: Limit Access to Resource Over Network"],["firewall","T1567","detect","MITRE detection strategy"],["firewall","T1041","detect","MITRE detection strategy"],
  ["siem","T1110.003","detect","MITRE detection strategy"],["siem","T1110.004","detect","MITRE detection strategy"],["siem","T1078.004","detect","MITRE detection strategy"],
  ["tool_x","T1059.001","stop","Team assumption — to be validated"],["tool_x","T1059","stop","Team assumption — to be validated"],
- ["mfa_owned","T1078.004","stop","MITRE mitigation: Multi-factor Authentication"],["mfa_owned","T1621","stop","MITRE mitigation: Multi-factor Authentication"],
+ ["mfa_owned","T1078.004","stop","CTID M365 mapping: Multifactor Authentication (protect, significant)"],["mfa_owned","T1621","stop","CTID M365 mapping: Multifactor Authentication (protect, significant)"],["mfa_owned","T1110.003","stop","CTID M365 mapping: Multifactor Authentication (protect, significant)"],["mfa_owned","T1110.004","stop","CTID M365 mapping: Multifactor Authentication (protect, significant)"],["mfa_owned","T1098.005","stop","CTID M365 mapping: Multifactor Authentication (protect, significant)"],
  ["identity_suite","T1557","stop","Vendor description — not tested"],["identity_suite","T1539","stop","Vendor description — not tested"],["identity_suite","T1550.004","stop","Vendor description — not tested"],["identity_suite","T1110.003","stop","Vendor description — not tested"],["identity_suite","T1110.004","stop","Vendor description — not tested"],
  ["payment_process","T1657","stop","MITRE mitigation: User Training"]
 ];
 const NOISE={email_security:4,edr:6,firewall:9,siem:18,tool_x:31,mfa_owned:0,payment_process:0,identity_suite:null};
 const DEFAULT_ASSUME={
   pass:{stopped:0.20,detected:0.60,missed:0.95,start:1.0},
-  sc:{S1:{f:[12,24,48],l:[30000,60000,180000]},S2:{f:[6,12,24],l:[20000,40000,120000]},S3:{f:[1.5,3,6],l:[60000,120000,360000]},S4:{f:[3,6,12],l:[750000,1500000,4500000]}},
+  sc:{S1:{f:[12,24,48],l:[30000,60000,180000]},S2:{f:[6,12,24],l:[20000,40000,120000]},S3:{f:[1.5,3,6],l:[61502.5,123005,369015]},S4:{f:[3,6,12],l:[850100,1700200,5100600]}},
   sev:{critical:0.5,high:0.2,medium:0.05}
 };
 const BASELINE=["email_security","edr","firewall","siem","tool_x"];
@@ -607,15 +607,20 @@ function renderPlan(){
 /* assumptions */
 function renderAssume(){
   const A=S.A,row=(l,k,v,step)=>`<label for="${k}">${l}</label><input id="${k}" data-k="${k}" type="number" step="${step}" value="${v}">`;
-  $("#assumeBody").innerHTML=`<p>Every number here is a sample assumption. Replace it with your organization's data or a sourced industry figure, and the whole app recalculates.</p>
+  $("#assumeBody").innerHTML=`<p>Each number is either a published figure (with its source) or a sample assumption. Replace any of them with your organization's data and the whole app recalculates.</p>
   <div class="formula">Yearly loss = tries per year × chance of success × cost per success<br>Chance of success = product of the step chances below</div>
   <h3>Chance an attacker gets past a step</h3><div class="fgrid">${row("Blocked step","pass.stopped",A.pass.stopped,0.05)}${row("Seen, not blocked","pass.detected",A.pass.detected,0.05)}${row("No tool reacted","pass.missed",A.pass.missed,0.05)}</div>
-  ${Object.keys(SCEN_META).map(id=>`<h3>${SCEN_META[id].name}</h3><div class="fgrid">${row("Tries per year (likely)","sc."+id+".f",A.sc[id].f[1],0.5)}${row("Cost per success, $ (likely)","sc."+id+".l",A.sc[id].l[1],5000)}</div>`).join("")}
+  ${Object.keys(SCEN_META).map(id=>`<h3>${SCEN_META[id].name}</h3><div class="fgrid">${row("Tries per year (likely)","sc."+id+".f",A.sc[id].f[1],0.5)}${row("Cost per success, $ (likely)","sc."+id+".l",A.sc[id].l[1],5000)}</div><p style="margin:6px 0 0">${SRC[id]}</p>`).join("")}
   <p>Ranges use low = half and high = double the tries, and low = half and high = three times the cost, with a PERT distribution (4,000 runs, fixed seed).</p>
   <p>Severity: Critical from ${A.sev.critical*100}% chance, High from ${A.sev.high*100}%, Medium from ${A.sev.medium*100}%.</p>
-  <p>Methods: loss follows the FAIR structure (Open Group). Return on security investment follows the ROSI formula described by ENISA. Attack steps come from MITRE ATT&CK.</p>
+  <p>Methods: loss follows the FAIR structure (Open Group). Return on security investment follows the ROSI formula described by ENISA. Attack steps come from MITRE ATT&CK v19.2. Tool effects for MFA and email protection are backed by the CTID Mappings Explorer Microsoft 365 mappings.</p>
   <button class="secondary" id="resetA">Reset to sample values</button>`;
 }
+const SRC={
+ S1:"Tries and cost: sample assumptions (no public per-company figure).",
+ S2:"Tries and cost: sample assumptions (no public per-company figure).",
+ S3:'Cost: <a href="https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf" target="_blank" rel="noopener">FBI IC3 2025</a> — average loss per business email compromise complaint ($3,046,598,558 ÷ 24,768 = $123,005). Tries: sample assumption.',
+ S4:'Cost: <a href="https://www.sophos.com/en-us/content/state-of-ransomware" target="_blank" rel="noopener">Sophos, State of Ransomware 2026</a> — mean recovery cost excluding ransom, $1,700,200. Tries: sample assumption.'};
 function setAssume(k,v){
   v=parseFloat(v);if(!isFinite(v)||v<0)return;
   const p=k.split(".");

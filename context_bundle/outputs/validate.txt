@@ -1,0 +1,4 @@
+[validate.py] Running full data validation suite...
+[validate.py] Wrote JSON report to /Users/aminzayer/MyGit/Cyber-Risk-Prediction-Platform/validation_report.json
+[validate.py] Wrote Markdown report to /Users/aminzayer/MyGit/Cyber-Risk-Prediction-Platform/VALIDATION_REPORT.md
+[validate.py] Data validation complete.

@@ -1,0 +1,13 @@
+{
+  "description": "A simulated normal workday. No attacks occur. Any alert is a false alarm.",
+  "event_types": [
+    { "id": "E1", "name": "Marketing newsletter with tracking links", "count": 4,  "alerting_tools": ["email_security"] },
+    { "id": "E2", "name": "IT admin runs a PowerShell maintenance script", "count": 6, "alerting_tools": ["edr", "tool_x"] },
+    { "id": "E3", "name": "Software update downloads large files", "count": 9, "alerting_tools": ["firewall", "tool_x"] },
+    { "id": "E4", "name": "Employee signs in from a new city (business trip)", "count": 8, "alerting_tools": ["siem"] },
+    { "id": "E5", "name": "Several failed sign-ins after a password change", "count": 10, "alerting_tools": ["siem"] },
+    { "id": "E6", "name": "Finance team opens spreadsheets with macros", "count": 16, "alerting_tools": ["tool_x"] },
+    { "id": "E7", "name": "Normal internal emails", "count": 220, "alerting_tools": [] },
+    { "id": "E8", "name": "Normal file sharing", "count": 85, "alerting_tools": [] }
+  ]
+}

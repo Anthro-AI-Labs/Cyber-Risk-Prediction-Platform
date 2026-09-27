@@ -1,0 +1,315 @@
+@import "tailwindcss";
+
+:root {
+  --paper: #F2F4F7;
+  --surface: #FFFFFF;
+  --ink: #13202F;
+  --muted: #5A6878;
+  --line: #D9DFE6;
+  --soft: #E8ECF1;
+  --accent: #2F49D1;
+  --accent-soft: #E6EAFB;
+  --stop: #0D8466;
+  --stop-soft: #E1F3EC;
+  --det: #A96C10;
+  --det-soft: #FBF0DC;
+  --miss: #C0392F;
+  --miss-soft: #FBE6E3;
+  --start: #7E8A99;
+  --critical: #B32430;
+  --high: #D0602A;
+  --medium: #B98912;
+  --low: #2E8B67;
+  --r-lg: 14px;
+  --r-md: 10px;
+  --r-sm: 6px;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #080D15;
+    --surface: #0E1624;
+    --ink: #F3F7FC;
+    --muted: #94A3B8;
+    --line: #202F44;
+    --soft: #152032;
+    --accent: #5E7CFF;
+    --accent-soft: rgba(94, 124, 255, 0.16);
+    --stop: #00F09F;
+    --stop-soft: rgba(0, 240, 159, 0.14);
+    --det: #FFBA08;
+    --det-soft: rgba(255, 186, 8, 0.14);
+    --miss: #FF4757;
+    --miss-soft: rgba(255, 71, 87, 0.14);
+    --start: #8195AB;
+    --critical: #FF3838;
+    --high: #FF9F1A;
+    --medium: #FFC048;
+    --low: #2ED573;
+  }
+}
+
+:root[data-theme="dark"] {
+  --paper: #080D15;
+  --surface: #0E1624;
+  --ink: #F3F7FC;
+  --muted: #94A3B8;
+  --line: #202F44;
+  --soft: #152032;
+  --accent: #5E7CFF;
+  --accent-soft: rgba(94, 124, 255, 0.16);
+  --stop: #00F09F;
+  --stop-soft: rgba(0, 240, 159, 0.14);
+  --det: #FFBA08;
+  --det-soft: rgba(255, 186, 8, 0.14);
+  --miss: #FF4757;
+  --miss-soft: rgba(255, 71, 87, 0.14);
+  --start: #8195AB;
+  --critical: #FF3838;
+  --high: #FF9F1A;
+  --medium: #FFC048;
+  --low: #2ED573;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-padding-top: env(safe-area-inset-top, 0px);
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-ibm-plex-sans), system-ui, -apple-system, sans-serif;
+  font-size: 17px;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+button, input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+a {
+  color: var(--accent);
+}
+
+.wrap {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 10px 24px;
+}
+
+/* Card base */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 22px;
+}
+
+/* Step body */
+.step .body {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+}
+
+/* Math breakdown */
+.math {
+  font-size: 14px;
+  color: var(--muted);
+  background: var(--soft);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+  margin-top: 10px;
+  overflow-x: auto;
+}
+
+/* Goal box */
+.goal {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  border: 1px dashed var(--line);
+  margin-left: 58px;
+  font-weight: 600;
+}
+
+/* Warning */
+.warn {
+  background: var(--det-soft);
+  color: var(--det);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+  font-size: 14.5px;
+  font-weight: 500;
+}
+
+/* Formula */
+.formula {
+  background: var(--soft);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14.5px;
+  font-weight: 500;
+}
+
+/* Drawer padding */
+.drawer .hd {
+  padding: 18px 22px;
+}
+.drawer .bd {
+  padding: 18px 22px;
+}
+
+/* Key-Value rows */
+.kv {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+/* Plan moves */
+.move {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+/* What-if changes */
+.changes li {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+/* Badge classes */
+.b-stopped { background: var(--stop-soft); color: var(--stop); }
+.b-detected { background: var(--det-soft); color: var(--det); }
+.b-missed { background: var(--miss-soft); color: var(--miss); }
+.b-start { background: var(--soft); color: var(--start); }
+
+/* Delta classes */
+.delta.good { color: #6FE0B6; }
+.delta.bad { color: #FF9A90; }
+
+/* ROSI color classes */
+.c-high, .c-free { color: var(--stop); }
+.c-positive { color: var(--accent); }
+.c-low { color: var(--high); }
+
+/* Switch */
+.switch {
+  position: relative;
+  width: 44px;
+  height: 26px;
+  flex: none;
+}
+.switch input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  margin: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+.switch span {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: var(--line);
+  transition: background 0.2s;
+}
+.switch span::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s;
+}
+.switch input:checked + span {
+  background: var(--ink);
+}
+:root[data-theme="dark"] .switch input:checked + span {
+  background: var(--accent);
+  box-shadow: 0 0 12px rgba(94, 124, 255, 0.45);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .switch input:checked + span {
+    background: var(--accent);
+    box-shadow: 0 0 12px rgba(94, 124, 255, 0.45);
+  }
+}
+.switch input:checked + span::after {
+  transform: translateX(18px);
+}
+.switch input:focus-visible + span {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Primary buttons with controlled neon glow on LCD */
+.btn-neon-primary, .primary {
+  background: var(--accent);
+  color: #fff;
+  border: 0;
+  border-radius: 999px;
+  padding: 13px 24px;
+  font-weight: 600;
+  font-size: 16px;
+  box-shadow: 0 0 14px rgba(94, 124, 255, 0.3);
+  transition: all 0.2s ease-in-out;
+}
+.btn-neon-primary:hover, .primary:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 0 22px rgba(94, 124, 255, 0.5);
+}
+
+/* Neon glow indicators for important states */
+.neon-glow-stop {
+  box-shadow: 0 0 14px rgba(0, 240, 159, 0.32);
+}
+.neon-glow-det {
+  box-shadow: 0 0 14px rgba(255, 186, 8, 0.32);
+}
+.neon-glow-miss {
+  box-shadow: 0 0 14px rgba(255, 71, 87, 0.32);
+}
+.neon-glow-accent {
+  box-shadow: 0 0 14px rgba(94, 124, 255, 0.35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+@media print {
+  header, .rail, .next, .presets { display: none !important; }
+  .band { background: #fff !important; color: #000 !important; }
+}

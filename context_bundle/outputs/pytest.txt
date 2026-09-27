@@ -1,0 +1,45 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.14.7, pytest-9.1.1, pluggy-1.6.0 -- /Users/aminzayer/MyGit/Cyber-Risk-Prediction-Platform/backend/.venv/bin/python3.14
+cachedir: .pytest_cache
+rootdir: /Users/aminzayer/MyGit/Cyber-Risk-Prediction-Platform/backend
+configfile: pytest.ini
+testpaths: tests
+plugins: anyio-4.15.1
+collecting ... collected 28 items
+
+tests/test_api.py::test_health PASSED                                    [  3%]
+tests/test_api.py::test_meta PASSED                                      [  7%]
+tests/test_api.py::test_evidence_report PASSED                           [ 10%]
+tests/test_api.py::test_tools PASSED                                     [ 14%]
+tests/test_api.py::test_scenarios PASSED                                 [ 17%]
+tests/test_api.py::test_techniques PASSED                                [ 21%]
+tests/test_api.py::test_assumptions_crud PASSED                          [ 25%]
+tests/test_api.py::test_simulate_api PASSED                              [ 28%]
+tests/test_api.py::test_whatif_api PASSED                                [ 32%]
+tests/test_api.py::test_optimize_api PASSED                              [ 35%]
+tests/test_api.py::test_agent_narrate_api PASSED                         [ 39%]
+tests/test_api.py::test_normal_day_api PASSED                            [ 42%]
+tests/test_api.py::test_summary_api PASSED                               [ 46%]
+tests/test_api.py::test_banned_phrases_scan_in_api_responses PASSED      [ 50%]
+tests/test_engine.py::test_engine_baseline_step_outcomes PASSED          [ 53%]
+tests/test_engine.py::test_scenario_status_counts PASSED                 [ 57%]
+tests/test_fixtures.py::test_export_and_verify_engine_fixtures PASSED    [ 60%]
+tests/test_optimizer.py::test_optimizer_locked_baseline PASSED           [ 64%]
+tests/test_optimizer.py::test_optimizer_allow_remove_baseline PASSED     [ 67%]
+tests/test_risk.py::test_baseline_spend PASSED                           [ 71%]
+tests/test_risk.py::test_baseline_scenarios PASSED                       [ 75%]
+tests/test_risk.py::test_baseline_monte_carlo PASSED                     [ 78%]
+tests/test_risk.py::test_per_tool_returns PASSED                         [ 82%]
+tests/test_risk.py::test_whatif_remove_edr PASSED                        [ 85%]
+tests/test_risk.py::test_whatif_remove_tool_x PASSED                     [ 89%]
+tests/test_risk.py::test_whatif_enable_mfa_owned PASSED                  [ 92%]
+tests/test_risk.py::test_whatif_add_identity_suite PASSED                [ 96%]
+tests/test_risk.py::test_whatif_add_payment_process PASSED               [100%]
+
+=============================== warnings summary ===============================
+.venv/lib/python3.14/site-packages/fastapi/testclient.py:1
+  /Users/aminzayer/MyGit/Cyber-Risk-Prediction-Platform/backend/.venv/lib/python3.14/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 28 passed, 1 warning in 3.34s =========================

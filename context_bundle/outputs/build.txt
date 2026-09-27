@@ -1,0 +1,45 @@
+
+> frontend@0.1.0 prebuild
+> npm run sync-data
+
+
+> frontend@0.1.0 sync-data
+> node ../scripts/sync-data.mjs
+
+[sync-data] Synced verified backend data to frontend:
+  - /Users/aminzayer/MyGit/Cyber-Risk-Prediction-Platform/frontend/src/data/generated.json (111.3 KB)
+  - /Users/aminzayer/MyGit/Cyber-Risk-Prediction-Platform/frontend/src/data/generated.meta.json
+
+> frontend@0.1.0 build
+> next build
+
+▲ Next.js 16.3.6 (Turbopack)
+- Environments: .env.local
+⚠ Warning: Next.js ignored package-lock.json in /Users/aminzayer because it is outside the current Git repository (/Users/aminzayer/MyGit/Cyber-Risk-Prediction-Platform).
+ To use this directory, set `turbopack.root` in your Next.js config.
+
+✓ Running next.config.ts took 12ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 337ms
+  Running TypeScript ...
+  Finished TypeScript in 745ms ...
+  Collecting page data using 9 workers ...
+  Generating static pages using 9 workers (0/8) ...
+  Generating static pages using 9 workers (2/8) 
+  Generating static pages using 9 workers (4/8) 
+  Generating static pages using 9 workers (6/8) 
+✓ Generating static pages using 9 workers (8/8) in 275ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /methodology
+├ ○ /noise
+├ ○ /report
+└ ○ /validation
+
+
+○  (Static)  prerendered as static content
+

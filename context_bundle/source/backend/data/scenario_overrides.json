@@ -1,0 +1,10 @@
+{
+  "S3": {
+    "steps": {
+      "1": {
+        "assumed_compromise": true,
+        "note": "Starts after an account is already compromised (e.g. via S1 or S2). Step 1 is a starting condition and is not evaluated."
+      }
+    }
+  }
+}

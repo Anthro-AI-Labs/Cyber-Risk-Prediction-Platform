@@ -1,0 +1,32 @@
+ M backend/app/data_loader.py
+ M backend/app/engine.py
+ M backend/app/models.py
+ M backend/app/risk.py
+ M backend/app/routers/meta.py
+ M backend/data/mappings.json
+ M backend/data/risk_assumptions.json
+ M backend/tests/fixtures/engine_test_cases.json
+ M backend/tests/test_api.py
+ M backend/tests/test_fixtures.py
+ M backend/tests/test_optimizer.py
+ M backend/tests/test_risk.py
+ M frontend/package.json
+ M frontend/src/components/AssumptionsDrawer.tsx
+ M frontend/src/components/ChapterAttacks.tsx
+ M frontend/src/components/Footer.tsx
+ M frontend/src/lib/engine.test.ts
+ M frontend/src/lib/engine.ts
+ M frontend/src/lib/types.ts
+ M reference/roi-cyber-validator-prototype.html
+?? SOURCES.md
+?? VALIDATION_REPORT.md
+?? backend/app/validation.py
+?? backend/data/.cache/
+?? backend/data/ctid/
+?? backend/tests/fixtures/parity.json
+?? context_bundle/
+?? frontend/src/app/validation/
+?? frontend/src/data/
+?? frontend/src/lib/data-sync.test.ts
+?? scripts/
+?? validation_report.json

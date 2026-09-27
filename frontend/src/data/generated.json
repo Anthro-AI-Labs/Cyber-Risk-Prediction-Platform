@@ -1,0 +1,2487 @@
+{
+  "source": {
+    "name": "MITRE ATT&CK Enterprise",
+    "version": "19.2",
+    "released": "2026-08-05",
+    "url": "https://attack.mitre.org",
+    "data": "https://github.com/mitre-attack/attack-stix-data",
+    "terms": "https://attack.mitre.org/resources/legal-and-branding/terms-of-use/",
+    "attribution": "© The MITRE Corporation. This work is reproduced and distributed with the permission of The MITRE Corporation."
+  },
+  "ctid_source": {
+    "name": "Center for Threat-Informed Defense — Mappings Explorer: Microsoft 365 security capabilities mapped to MITRE ATT&CK",
+    "mapping_framework_version": "07/18/2025",
+    "attack_version_of_mapping": "16.1",
+    "last_update": "07/24/2025",
+    "author": "Center for Threat-Informed Defense",
+    "project_page": "https://ctid.mitre.org/projects/mappings-explorer/",
+    "repository": "https://github.com/center-for-threat-informed-defense/mappings-explorer",
+    "file": "mappings/m365/attack-16.1/m365-07.18.2025/enterprise/m365-07.18.2025_attack-16.1-enterprise.json",
+    "license": "Apache License 2.0",
+    "note": "Subset: only rows for the 28 ATT&CK techniques used in our scenarios. Mapping uses ATT&CK v16.1; our scenarios use v19.2. T1684.001 (new in v19) has no mapping row."
+  },
+  "tools": [
+    {
+      "id": "email_security",
+      "name": "Email Security",
+      "category": "Email",
+      "annual_cost": 40000,
+      "status": "active",
+      "baseline_required": true,
+      "description": "Filters malicious links and attachments in incoming email.",
+      "short": "Email Security"
+    },
+    {
+      "id": "edr",
+      "name": "EDR (Endpoint Protection)",
+      "category": "Endpoint",
+      "annual_cost": 90000,
+      "status": "active",
+      "baseline_required": false,
+      "description": "Monitors and blocks malicious activity on laptops and servers.",
+      "short": "EDR"
+    },
+    {
+      "id": "firewall",
+      "name": "Firewall",
+      "category": "Network",
+      "annual_cost": 70000,
+      "status": "active",
+      "baseline_required": true,
+      "description": "Controls network traffic in and out of the company.",
+      "short": "Firewall"
+    },
+    {
+      "id": "siem",
+      "name": "SIEM (Log Monitoring)",
+      "category": "Monitoring",
+      "annual_cost": 85000,
+      "status": "active",
+      "baseline_required": true,
+      "description": "Collects logs from many systems and raises alerts.",
+      "short": "SIEM"
+    },
+    {
+      "id": "tool_x",
+      "name": "Tool X (Script Control)",
+      "category": "Endpoint",
+      "annual_cost": 60000,
+      "status": "active",
+      "baseline_required": false,
+      "description": "Blocks unapproved scripts on laptops.",
+      "short": "Tool X"
+    },
+    {
+      "id": "mfa_owned",
+      "name": "Second Login Check (MFA with number matching)",
+      "category": "Identity",
+      "annual_cost": 0,
+      "status": "owned_not_enabled",
+      "baseline_required": false,
+      "description": "Already included in the company's current office-suite license (sample). Not switched on yet.",
+      "short": "MFA"
+    },
+    {
+      "id": "identity_suite",
+      "name": "Identity Protection Suite",
+      "category": "Identity",
+      "annual_cost": 50000,
+      "status": "candidate",
+      "baseline_required": false,
+      "description": "A product the company is considering. Effects are based on the vendor's description and are not tested.",
+      "short": "Identity Suite"
+    },
+    {
+      "id": "payment_process",
+      "name": "Payment Verification Procedure + Staff Training",
+      "category": "Process",
+      "annual_cost": 8000,
+      "status": "candidate",
+      "baseline_required": false,
+      "description": "Call the customer or supplier on a known number before any change to payment details.",
+      "short": "Payment check"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "S1",
+      "name": "Phishing & credential theft (fake login page)",
+      "category": "Phishing / credential theft",
+      "steps": [
+        {
+          "order": 1,
+          "technique_id": "T1566.002",
+          "technique_name": "Spearphishing Link",
+          "step": "Employee receives an email with a link to a fake login page",
+          "alternative_techniques": [
+            {
+              "id": "T1566.001",
+              "name": "Spearphishing Attachment"
+            }
+          ],
+          "control_layer_team_assumption": "Email security"
+        },
+        {
+          "order": 2,
+          "technique_id": "T1557",
+          "technique_name": "Adversary-in-the-Middle",
+          "step": "Fake page relays the real login and captures password and session",
+          "alternative_techniques": [
+            {
+              "id": "T1539",
+              "name": "Steal Web Session Cookie"
+            }
+          ],
+          "control_layer_team_assumption": "Identity / login protection"
+        },
+        {
+          "order": 3,
+          "technique_id": "T1550.004",
+          "technique_name": "Web Session Cookie",
+          "step": "Attacker reuses the stolen session to enter the mailbox without a password prompt",
+          "alternative_techniques": [
+            {
+              "id": "T1078.004",
+              "name": "Cloud Accounts"
+            }
+          ],
+          "control_layer_team_assumption": "Identity / login protection"
+        },
+        {
+          "order": 4,
+          "technique_id": "T1098.005",
+          "technique_name": "Device Registration",
+          "step": "Attacker registers their own device to keep access",
+          "alternative_techniques": [
+            {
+              "id": "T1564.008",
+              "name": "Email Hiding Rules"
+            }
+          ],
+          "control_layer_team_assumption": "Identity / login protection; SIEM"
+        },
+        {
+          "order": 5,
+          "technique_id": "T1114.002",
+          "technique_name": "Remote Email Collection",
+          "step": "Attacker reads and downloads email",
+          "alternative_techniques": [],
+          "control_layer_team_assumption": "SIEM"
+        }
+      ]
+    },
+    {
+      "id": "S2",
+      "name": "Account compromise via password guessing",
+      "category": "Account compromise",
+      "steps": [
+        {
+          "order": 1,
+          "technique_id": "T1110.003",
+          "technique_name": "Password Spraying",
+          "step": "Attacker tries a few common passwords across many accounts",
+          "alternative_techniques": [
+            {
+              "id": "T1110.004",
+              "name": "Credential Stuffing"
+            }
+          ],
+          "control_layer_team_assumption": "Identity / login protection; SIEM"
+        },
+        {
+          "order": 2,
+          "technique_id": "T1621",
+          "technique_name": "Multi-Factor Authentication Request Generation",
+          "step": "If a second login check exists, attacker floods the employee with approval requests",
+          "alternative_techniques": [],
+          "control_layer_team_assumption": "Identity / login protection"
+        },
+        {
+          "order": 3,
+          "technique_id": "T1078.004",
+          "technique_name": "Cloud Accounts",
+          "step": "Attacker signs in as the employee",
+          "alternative_techniques": [],
+          "control_layer_team_assumption": "Identity / login protection; SIEM"
+        },
+        {
+          "order": 4,
+          "technique_id": "T1114.003",
+          "technique_name": "Email Forwarding Rule",
+          "step": "Attacker sets a rule that silently forwards the employee's email",
+          "alternative_techniques": [
+            {
+              "id": "T1564.008",
+              "name": "Email Hiding Rules"
+            }
+          ],
+          "control_layer_team_assumption": "Email security; SIEM"
+        }
+      ]
+    },
+    {
+      "id": "S3",
+      "name": "Business email compromise / invoice fraud",
+      "category": "Financial fraud (account compromise)",
+      "steps": [
+        {
+          "order": 1,
+          "technique_id": "T1078.004",
+          "technique_name": "Cloud Accounts",
+          "step": "Attacker already controls an employee mailbox (e.g. after S1 or S2)",
+          "alternative_techniques": [],
+          "control_layer_team_assumption": "Identity / login protection; SIEM"
+        },
+        {
+          "order": 2,
+          "technique_id": "T1564.008",
+          "technique_name": "Email Hiding Rules",
+          "step": "Attacker hides replies from customers so the employee doesn't notice",
+          "alternative_techniques": [
+            {
+              "id": "T1114.003",
+              "name": "Email Forwarding Rule"
+            }
+          ],
+          "control_layer_team_assumption": "Email security; SIEM"
+        },
+        {
+          "order": 3,
+          "technique_id": "T1534",
+          "technique_name": "Internal Spearphishing",
+          "step": "Attacker emails colleagues or customers from the real account",
+          "alternative_techniques": [
+            {
+              "id": "T1684.001",
+              "name": "Impersonation"
+            }
+          ],
+          "control_layer_team_assumption": "Email security"
+        },
+        {
+          "order": 4,
+          "technique_id": "T1657",
+          "technique_name": "Financial Theft",
+          "step": "Customer pays a fake invoice to the attacker's bank account",
+          "alternative_techniques": [],
+          "control_layer_team_assumption": "Process (payment verification)"
+        }
+      ]
+    },
+    {
+      "id": "S4",
+      "name": "Ransomware",
+      "category": "Ransomware",
+      "steps": [
+        {
+          "order": 1,
+          "technique_id": "T1566.001",
+          "technique_name": "Spearphishing Attachment",
+          "step": "Employee receives an email with a malicious attachment",
+          "alternative_techniques": [
+            {
+              "id": "T1133",
+              "name": "External Remote Services"
+            },
+            {
+              "id": "T1190",
+              "name": "Exploit Public-Facing Application"
+            }
+          ],
+          "control_layer_team_assumption": "Email security"
+        },
+        {
+          "order": 2,
+          "technique_id": "T1204.002",
+          "technique_name": "Malicious File",
+          "step": "Employee opens the file",
+          "alternative_techniques": [],
+          "control_layer_team_assumption": "EDR; user awareness"
+        },
+        {
+          "order": 3,
+          "technique_id": "T1059.001",
+          "technique_name": "PowerShell",
+          "step": "Malicious script runs on the laptop",
+          "alternative_techniques": [
+            {
+              "id": "T1059",
+              "name": "Command and Scripting Interpreter"
+            }
+          ],
+          "control_layer_team_assumption": "EDR"
+        },
+        {
+          "order": 4,
+          "technique_id": "T1003",
+          "technique_name": "OS Credential Dumping",
+          "step": "Attacker steals stored passwords from the machine",
+          "alternative_techniques": [],
+          "control_layer_team_assumption": "EDR"
+        },
+        {
+          "order": 5,
+          "technique_id": "T1021.001",
+          "technique_name": "Remote Desktop Protocol",
+          "step": "Attacker moves to other computers using remote desktop",
+          "alternative_techniques": [
+            {
+              "id": "T1570",
+              "name": "Lateral Tool Transfer"
+            }
+          ],
+          "control_layer_team_assumption": "Firewall; EDR"
+        },
+        {
+          "order": 6,
+          "technique_id": "T1567",
+          "technique_name": "Exfiltration Over Web Service",
+          "step": "Attacker copies company data out (for extortion)",
+          "alternative_techniques": [
+            {
+              "id": "T1041",
+              "name": "Exfiltration Over C2 Channel"
+            }
+          ],
+          "control_layer_team_assumption": "Firewall / web filtering; SIEM"
+        },
+        {
+          "order": 7,
+          "technique_id": "T1490",
+          "technique_name": "Inhibit System Recovery",
+          "step": "Attacker deletes backups and recovery options",
+          "alternative_techniques": [],
+          "control_layer_team_assumption": "EDR; backup"
+        },
+        {
+          "order": 8,
+          "technique_id": "T1486",
+          "technique_name": "Data Encrypted for Impact",
+          "step": "Attacker encrypts company files and demands payment",
+          "alternative_techniques": [],
+          "control_layer_team_assumption": "EDR; backup"
+        }
+      ]
+    }
+  ],
+  "techniques": {
+    "T1003": {
+      "id": "T1003",
+      "name": "OS Credential Dumping",
+      "url": "https://attack.mitre.org/techniques/T1003",
+      "tactics": "Credential Access",
+      "platforms": "Linux, macOS, Windows",
+      "description": "Adversaries may attempt to dump credentials to obtain account login and credential material, normally in the form of a hash or a clear text password. Credentials can be obtained from OS caches, memory, or structures. Credentials can then be used to perform Lateral Movement and access restricted information.",
+      "mitigations": [
+        {
+          "id": "M1015",
+          "name": "Active Directory Configuration",
+          "how": "Manage the access control list for “Replicating Directory Changes All” and other permissions associated with domain controller replication. Consider adding users to the \"Protected Users\" Active Directory security group. This can help limit the caching of users' plaintext credentials.",
+          "url": "https://attack.mitre.org/mitigations/M1015"
+        },
+        {
+          "id": "M1017",
+          "name": "User Training",
+          "how": "Limit credential overlap across accounts and systems by training users and administrators not to use the same password for multiple accounts.",
+          "url": "https://attack.mitre.org/mitigations/M1017"
+        },
+        {
+          "id": "M1025",
+          "name": "Privileged Process Integrity",
+          "how": "On Windows 8.1 and Windows Server 2012 R2, enable Protected Process Light for LSA.",
+          "url": "https://attack.mitre.org/mitigations/M1025"
+        },
+        {
+          "id": "M1026",
+          "name": "Privileged Account Management",
+          "how": "Windows: Do not put user or admin domain accounts in the local administrator groups across systems unless they are tightly controlled, as this is often equivalent to having a local administrator account with the same password on all systems. Follow best practices for design and administration of an enterprise network to limit privileged account use across administrative tiers. Linux: Scraping the passwords from memory requires root privileges.",
+          "url": "https://attack.mitre.org/mitigations/M1026"
+        },
+        {
+          "id": "M1027",
+          "name": "Password Policies",
+          "how": "Ensure that local administrator accounts have complex, unique passwords across all systems on the network.",
+          "url": "https://attack.mitre.org/mitigations/M1027"
+        },
+        {
+          "id": "M1028",
+          "name": "Operating System Configuration",
+          "how": "Consider disabling or restricting NTLM. Consider disabling WDigest authentication.",
+          "url": "https://attack.mitre.org/mitigations/M1028"
+        },
+        {
+          "id": "M1040",
+          "name": "Behavior Prevention on Endpoint",
+          "how": "On Windows 10, enable Attack Surface Reduction (ASR) rules to secure LSASS and prevent credential stealing.",
+          "url": "https://attack.mitre.org/mitigations/M1040"
+        },
+        {
+          "id": "M1041",
+          "name": "Encrypt Sensitive Information",
+          "how": "Ensure Domain Controller backups are properly secured.",
+          "url": "https://attack.mitre.org/mitigations/M1041"
+        },
+        {
+          "id": "M1043",
+          "name": "Credential Access Protection",
+          "how": "With Windows 10, Microsoft implemented new protections called Credential Guard to protect the LSA secrets that can be used to obtain credentials through forms of credential dumping. It is not configured by default and has hardware and firmware system requirements. It also does not protect against all forms of credential dumping.",
+          "url": "https://attack.mitre.org/mitigations/M1043"
+        }
+      ],
+      "detection_strategies": [
+        {
+          "id": "DET0234",
+          "name": "Credential Dumping via Sensitive Memory and Registry Access Correlation",
+          "url": "https://attack.mitre.org/detectionstrategies/DET0234"
+        }
+      ],
+      "known_groups_count": 13,
+      "used_by_scattered_spider": false,
+      "known_groups_sample": [
+        "APT28",
+        "APT32",
+        "APT39",
+        "Axiom",
+        "BlackByte",
+        "Ember Bear",
+        "Leviathan",
+        "Mustang Panda"
+      ],
+      "control_layer_team_assumption": "EDR"
+    },
+    "T1021.001": {
+      "id": "T1021.001",
+      "name": "Remote Desktop Protocol",
+      "url": "https://attack.mitre.org/techniques/T1021/001",
+      "tactics": "Lateral Movement",
+      "platforms": "Windows",
+      "description": "Adversaries may use Valid Accounts to log into a computer using the Remote Desktop Protocol (RDP). The adversary may then perform actions as the logged-on user. Remote desktop is a common feature in operating systems. It allows a user to log into an interactive session with a system desktop graphical user interface on a remote system.",
+      "mitigations": [
+        {
+          "id": "M1018",
+          "name": "User Account Management",
+          "how": "Limit remote user permissions if remote access is necessary.",
+          "url": "https://attack.mitre.org/mitigations/M1018"
+        },
+        {
+          "id": "M1026",
+          "name": "Privileged Account Management",
+          "how": "Consider removing the local Administrators group from the list of groups allowed to log in through RDP.",
+          "url": "https://attack.mitre.org/mitigations/M1026"
+        },
+        {
+          "id": "M1028",
+          "name": "Operating System Configuration",
+          "how": "Change GPOs to define shorter timeouts sessions and maximum amount of time any single session can be active. Change GPOs to specify the maximum amount of time that a disconnected session stays active on the RD session host server.",
+          "url": "https://attack.mitre.org/mitigations/M1028"
+        },
+        {
+          "id": "M1030",
+          "name": "Network Segmentation",
+          "how": "Do not leave RDP accessible from the internet. Enable firewall rules to block RDP traffic between network security zones within a network.",
+          "url": "https://attack.mitre.org/mitigations/M1030"
+        },
+        {
+          "id": "M1032",
+          "name": "Multi-factor Authentication",
+          "how": "Use multi-factor authentication for remote logins.",
+          "url": "https://attack.mitre.org/mitigations/M1032"
+        },
+        {
+          "id": "M1035",
+          "name": "Limit Access to Resource Over Network",
+          "how": "Use remote desktop gateways.",
+          "url": "https://attack.mitre.org/mitigations/M1035"
+        },
+        {
+          "id": "M1042",
+          "name": "Disable or Remove Feature or Program",
+          "how": "Disable the RDP service if it is unnecessary.",
+          "url": "https://attack.mitre.org/mitigations/M1042"
+        },
+        {
+          "id": "M1047",
+          "name": "Audit",
+          "how": "Audit the Remote Desktop Users group membership regularly. Remove unnecessary accounts and groups from Remote Desktop Users groups.",
+          "url": "https://attack.mitre.org/mitigations/M1047"
+        }
+      ],
+      "detection_strategies": [
+        {
+          "id": "DET0327",
+          "name": "Multi-event Detection Strategy for RDP-Based Remote Logins and Post-Access Activity",
+          "url": "https://attack.mitre.org/detectionstrategies/DET0327"
+        }
+      ],
+      "known_groups_count": 37,
+      "used_by_scattered_spider": true,
+      "known_groups_sample": [
+        "APT1",
+        "APT3",
+        "APT39",
+        "APT41",
+        "APT5",
+        "Agrius",
+        "Akira",
+        "Aquatic Panda"
+      ],
+      "control_layer_team_assumption": "Firewall; EDR"
+    },
+    "T1041": {
+      "id": "T1041",
+      "name": "Exfiltration Over C2 Channel",
+      "url": "https://attack.mitre.org/techniques/T1041",
+      "tactics": "Exfiltration",
+      "platforms": "ESXi, Linux, macOS, Windows",
+      "description": "Adversaries may steal data by exfiltrating it over an existing command and control channel. Stolen data is encoded into the normal communications channel using the same protocol as command and control communications.",
+      "mitigations": [
+        {
+          "id": "M1031",
+          "name": "Network Intrusion Prevention",
+          "how": "Network intrusion detection and prevention systems that use network signatures to identify traffic for specific adversary malware can be used to mitigate activity at the network level. Signatures are often for unique indicators within protocols and may be based on the specific obfuscation technique used by a particular adversary or tool, and will likely be different across various malware families and versions.",
+          "url": "https://attack.mitre.org/mitigations/M1031"
+        },
+        {
+          "id": "M1057",
+          "name": "Data Loss Prevention",
+          "how": "Data loss prevention can detect and block sensitive data being sent over unencrypted protocols.",
+          "url": "https://attack.mitre.org/mitigations/M1057"
+        }
+      ],
+      "detection_strategies": [
+        {
+          "id": "DET0348",
+          "name": "Detection Strategy for Exfiltration Over C2 Channel",
+          "url": "https://attack.mitre.org/detectionstrategies/DET0348"
+        }
+      ],
+      "known_groups_count": 27,
+      "used_by_scattered_spider": true,
+      "known_groups_sample": [
+        "APT3",
+        "APT32",
+        "APT39",
+        "Agrius",
+        "BlackByte",
+        "CURIUM",
+        "Chimera",
+        "Confucius"
+      ],
+      "control_layer_team_assumption": "Firewall; SIEM"
+    },
+    "T1059": {
+      "id": "T1059",
+      "name": "Command and Scripting Interpreter",
+      "url": "https://attack.mitre.org/techniques/T1059",
+      "tactics": "Execution",
+      "platforms": "Containers, ESXi, IaaS, Identity Provider, Linux, macOS, Network Devices, Office Suite, SaaS, Windows",
+      "description": "Adversaries may abuse command and script interpreters to execute commands, scripts, or binaries. These interfaces and languages provide ways of interacting with computer systems and are a common feature across many different platforms.",
+      "mitigations": [
+        {
+          "id": "M1021",
+          "name": "Restrict Web-Based Content",
+          "how": "Script blocking extensions can help prevent the execution of scripts and HTA files that may commonly be used during the exploitation process. For malicious code served up through ads, adblockers can help prevent that code from executing in the first place.",
+          "url": "https://attack.mitre.org/mitigations/M1021"
+        },
+        {
+          "id": "M1026",
+          "name": "Privileged Account Management",
+          "how": "When PowerShell is necessary, consider restricting PowerShell execution policy to administrators. Be aware that there are methods of bypassing the PowerShell execution policy, depending on environment configuration. PowerShell JEA (Just Enough Administration) may also be used to sandbox administration and limit what commands admins/users can execute through remote PowerShell sessions.",
+          "url": "https://attack.mitre.org/mitigations/M1026"
+        },
+        {
+          "id": "M1033",
+          "name": "Limit Software Installation",
+          "how": "Prevent user installation of unrequired command and scripting interpreters.",
+          "url": "https://attack.mitre.org/mitigations/M1033"
+        },
+        {
+          "id": "M1038",
+          "name": "Execution Prevention",
+          "how": "Use application control where appropriate. For example, PowerShell Constrained Language mode can be used to restrict access to sensitive or otherwise dangerous language elements such as those used to execute arbitrary Windows APIs or files (e.g., `Add-Type`).",
+          "url": "https://attack.mitre.org/mitigations/M1038"
+        },
+        {
+          "id": "M1040",
+          "name": "Behavior Prevention on Endpoint",
+          "how": "On Windows 10, enable Attack Surface Reduction (ASR) rules to prevent Visual Basic and JavaScript scripts from executing potentially malicious downloaded content .",
+          "url": "https://attack.mitre.org/mitigations/M1040"
+        },
+        {
+          "id": "M1042",
+          "name": "Disable or Remove Feature or Program",
+          "how": "Disable or remove any unnecessary or unused shells or interpreters.",
+          "url": "https://attack.mitre.org/mitigations/M1042"
+        },
+        {
+          "id": "M1045",
+          "name": "Code Signing",
+          "how": "Where possible, only permit execution of signed scripts.",
+          "url": "https://attack.mitre.org/mitigations/M1045"
+        },
+        {
+          "id": "M1047",
+          "name": "Audit",
+          "how": "Inventory systems for unauthorized command and scripting interpreter installations.",
+          "url": "https://attack.mitre.org/mitigations/M1047"
+        },
+        {
+          "id": "M1049",
+          "name": "Antivirus/Antimalware",
+          "how": "Anti-virus can be used to automatically quarantine suspicious files.",
+          "url": "https://attack.mitre.org/mitigations/M1049"
+        }
+      ],
+      "detection_strategies": [
+        {
+          "id": "DET0516",
+          "name": "Behavioral Detection of Command and Scripting Interpreter Abuse",
+          "url": "https://attack.mitre.org/detectionstrategies/DET0516"
+        }
+      ],
+      "known_groups_count": 17,
+      "used_by_scattered_spider": false,
+      "known_groups_sample": [
+        "APT19",
+        "APT32",
+        "APT37",
+        "APT39",
+        "Dragonfly",
+        "FIN5",
+        "FIN6",
+        "FIN7"
+      ],
+      "control_layer_team_assumption": "EDR"
+    },
+    "T1059.001": {
+      "id": "T1059.001",
+      "name": "PowerShell",
+      "url": "https://attack.mitre.org/techniques/T1059/001",
+      "tactics": "Execution",
+      "platforms": "Windows",
+      "description": "Adversaries may abuse PowerShell commands and scripts for execution. PowerShell is a powerful interactive command-line interface and scripting environment included in the Windows operating system. Adversaries can use PowerShell to perform a number of actions, including discovery of information and execution of code.",
+      "mitigations": [
+        {
+          "id": "M1026",
+          "name": "Privileged Account Management",
+          "how": "When PowerShell is necessary, consider restricting PowerShell execution policy to administrators. Be aware that there are methods of bypassing the PowerShell execution policy, depending on environment configuration. PowerShell JEA (Just Enough Administration) may also be used to sandbox administration and limit what commands admins/users can execute through remote PowerShell sessions.",
+          "url": "https://attack.mitre.org/mitigations/M1026"
+        },
+        {
+          "id": "M1038",
+          "name": "Execution Prevention",
+          "how": "Use application control where appropriate. PowerShell Constrained Language mode can be used to restrict access to sensitive or otherwise dangerous language elements such as those used to execute arbitrary Windows APIs or files (e.g., `Add-Type`).",
+          "url": "https://attack.mitre.org/mitigations/M1038"
+        },
+        {
+          "id": "M1042",
+          "name": "Disable or Remove Feature or Program",
+          "how": "It may be possible to remove PowerShell from systems when not needed, but a review should be performed to assess the impact to an environment, since it could be in use for many legitimate purposes and administrative functions. Disable/restrict the WinRM Service to help prevent uses of PowerShell for remote execution.",
+          "url": "https://attack.mitre.org/mitigations/M1042"
+        },
+        {
+          "id": "M1045",
+          "name": "Code Signing",
+          "how": "Set PowerShell execution policy to execute only signed scripts.",
+          "url": "https://attack.mitre.org/mitigations/M1045"
+        },
+        {
+          "id": "M1049",
+          "name": "Antivirus/Antimalware",
+          "how": "Anti-virus can be used to automatically quarantine suspicious files.",
+          "url": "https://attack.mitre.org/mitigations/M1049"
+        }
+      ],
+      "detection_strategies": [
+        {
+          "id": "DET0455",
+          "name": "Abuse of PowerShell for Arbitrary Execution",
+          "url": "https://attack.mitre.org/detectionstrategies/DET0455"
+        }
+      ],
+      "known_groups_count": 85,
+      "used_by_scattered_spider": true,
+      "known_groups_sample": [
+        "APT-C-36",
+        "APT19",
+        "APT28",
+        "APT29",
+        "APT3",
+        "APT32",
+        "APT33",
+        "APT38"
+      ],
+      "control_layer_team_assumption": "EDR"
+    },
+    "T1078.004": {
+      "id": "T1078.004",
+      "name": "Cloud Accounts",
+      "url": "https://attack.mitre.org/techniques/T1078/004",
+      "tactics": "Stealth, Persistence, Privilege Escalation, Initial Access",
+      "platforms": "IaaS, Identity Provider, Office Suite, SaaS",
+      "description": "Valid accounts in cloud environments may allow adversaries to perform actions to achieve Initial Access, Persistence, Privilege Escalation, or Defense Evasion. Cloud accounts are those created and configured by an organization for use by users, remote support, services, or for administration of resources within a cloud service provider or SaaS application.",
+      "mitigations": [
+        {
+          "id": "M1015",
+          "name": "Active Directory Configuration",
+          "how": "Disable legacy authentication, which does not support MFA, and require the use of modern authentication protocols instead.",
+          "url": "https://attack.mitre.org/mitigations/M1015"
+        },
+        {
+          "id": "M1017",
+          "name": "User Training",
+          "how": "Applications may send push notifications to verify a login as a form of multi-factor authentication (MFA). Train users to only accept valid push notifications and to report suspicious push notifications.",
+          "url": "https://attack.mitre.org/mitigations/M1017"
+        },
+        {
+          "id": "M1018",
+          "name": "User Account Management",
+          "how": "Periodically review user accounts and remove those that are inactive or unnecessary. Limit the ability for user accounts to create additional accounts.",
+          "url": "https://attack.mitre.org/mitigations/M1018"
+        },
+        {
+          "id": "M1026",
+          "name": "Privileged Account Management",
+          "how": "Review privileged cloud account permission levels routinely to look for those that could allow an adversary to gain wide access, such as Global Administrator and Privileged Role Administrator in Azure AD. These reviews should also check if new privileged cloud accounts have been created that were not authorized.",
+          "url": "https://attack.mitre.org/mitigations/M1026"
+        },
+        {
+          "id": "M1027",
+          "name": "Password Policies",
+          "how": "Ensure that cloud accounts, particularly privileged accounts, have complex, unique passwords across all systems on the network. Passwords and access keys should be rotated regularly. This limits the amount of time credentials can be used to access resources if a credential is compromised without your knowledge. Cloud service providers may track access key age to help audit and identify keys that may need to be rotated.",
+          "url": "https://attack.mitre.org/mitigations/M1027"
+        },
+        {
+          "id": "M1032",
+          "name": "Multi-factor Authentication",
+          "how": "Use multi-factor authentication for cloud accounts, especially privileged accounts. This can be implemented in a variety of forms (e.g. hardware, virtual, SMS), and can also be audited using administrative reporting features.",
+          "url": "https://attack.mitre.org/mitigations/M1032"
+        },
+        {
+          "id": "M1036",
+          "name": "Account Use Policies",
+          "how": "Use conditional access policies to block logins from non-compliant devices or from outside defined organization IP ranges.",
+          "url": "https://attack.mitre.org/mitigations/M1036"
+        }
+      ],
+      "detection_strategies": [
+        {
+          "id": "DET0546",
+          "name": "Detection of Abused or Compromised Cloud Accounts for Access and Persistence",
+          "url": "https://attack.mitre.org/detectionstrategies/DET0546"
+        }
+      ],
+      "known_groups_count": 12,
+      "used_by_scattered_spider": true,
+      "known_groups_sample": [
+        "APT28",
+        "APT29",
+        "APT33",
+        "APT5",
+        "HAFNIUM",
+        "Ke3chang",
+        "LAPSUS$",
+        "Scattered Spider"
+      ],
+      "control_layer_team_assumption": "Identity / login protection; SIEM"
+    },
+    "T1098.005": {
+      "id": "T1098.005",
+      "name": "Device Registration",
+      "url": "https://attack.mitre.org/techniques/T1098/005",
+      "tactics": "Persistence, Privilege Escalation",
+      "platforms": "Windows, Identity Provider",
+      "description": "Adversaries may register a device to an adversary-controlled account. Devices may be registered in a multifactor authentication (MFA) system, which handles authentication to the network, or in a device management system, which handles device access and compliance. MFA systems, such as Duo or Okta, allow users to associate devices with their accounts in order to complete MFA requirements.",
+      "mitigations": [
+        {
+          "id": "M1032",
+          "name": "Multi-factor Authentication",
+          "how": "Require multi-factor authentication to register devices in Entra ID. Configure multi-factor authentication systems to disallow enrolling new devices for inactive accounts. When first enrolling MFA, use conditional access policies to restrict device enrollment to trusted locations or devices, and consider using temporary access passes as an initial MFA solution to enroll a device.",
+          "url": "https://attack.mitre.org/mitigations/M1032"
+        }
+      ],
+      "detection_strategies": [
+        {
+          "id": "DET0036",
+          "name": "Suspicious Device Registration via Entra ID or MFA Platform",
+          "url": "https://attack.mitre.org/detectionstrategies/DET0036"
+        }
+      ],
+      "known_groups_count": 1,
+      "used_by_scattered_spider": false,
+      "known_groups_sample": [
+        "APT29"
+      ],
+      "control_layer_team_assumption": "Identity / login protection; SIEM"
+    },
+    "T1110.003": {
+      "id": "T1110.003",
+      "name": "Password Spraying",
+      "url": "https://attack.mitre.org/techniques/T1110/003",
+      "tactics": "Credential Access",
+      "platforms": "Containers, ESXi, IaaS, Identity Provider, Linux, Network Devices, Office Suite, SaaS, Windows, macOS",
+      "description": "Adversaries may use a single or small list of commonly used passwords against many different accounts to attempt to acquire valid account credentials. Password spraying uses one password (e.g. 'Password01'), or a small list of commonly used passwords, that may match the complexity policy of the domain.",
+      "mitigations": [
+        {
+          "id": "M1027",
+          "name": "Password Policies",
+          "how": "Refer to NIST guidelines when creating password policies.",
+          "url": "https://attack.mitre.org/mitigations/M1027"
+        },
+        {
+          "id": "M1032",
+          "name": "Multi-factor Authentication",
+          "how": "Use multi-factor authentication. Where possible, also enable multi-factor authentication on externally facing services.",
+          "url": "https://attack.mitre.org/mitigations/M1032"
+        },
+        {
+          "id": "M1036",
+          "name": "Account Use Policies",
+          "how": "Set account lockout policies after a certain number of failed login attempts to prevent passwords from being guessed. Too strict a policy may create a denial of service condition and render environments un-usable, with all accounts used in the brute force being locked-out. Use conditional access policies to block logins from non-compliant devices or from outside defined organization IP ranges.",
+          "url": "https://attack.mitre.org/mitigations/M1036"
+        }
+      ],
+      "detection_strategies": [
+        {
+          "id": "DET0487",
+          "name": "Distributed Password Spraying via Authentication Failures Across Multiple Accounts",
+          "url": "https://attack.mitre.org/detectionstrategies/DET0487"
+        }
+      ],
+      "known_groups_count": 11,
+      "used_by_scattered_spider": false,
+      "known_groups_sample": [
+        "APT28",
+        "APT29",
+        "APT33",
+        "Agrius",
+        "Chimera",
+        "Ember Bear",
+        "HAFNIUM",
+        "HEXANE"
+      ],
+      "control_layer_team_assumption": "Identity / login protection; SIEM"
+    },
+    "T1110.004": {
+      "id": "T1110.004",
+      "name": "Credential Stuffing",
+      "url": "https://attack.mitre.org/techniques/T1110/004",
+      "tactics": "Credential Access",
+      "platforms": "Containers, ESXi, IaaS, Identity Provider, Linux, macOS, Network Devices, Office Suite, SaaS, Windows",
+      "description": "Adversaries may use credentials obtained from breach dumps of unrelated accounts to gain access to target accounts through credential overlap. Occasionally, large numbers of username and password pairs are dumped online when a website or service is compromised and the user account credentials accessed.",
+      "mitigations": [
+        {
+          "id": "M1018",
+          "name": "User Account Management",
+          "how": "Proactively reset accounts that are known to be part of breached credentials either immediately, or after detecting bruteforce attempts.",
+          "url": "https://attack.mitre.org/mitigations/M1018"
+        },
+        {
+          "id": "M1027",
+          "name": "Password Policies",
+          "how": "Refer to NIST guidelines when creating password policies.",
+          "url": "https://attack.mitre.org/mitigations/M1027"
+        },
+        {
+          "id": "M1032",
+          "name": "Multi-factor Authentication",
+          "how": "Use multi-factor authentication. Where possible, also enable multi-factor authentication on externally facing services.",
+          "url": "https://attack.mitre.org/mitigations/M1032"
+        },
+        {
+          "id": "M1036",
+          "name": "Account Use Policies",
+          "how": "Set account lockout policies after a certain number of failed login attempts to prevent passwords from being guessed. Too strict a policy may create a denial of service condition and render environments un-usable, with all accounts used in the brute force being locked-out. Use conditional access policies to block logins from non-compliant devices or from outside defined organization IP ranges.",
+          "url": "https://attack.mitre.org/mitigations/M1036"
+        }
+      ],
+      "detection_strategies": [
+        {
+          "id": "DET0460",
+          "name": "Credential Stuffing Detection via Reused Breached Credentials Across Services",
+          "url": "https://attack.mitre.org/detectionstrategies/DET0460"
+        }
+      ],
+      "known_groups_count": 2,
+      "used_by_scattered_spider": false,
+      "known_groups_sample": [
+        "Chimera",
+        "VOID MANTICORE"
+      ],
+      "control_layer_team_assumption": "Identity / login protection"
+    },
+    "T1114.002": {
+      "id": "T1114.002",
+      "name": "Remote Email Collection",
+      "url": "https://attack.mitre.org/techniques/T1114/002",
+      "tactics": "Collection",
+      "platforms": "Office Suite, Windows",
+      "description": "Adversaries may target an Exchange server, Office 365, or Google Workspace to collect sensitive information. Adversaries may leverage a user's credentials and interact directly with the Exchange server to acquire information from within a network. Adversaries may also access externally facing Exchange services, Office 365, or Google Workspace to access email using credentials or access tokens.",
+      "mitigations": [
+        {
+          "id": "M1032",
+          "name": "Multi-factor Authentication",
+          "how": "Use of multi-factor authentication for public-facing webmail servers is a recommended best practice to minimize the usefulness of usernames and passwords to adversaries.",
+          "url": "https://attack.mitre.org/mitigations/M1032"
+        },
+        {
+          "id": "M1041",
+          "name": "Encrypt Sensitive Information",
+          "how": "Use of encryption provides an added layer of security to sensitive information sent over email. Encryption using public key cryptography requires the adversary to obtain the private certificate along with an encryption key to decrypt messages.",
+          "url": "https://attack.mitre.org/mitigations/M1041"
+        },
+        {
+          "id": "M1060",
+          "name": "Out-of-Band Communications Channel",
+          "how": "Use secure out-of-band authentication methods to verify the authenticity of critical actions initiated via email, such as password resets, financial transactions, or access requests. For highly sensitive information, utilize out-of-band communication channels instead of relying solely on email. This reduces the risk of sensitive data being collected through compromised email accounts.",
+          "url": "https://attack.mitre.org/mitigations/M1060"
+        }
+      ],
+      "detection_strategies": [
+        {
+          "id": "DET0048",
+          "name": "Detect Remote Email Collection via Abnormal Login and Programmatic Access",
+          "url": "https://attack.mitre.org/detectionstrategies/DET0048"
+        }
+      ],
+      "known_groups_count": 13,
+      "used_by_scattered_spider": false,
+      "known_groups_sample": [
+        "APT1",
+        "APT28",
+        "APT29",
+        "Chimera",
+        "Dragonfly",
+        "FIN4",
+        "HAFNIUM",
+        "Ke3chang"
+      ],
+      "control_layer_team_assumption": "SIEM"
+    },
+    "T1114.003": {
+      "id": "T1114.003",
+      "name": "Email Forwarding Rule",
+      "url": "https://attack.mitre.org/techniques/T1114/003",
+      "tactics": "Collection",
+      "platforms": "Linux, macOS, Office Suite, Windows",
+      "description": "Adversaries may setup email forwarding rules to collect sensitive information. Adversaries may abuse email forwarding rules to monitor the activities of a victim, steal information, and further gain intelligence on the victim or the victim’s organization to use as part of further exploits or operations.",
+      "mitigations": [
+        {
+          "id": "M1041",
+          "name": "Encrypt Sensitive Information",
+          "how": "Use of encryption provides an added layer of security to sensitive information sent over email. Encryption using public key cryptography requires the adversary to obtain the private certificate along with an encryption key to decrypt messages.",
+          "url": "https://attack.mitre.org/mitigations/M1042"
+        },
+        {
+          "id": "M1042",
+          "name": "Disable or Remove Feature or Program",
+          "how": "Consider disabling external email forwarding.",
+          "url": "https://attack.mitre.org/mitigations/M1042"
+        },
+        {
+          "id": "M1047",
+          "name": "Audit",
+          "how": "Enterprise email solutions have monitoring mechanisms that may include the ability to audit auto-forwarding rules on a regular basis. In an Exchange environment, Administrators can use `Get-InboxRule` / `Remove-InboxRule` and `Get-TransportRule` / `Remove-TransportRule` to discover and remove potentially malicious auto-fowarding and transport rules.",
+          "url": "https://attack.mitre.org/mitigations/M1047"
+        },
+        {
+          "id": "M1060",
+          "name": "Out-of-Band Communications Channel",
+          "how": "Use secure out-of-band authentication methods to verify the authenticity of critical actions initiated via email, such as password resets, financial transactions, or access requests. For highly sensitive information, utilize out-of-band communication channels instead of relying solely on email. This reduces the risk of sensitive data being collected through compromised email accounts.",
+          "url": "https://attack.mitre.org/mitigations/M1060"
+        }
+      ],
+      "detection_strategies": [
+        {
+          "id": "DET0576",
+          "name": "Email Forwarding Rule Abuse Detection Across Platforms",
+          "url": "https://attack.mitre.org/detectionstrategies/DET0576"
+        }
+      ],
+      "known_groups_count": 5,
+      "used_by_scattered_spider": true,
+      "known_groups_sample": [
+        "Kimsuky",
+        "LAPSUS$",
+        "Scattered Spider",
+        "Silent Librarian",
+        "Star Blizzard"
+      ],
+      "control_layer_team_assumption": "Email security; SIEM"
+    },
+    "T1133": {
+      "id": "T1133",
+      "name": "External Remote Services",
+      "url": "https://attack.mitre.org/techniques/T1133",
+      "tactics": "Persistence, Initial Access",
+      "platforms": "Containers, Linux, macOS, Windows",
+      "description": "Adversaries may leverage external-facing remote services to initially access and/or persist within a network. Remote services such as VPNs, Citrix, and other access mechanisms allow users to connect to internal enterprise network resources from external locations. There are often remote service gateways that manage connections and credential authentication for these services.",
+      "mitigations": [
+        {
+          "id": "M1021",
+          "name": "Restrict Web-Based Content",
+          "how": "Restrict all traffic to and from public Tor nodes.",
+          "url": "https://attack.mitre.org/mitigations/M1021"
+        },
+        {
+          "id": "M1030",
+          "name": "Network Segmentation",
+          "how": "Deny direct remote access to internal systems through the use of network proxies, gateways, and firewalls.",
+          "url": "https://attack.mitre.org/mitigations/M1030"
+        },
+        {
+          "id": "M1032",
+          "name": "Multi-factor Authentication",
+          "how": "Use strong two-factor or multi-factor authentication for remote service accounts to mitigate an adversary's ability to leverage stolen credentials, but be aware of Multi-Factor Authentication Interception techniques for some two-factor authentication implementations.",
+          "url": "https://attack.mitre.org/mitigations/M1032"
+        },
+        {
+          "id": "M1035",
+          "name": "Limit Access to Resource Over Network",
+          "how": "Limit access to remote services through centrally managed concentrators such as VPNs and other managed remote access systems.",
+          "url": "https://attack.mitre.org/mitigations/M1035"
+        },
+        {
+          "id": "M1042",
+          "name": "Disable or Remove Feature or Program",
+          "how": "Disable or block remotely available services that may be unnecessary.",
+          "url": "https://attack.mitre.org/mitigations/M1042"
+        }
+      ],
+      "detection_strategies": [
+        {
+          "id": "DET0354",
+          "name": "Behavior-chain detection for T1133 External Remote Services across Windows, Linux, macOS, Containers",
+          "url": "https://attack.mitre.org/detectionstrategies/DET0354"
+        }
+      ],
+      "known_groups_count": 28,
+      "used_by_scattered_spider": true,
+      "known_groups_sample": [
+        "APT-C-36",
+        "APT18",
+        "APT28",
+        "APT29",
+        "APT41",
+        "Akira",
+        "Chimera",
+        "Dragonfly"
+      ],
+      "control_layer_team_assumption": "Firewall / remote access"
+    },
+    "T1190": {
+      "id": "T1190",
+      "name": "Exploit Public-Facing Application",
+      "url": "https://attack.mitre.org/techniques/T1190",
+      "tactics": "Initial Access",
+      "platforms": "Containers, ESXi, IaaS, Linux, macOS, Network Devices, Windows",
+      "description": "Adversaries may attempt to exploit a weakness in an Internet-facing host or system to initially access a network. The weakness in the system can be a software bug, a temporary glitch, or a misconfiguration.",
+      "mitigations": [
+        {
+          "id": "M1016",
+          "name": "Vulnerability Scanning",
+          "how": "Regularly scan externally facing systems for vulnerabilities and establish procedures to rapidly patch systems when critical vulnerabilities are discovered through scanning and through public disclosure.",
+          "url": "https://attack.mitre.org/mitigations/M1016"
+        },
+        {
+          "id": "M1026",
+          "name": "Privileged Account Management",
+          "how": "Use least privilege for service accounts will limit what permissions the exploited process gets on the rest of the system.",
+          "url": "https://attack.mitre.org/mitigations/M1026"
+        },
+        {
+          "id": "M1030",
+          "name": "Network Segmentation",
+          "how": "Segment externally facing servers and services from the rest of the network with a DMZ or on separate hosting infrastructure.",
+          "url": "https://attack.mitre.org/mitigations/M1030"
+        },
+        {
+          "id": "M1035",
+          "name": "Limit Access to Resource Over Network",
+          "how": "Ensure that all publicly exposed services are actually intended to be so, and restrict access to any that should only be available internally.",
+          "url": "https://attack.mitre.org/mitigations/M1035"
+        },
+        {
+          "id": "M1037",
+          "name": "Filter Network Traffic",
+          "how": "Restrict outbound network traffic from public-facing servers to prevent unauthorized connections from initiating communications with attacker-controlled infrastructure. While this may not prevent the initial exploitation, it limits the attacker's ability to verify and control the compromised server post-exploit, reducing the overall impact of the attack.",
+          "url": "https://attack.mitre.org/mitigations/M1037"
+        },
+        {
+          "id": "M1048",
+          "name": "Application Isolation and Sandboxing",
+          "how": "Application isolation will limit what other processes and system features the exploited target can access.",
+          "url": "https://attack.mitre.org/mitigations/M1048"
+        },
+        {
+          "id": "M1050",
+          "name": "Exploit Protection",
+          "how": "Web Application Firewalls may be used to limit exposure of applications to prevent exploit traffic from reaching the application.",
+          "url": "https://attack.mitre.org/mitigations/M1050"
+        },
+        {
+          "id": "M1051",
+          "name": "Update Software",
+          "how": "Update software regularly by employing patch management for externally exposed applications.",
+          "url": "https://attack.mitre.org/mitigations/M1051"
+        }
+      ],
+      "detection_strategies": [
+        {
+          "id": "DET0080",
+          "name": "Exploit Public-Facing Application – multi-signal correlation (request → error → post-exploit process/egress)",
+          "url": "https://attack.mitre.org/detectionstrategies/DET0080"
+        }
+      ],
+      "known_groups_count": 46,
+      "used_by_scattered_spider": false,
+      "known_groups_sample": [
+        "APT28",
+        "APT29",
+        "APT39",
+        "APT41",
+        "APT5",
+        "Agrius",
+        "Axiom",
+        "BackdoorDiplomacy"
+      ],
+      "control_layer_team_assumption": "Firewall; patching"
+    },
+    "T1204.002": {
+      "id": "T1204.002",
+      "name": "Malicious File",
+      "url": "https://attack.mitre.org/techniques/T1204/002",
+      "tactics": "Execution",
+      "platforms": "Linux, macOS, Windows",
+      "description": "An adversary may rely upon a user opening a malicious file in order to gain execution. Users may be subjected to social engineering to get them to open a file that will lead to code execution. This user action will typically be observed as follow-on behavior from Spearphishing Attachment.",
+      "mitigations": [
+        {
+          "id": "M1017",
+          "name": "User Training",
+          "how": "Use user training as a way to bring awareness to common phishing and spearphishing techniques and how to raise suspicion for potentially malicious events.",
+          "url": "https://attack.mitre.org/mitigations/M1017"
+        },
+        {
+          "id": "M1038",
+          "name": "Execution Prevention",
+          "how": "Application control may be able to prevent the running of executables masquerading as other files.",
+          "url": "https://attack.mitre.org/mitigations/M1038"
+        },
+        {
+          "id": "M1040",
+          "name": "Behavior Prevention on Endpoint",
+          "how": "On Windows 10, various Attack Surface Reduction (ASR) rules can be enabled to prevent the execution of potentially malicious executable files (such as those that have been downloaded and executed by Office applications/scripting interpreters/email clients or that do not meet specific prevalence, age, or trusted list criteria). Note: cloud-delivered protection must be enabled for certain rules.",
+          "url": "https://attack.mitre.org/mitigations/M1040"
+        }
+      ],
+      "detection_strategies": [
+        {
+          "id": "DET0294",
+          "name": "User Execution – Malicious File via download/open → spawn chain (T1204.002)",
+          "url": "https://attack.mitre.org/detectionstrategies/DET0294"
+        }
+      ],
+      "known_groups_count": 86,
+      "used_by_scattered_spider": false,
+      "known_groups_sample": [
+        "APT-C-36",
+        "APT12",
+        "APT19",
+        "APT28",
+        "APT29",
+        "APT30",
+        "APT32",
+        "APT33"
+      ],
+      "control_layer_team_assumption": "EDR; user awareness"
+    },
+    "T1486": {
+      "id": "T1486",
+      "name": "Data Encrypted for Impact",
+      "url": "https://attack.mitre.org/techniques/T1486",
+      "tactics": "Impact",
+      "platforms": "ESXi, IaaS, Linux, macOS, Windows",
+      "description": "Adversaries may encrypt data on target systems or on large numbers of systems in a network to interrupt availability to system and network resources. They can attempt to render stored data inaccessible by encrypting files or data on local and remote drives and withholding access to a decryption key.",
+      "mitigations": [
+        {
+          "id": "M1040",
+          "name": "Behavior Prevention on Endpoint",
+          "how": "On Windows 10, enable cloud-delivered protection and Attack Surface Reduction (ASR) rules to block the execution of files that resemble ransomware. In AWS environments, create an IAM policy to restrict or block the use of SSE-C on S3 buckets.",
+          "url": "https://attack.mitre.org/mitigations/M1040"
+        },
+        {
+          "id": "M1053",
+          "name": "Data Backup",
+          "how": "Consider implementing IT disaster recovery plans that contain procedures for regularly taking and testing data backups that can be used to restore organizational data. Ensure backups are stored off system and is protected from common methods adversaries may use to gain access and destroy the backups to prevent recovery. Consider enabling versioning in cloud environments to maintain backup copies of storage objects.",
+          "url": "https://attack.mitre.org/mitigations/M1053"
+        }
+      ],
+      "detection_strategies": [
+        {
+          "id": "DET0215",
+          "name": "Detection of Multi-Platform File Encryption for Impact",
+          "url": "https://attack.mitre.org/detectionstrategies/DET0215"
+        }
+      ],
+      "known_groups_count": 19,
+      "used_by_scattered_spider": true,
+      "known_groups_sample": [
+        "APT38",
+        "APT41",
+        "Akira",
+        "BlackByte",
+        "FIN7",
+        "FIN8",
+        "INC Ransom",
+        "Indrik Spider"
+      ],
+      "control_layer_team_assumption": "EDR; backup"
+    },
+    "T1490": {
+      "id": "T1490",
+      "name": "Inhibit System Recovery",
+      "url": "https://attack.mitre.org/techniques/T1490",
+      "tactics": "Impact",
+      "platforms": "Containers, ESXi, IaaS, Linux, macOS, Network Devices, Windows",
+      "description": "Adversaries may delete or remove built-in data and turn off services designed to aid in the recovery of a corrupted system to prevent recovery. This may deny access to available backups and recovery options. Operating systems may contain features that can help fix corrupted systems, such as a backup catalog, volume shadow copies, and automatic repair features.",
+      "mitigations": [
+        {
+          "id": "M1018",
+          "name": "User Account Management",
+          "how": "Limit the user accounts that have access to backups to only those required. In AWS environments, consider using Service Control Policies to restrict API calls to delete backups, snapshots, and images.",
+          "url": "https://attack.mitre.org/mitigations/M1018"
+        },
+        {
+          "id": "M1028",
+          "name": "Operating System Configuration",
+          "how": "Consider technical controls to prevent the disabling of services or deletion of files involved in system recovery. Additionally, ensure that WinRE is enabled using the following command: reagentc /enable.",
+          "url": "https://attack.mitre.org/mitigations/M1028"
+        },
+        {
+          "id": "M1038",
+          "name": "Execution Prevention",
+          "how": "Consider using application control configured to block execution of utilities such as `diskshadow.exe` that may not be required for a given system or network to prevent potential misuse by adversaries.",
+          "url": "https://attack.mitre.org/mitigations/M1038"
+        },
+        {
+          "id": "M1053",
+          "name": "Data Backup",
+          "how": "Consider implementing IT disaster recovery plans that contain procedures for taking regular data backups that can be used to restore organizational data. Ensure backups are stored off system and is protected from common methods adversaries may use to gain access and destroy the backups to prevent recovery.",
+          "url": "https://attack.mitre.org/mitigations/M1053"
+        }
+      ],
+      "detection_strategies": [
+        {
+          "id": "DET0329",
+          "name": "Behavioral Detection for T1490 - Inhibit System Recovery",
+          "url": "https://attack.mitre.org/detectionstrategies/DET0329"
+        }
+      ],
+      "known_groups_count": 7,
+      "used_by_scattered_spider": true,
+      "known_groups_sample": [
+        "BlackByte",
+        "Medusa Group",
+        "Sandworm Team",
+        "Scattered Spider",
+        "Storm-0501",
+        "VOID MANTICORE",
+        "Wizard Spider"
+      ],
+      "control_layer_team_assumption": "EDR; backup"
+    },
+    "T1534": {
+      "id": "T1534",
+      "name": "Internal Spearphishing",
+      "url": "https://attack.mitre.org/techniques/T1534",
+      "tactics": "Lateral Movement",
+      "platforms": "Linux, macOS, Office Suite, SaaS, Windows",
+      "description": "After they already have access to accounts or systems within the environment, adversaries may use internal spearphishing to gain access to additional information or compromise other users within the same organization. Internal spearphishing is multi-staged campaign where a legitimate account is initially compromised either by controlling the user's device or by compromising the account credentials of the user.",
+      "mitigations": [],
+      "detection_strategies": [
+        {
+          "id": "DET0054",
+          "name": "Internal Spearphishing via Trusted Accounts",
+          "url": "https://attack.mitre.org/detectionstrategies/DET0054"
+        }
+      ],
+      "known_groups_count": 6,
+      "used_by_scattered_spider": false,
+      "known_groups_sample": [
+        "APT-C-36",
+        "Gamaredon Group",
+        "HEXANE",
+        "Kimsuky",
+        "Leviathan",
+        "MuddyWater"
+      ],
+      "control_layer_team_assumption": "Email security"
+    },
+    "T1539": {
+      "id": "T1539",
+      "name": "Steal Web Session Cookie",
+      "url": "https://attack.mitre.org/techniques/T1539",
+      "tactics": "Credential Access",
+      "platforms": "Linux, macOS, Office Suite, SaaS, Windows",
+      "description": "An adversary may steal web application or service session cookies and use them to gain access to web applications or Internet services as an authenticated user without needing credentials. Web applications and services often use session cookies as an authentication token after a user has authenticated to a website.",
+      "mitigations": [
+        {
+          "id": "M1017",
+          "name": "User Training",
+          "how": "Train users to identify aspects of phishing attempts where they're asked to enter credentials into a site that has the incorrect domain for the application they are logging into. Additionally, train users not to run untrusted JavaScript in their browser, such as by copying and pasting code or dragging and dropping bookmarklets.",
+          "url": "https://attack.mitre.org/mitigations/M1017"
+        },
+        {
+          "id": "M1021",
+          "name": "Restrict Web-Based Content",
+          "how": "Restrict or block web-based content that could be used to extract session cookies or credentials stored in browsers. Use browser security settings, such as disabling third-party cookies and restricting browser extensions, to limit the attack surface.",
+          "url": "https://attack.mitre.org/mitigations/M1021"
+        },
+        {
+          "id": "M1032",
+          "name": "Multi-factor Authentication",
+          "how": "Deploy hardware-based token (e.g., YubiKey or FIDO key), which incorporates the target login domain as part of the negotiation protocol, will prevent session cookie theft through proxy methods. Implement Conditional Access policies to only allow logins from trusted devices, such as those enrolled in Intune or joined via Hybrid/Entra.",
+          "url": "https://attack.mitre.org/mitigations/M1032"
+        },
+        {
+          "id": "M1047",
+          "name": "Audit",
+          "how": "Implement auditing for authentication activities and user logins to detect the use of stolen session cookies. Monitor for impossible travel scenarios and anomalous behavior that could indicate the use of compromised session tokens or cookies.",
+          "url": "https://attack.mitre.org/mitigations/M1047"
+        },
+        {
+          "id": "M1051",
+          "name": "Update Software",
+          "how": "Regularly update web browsers, password managers, and all related software to the latest versions. Keeping software up-to-date reduces the risk of vulnerabilities being exploited by attackers to extract stored credentials or session cookies.",
+          "url": "https://attack.mitre.org/mitigations/M1051"
+        },
+        {
+          "id": "M1054",
+          "name": "Software Configuration",
+          "how": "Configure browsers or tasks to regularly delete persistent cookies. Additionally, minimize the length of time a web cookie is viable to potentially reduce the impact of stolen cookies while also increasing the needed frequency of cookie theft attempts – providing defenders with additional chances at detection.",
+          "url": "https://attack.mitre.org/mitigations/M1054"
+        }
+      ],
+      "detection_strategies": [
+        {
+          "id": "DET0509",
+          "name": "Detection of Web Session Cookie Theft via File, Memory, and Network Artifacts",
+          "url": "https://attack.mitre.org/detectionstrategies/DET0509"
+        }
+      ],
+      "known_groups_count": 8,
+      "used_by_scattered_spider": true,
+      "known_groups_sample": [
+        "APT42",
+        "Evilnum",
+        "Kimsuky",
+        "Lotus Blossom",
+        "LuminousMoth",
+        "Sandworm Team",
+        "Scattered Spider",
+        "Star Blizzard"
+      ],
+      "control_layer_team_assumption": "Identity / login protection; EDR"
+    },
+    "T1550.004": {
+      "id": "T1550.004",
+      "name": "Web Session Cookie",
+      "url": "https://attack.mitre.org/techniques/T1550/004",
+      "tactics": "Lateral Movement",
+      "platforms": "IaaS, Office Suite, SaaS",
+      "description": "Adversaries can use stolen session cookies to authenticate to web applications and services. This technique bypasses some multi-factor authentication protocols since the session is already authenticated.",
+      "mitigations": [
+        {
+          "id": "M1054",
+          "name": "Software Configuration",
+          "how": "Configure browsers or tasks to regularly delete persistent cookies.",
+          "url": "https://attack.mitre.org/mitigations/M1054"
+        }
+      ],
+      "detection_strategies": [
+        {
+          "id": "DET0074",
+          "name": "Detect Use of Stolen Web Session Cookies Across Platforms",
+          "url": "https://attack.mitre.org/detectionstrategies/DET0074"
+        }
+      ],
+      "known_groups_count": 1,
+      "used_by_scattered_spider": false,
+      "known_groups_sample": [
+        "Star Blizzard"
+      ],
+      "control_layer_team_assumption": "Identity / login protection"
+    },
+    "T1557": {
+      "id": "T1557",
+      "name": "Adversary-in-the-Middle",
+      "url": "https://attack.mitre.org/techniques/T1557",
+      "tactics": "Credential Access, Collection",
+      "platforms": "Linux, macOS, Network Devices, Windows",
+      "description": "Adversaries may attempt to position themselves between two or more networked devices using an adversary-in-the-middle (AiTM) technique to support follow-on behaviors such as Network Sniffing, Transmitted Data Manipulation, or replay attacks (Exploitation for Credential Access). By abusing features of common networking protocols that can determine the flow of network traffic (e.g.",
+      "mitigations": [
+        {
+          "id": "M1017",
+          "name": "User Training",
+          "how": "Train users to be suspicious about certificate errors. Adversaries may use their own certificates in an attempt to intercept HTTPS traffic. Certificate errors may arise when the application’s certificate does not match the one expected by the host.",
+          "url": "https://attack.mitre.org/mitigations/M1017"
+        },
+        {
+          "id": "M1030",
+          "name": "Network Segmentation",
+          "how": "Network segmentation can be used to isolate infrastructure components that do not require broad network access. This may mitigate, or at least alleviate, the scope of AiTM activity.",
+          "url": "https://attack.mitre.org/mitigations/M1030"
+        },
+        {
+          "id": "M1031",
+          "name": "Network Intrusion Prevention",
+          "how": "Network intrusion detection and prevention systems that can identify traffic patterns indicative of AiTM activity can be used to mitigate activity at the network level.",
+          "url": "https://attack.mitre.org/mitigations/M1031"
+        },
+        {
+          "id": "M1035",
+          "name": "Limit Access to Resource Over Network",
+          "how": "Limit access to network infrastructure and resources that can be used to reshape traffic or otherwise produce AiTM conditions.",
+          "url": "https://attack.mitre.org/mitigations/M1035"
+        },
+        {
+          "id": "M1037",
+          "name": "Filter Network Traffic",
+          "how": "Use network appliances and host-based security software to block network traffic that is not necessary within the environment, such as legacy protocols that may be leveraged for AiTM conditions.",
+          "url": "https://attack.mitre.org/mitigations/M1037"
+        },
+        {
+          "id": "M1041",
+          "name": "Encrypt Sensitive Information",
+          "how": "Ensure that all wired and/or wireless traffic is encrypted appropriately. Use best practices for authentication protocols, such as Kerberos, and ensure web traffic that may contain credentials is protected by SSL/TLS.",
+          "url": "https://attack.mitre.org/mitigations/M1041"
+        },
+        {
+          "id": "M1042",
+          "name": "Disable or Remove Feature or Program",
+          "how": "Disable legacy network protocols that may be used to intercept network traffic if applicable, especially those that are not needed within an environment.",
+          "url": "https://attack.mitre.org/mitigations/M1042"
+        }
+      ],
+      "detection_strategies": [
+        {
+          "id": "DET0296",
+          "name": "Detect Adversary-in-the-Middle via Network and Configuration Anomalies",
+          "url": "https://attack.mitre.org/detectionstrategies/DET0296"
+        }
+      ],
+      "known_groups_count": 3,
+      "used_by_scattered_spider": false,
+      "known_groups_sample": [
+        "Kimsuky",
+        "Mustang Panda",
+        "Sea Turtle"
+      ],
+      "control_layer_team_assumption": "Identity / login protection"
+    },
+    "T1564.008": {
+      "id": "T1564.008",
+      "name": "Email Hiding Rules",
+      "url": "https://attack.mitre.org/techniques/T1564/008",
+      "tactics": "Stealth",
+      "platforms": "Windows, Linux, macOS, Office Suite",
+      "description": "Adversaries may use email rules to hide inbound emails in a compromised user's mailbox. Many email clients allow users to create inbox rules for various email functions, including moving emails to other folders, marking emails as read, or deleting emails.",
+      "mitigations": [
+        {
+          "id": "M1047",
+          "name": "Audit",
+          "how": "Enterprise email solutions may have monitoring mechanisms that may include the ability to audit inbox rules on a regular basis. In an Exchange environment, Administrators can use `Get-InboxRule` / `Remove-InboxRule` and `Get-TransportRule` / `Remove-TransportRule` to discover and remove potentially malicious inbox and transport rules.",
+          "url": "https://attack.mitre.org/mitigations/M1047"
+        }
+      ],
+      "detection_strategies": [
+        {
+          "id": "DET0192",
+          "name": "Detection Strategy for Email Hiding Rules",
+          "url": "https://attack.mitre.org/detectionstrategies/DET0192"
+        }
+      ],
+      "known_groups_count": 2,
+      "used_by_scattered_spider": true,
+      "known_groups_sample": [
+        "FIN4",
+        "Scattered Spider"
+      ],
+      "control_layer_team_assumption": "Email security; SIEM"
+    },
+    "T1566.001": {
+      "id": "T1566.001",
+      "name": "Spearphishing Attachment",
+      "url": "https://attack.mitre.org/techniques/T1566/001",
+      "tactics": "Initial Access",
+      "platforms": "Linux, macOS, Windows",
+      "description": "Adversaries may send spearphishing emails with a malicious attachment in an attempt to gain access to victim systems. Spearphishing attachment is a specific variant of spearphishing. Spearphishing attachment is different from other forms of spearphishing in that it employs the use of malware attached to an email.",
+      "mitigations": [
+        {
+          "id": "M1017",
+          "name": "User Training",
+          "how": "Users can be trained to identify social engineering techniques and spearphishing emails.",
+          "url": "https://attack.mitre.org/mitigations/M1017"
+        },
+        {
+          "id": "M1018",
+          "name": "User Account Management",
+          "how": "Apply user account management principles to limit permissions for accounts interacting with email attachments, ensuring that only necessary accounts have the ability to open or execute files. Restricting account privileges reduces the potential impact of malicious attachments by preventing unauthorized execution or spread of malware within the environment.",
+          "url": "https://attack.mitre.org/mitigations/M1018"
+        },
+        {
+          "id": "M1021",
+          "name": "Restrict Web-Based Content",
+          "how": "Block unknown or unused attachments by default that should not be transmitted over email as a best practice to prevent some vectors, such as .scr, .exe, .pif, .cpl, etc. Some email scanning devices can open and analyze compressed and encrypted formats, such as zip and rar that may be used to conceal malicious attachments.",
+          "url": "https://attack.mitre.org/mitigations/M1021"
+        },
+        {
+          "id": "M1031",
+          "name": "Network Intrusion Prevention",
+          "how": "Network intrusion prevention systems and systems designed to scan and remove malicious email attachments can be used to block activity.",
+          "url": "https://attack.mitre.org/mitigations/M1031"
+        },
+        {
+          "id": "M1047",
+          "name": "Audit",
+          "how": "Enable auditing and monitoring for email attachments and file transfers to detect and investigate suspicious activity. Regularly review logs for anomalies related to attachments containing potentially malicious content, as well as any attempts to execute or interact with these files. This practice helps identify spearphishing attempts before they can lead to further compromise.",
+          "url": "https://attack.mitre.org/mitigations/M1047"
+        },
+        {
+          "id": "M1049",
+          "name": "Antivirus/Antimalware",
+          "how": "Anti-virus can also automatically quarantine suspicious files.",
+          "url": "https://attack.mitre.org/mitigations/M1049"
+        },
+        {
+          "id": "M1054",
+          "name": "Software Configuration",
+          "how": "Use anti-spoofing and email authentication mechanisms to filter messages based on validity checks of the sender domain (using SPF) and integrity of messages (using DKIM). Enabling these mechanisms within an organization (through policies such as DMARC) may enable recipients (intra-org and cross domain) to perform similar message filtering and validation.",
+          "url": "https://attack.mitre.org/mitigations/M1054"
+        }
+      ],
+      "detection_strategies": [
+        {
+          "id": "DET0236",
+          "name": "Detection Strategy for Spearphishing Attachment across OS Platforms",
+          "url": "https://attack.mitre.org/detectionstrategies/DET0236"
+        }
+      ],
+      "known_groups_count": 78,
+      "used_by_scattered_spider": false,
+      "known_groups_sample": [
+        "APT-C-36",
+        "APT1",
+        "APT12",
+        "APT19",
+        "APT28",
+        "APT29",
+        "APT30",
+        "APT32"
+      ],
+      "control_layer_team_assumption": "Email security"
+    },
+    "T1566.002": {
+      "id": "T1566.002",
+      "name": "Spearphishing Link",
+      "url": "https://attack.mitre.org/techniques/T1566/002",
+      "tactics": "Initial Access",
+      "platforms": "Identity Provider, Linux, macOS, Office Suite, SaaS, Windows",
+      "description": "Adversaries may send spearphishing emails with a malicious link in an attempt to gain access to victim systems. Spearphishing with a link is a specific variant of spearphishing. It is different from other forms of spearphishing in that it employs the use of links to download malware contained in email, instead of attaching malicious files to the email itself, to avoid defenses that may inspect email attachments.",
+      "mitigations": [
+        {
+          "id": "M1017",
+          "name": "User Training",
+          "how": "Users can be trained to identify social engineering techniques and spearphishing emails with malicious links which includes phishing for consent with OAuth 2.0. Additionally, users may perform visual checks of the domains they visit; however, homographs in ASCII and in IDN domains and URL schema obfuscation may render manual checks difficult.",
+          "url": "https://attack.mitre.org/mitigations/M1017"
+        },
+        {
+          "id": "M1018",
+          "name": "User Account Management",
+          "how": "Azure AD Administrators apply limitations upon the ability for users to grant consent to unfamiliar or unverified third-party applications.",
+          "url": "https://attack.mitre.org/mitigations/M1018"
+        },
+        {
+          "id": "M1021",
+          "name": "Restrict Web-Based Content",
+          "how": "Determine if certain websites that can be used for spearphishing are necessary for business operations and consider blocking access if activity cannot be monitored well or if it poses a significant risk.",
+          "url": "https://attack.mitre.org/mitigations/M1021"
+        },
+        {
+          "id": "M1047",
+          "name": "Audit",
+          "how": "Audit applications and their permissions to ensure access to data and resources are limited based upon necessity and principle of least privilege.",
+          "url": "https://attack.mitre.org/mitigations/M1047"
+        },
+        {
+          "id": "M1054",
+          "name": "Software Configuration",
+          "how": "Use anti-spoofing and email authentication mechanisms to filter messages based on validity checks of the sender domain (using SPF) and integrity of messages (using DKIM). Enabling these mechanisms within an organization (through policies such as DMARC) may enable recipients (intra-org and cross domain) to perform similar message filtering and validation..",
+          "url": "https://attack.mitre.org/mitigations/M1054"
+        }
+      ],
+      "detection_strategies": [
+        {
+          "id": "DET0107",
+          "name": "Detection Strategy for Spearphishing Links",
+          "url": "https://attack.mitre.org/detectionstrategies/DET0107"
+        }
+      ],
+      "known_groups_count": 46,
+      "used_by_scattered_spider": false,
+      "known_groups_sample": [
+        "APT-C-36",
+        "APT1",
+        "APT29",
+        "APT3",
+        "APT32",
+        "APT33",
+        "APT39",
+        "APT42"
+      ],
+      "control_layer_team_assumption": "Email security"
+    },
+    "T1567": {
+      "id": "T1567",
+      "name": "Exfiltration Over Web Service",
+      "url": "https://attack.mitre.org/techniques/T1567",
+      "tactics": "Exfiltration",
+      "platforms": "ESXi, Linux, macOS, Office Suite, SaaS, Windows",
+      "description": "Adversaries may use an existing, legitimate external Web service to exfiltrate data rather than their primary command and control channel. Popular Web services acting as an exfiltration mechanism may give a significant amount of cover due to the likelihood that hosts within a network are already communicating with them prior to compromise. Firewall rules may also already exist to permit traffic to these services.",
+      "mitigations": [
+        {
+          "id": "M1021",
+          "name": "Restrict Web-Based Content",
+          "how": "Web proxies can be used to enforce an external network communication policy that prevents use of unauthorized external services.",
+          "url": "https://attack.mitre.org/mitigations/M1021"
+        },
+        {
+          "id": "M1057",
+          "name": "Data Loss Prevention",
+          "how": "Data loss prevention can be detect and block sensitive data being uploaded to web services via web browsers.",
+          "url": "https://attack.mitre.org/mitigations/M1057"
+        }
+      ],
+      "detection_strategies": [
+        {
+          "id": "DET0548",
+          "name": "Detection Strategy for Exfiltration Over Web Service",
+          "url": "https://attack.mitre.org/detectionstrategies/DET0548"
+        }
+      ],
+      "known_groups_count": 5,
+      "used_by_scattered_spider": false,
+      "known_groups_sample": [
+        "APT28",
+        "BlackByte",
+        "Contagious Interview",
+        "Magic Hound",
+        "ShinyHunters"
+      ],
+      "control_layer_team_assumption": "Firewall / web filtering; SIEM"
+    },
+    "T1570": {
+      "id": "T1570",
+      "name": "Lateral Tool Transfer",
+      "url": "https://attack.mitre.org/techniques/T1570",
+      "tactics": "Lateral Movement",
+      "platforms": "ESXi, Linux, macOS, Windows",
+      "description": "Adversaries may transfer tools or other files between systems in a compromised environment. Once brought into the victim environment (i.e., Ingress Tool Transfer) files may then be copied from one system to another to stage adversary tools or other files over the course of an operation.",
+      "mitigations": [
+        {
+          "id": "M1031",
+          "name": "Network Intrusion Prevention",
+          "how": "Network intrusion detection and prevention systems that use network signatures to identify traffic for specific adversary malware or unusual data transfer over known tools and protocols like FTP can be used to mitigate activity at the network level.",
+          "url": "https://attack.mitre.org/mitigations/M1031"
+        },
+        {
+          "id": "M1037",
+          "name": "Filter Network Traffic",
+          "how": "Consider using the host firewall to restrict file sharing communications such as SMB.",
+          "url": "https://attack.mitre.org/mitigations/M1037"
+        }
+      ],
+      "detection_strategies": [
+        {
+          "id": "DET0183",
+          "name": "Detection Strategy for Lateral Tool Transfer across OS platforms",
+          "url": "https://attack.mitre.org/detectionstrategies/DET0183"
+        }
+      ],
+      "known_groups_count": 19,
+      "used_by_scattered_spider": false,
+      "known_groups_sample": [
+        "APT32",
+        "APT41",
+        "Agrius",
+        "Aoqin Dragon",
+        "BlackByte",
+        "Chimera",
+        "Ember Bear",
+        "FIN10"
+      ],
+      "control_layer_team_assumption": "EDR; firewall"
+    },
+    "T1621": {
+      "id": "T1621",
+      "name": "Multi-Factor Authentication Request Generation",
+      "url": "https://attack.mitre.org/techniques/T1621",
+      "tactics": "Credential Access",
+      "platforms": "Windows, Linux, macOS, IaaS, SaaS, Office Suite, Identity Provider",
+      "description": "Adversaries may attempt to bypass multi-factor authentication (MFA) mechanisms and gain access to accounts by generating MFA requests sent to users. Adversaries in possession of credentials to Valid Accounts may be unable to complete the login process if they lack access to the 2FA or MFA mechanisms required as an additional credential and security control.",
+      "mitigations": [
+        {
+          "id": "M1017",
+          "name": "User Training",
+          "how": "Train users to only accept 2FA/MFA requests from login attempts they initiated, to review source location of the login attempt prompting the 2FA/MFA requests, and to report suspicious/unsolicited prompts.",
+          "url": "https://attack.mitre.org/mitigations/M1017"
+        },
+        {
+          "id": "M1032",
+          "name": "Multi-factor Authentication",
+          "how": "Implement more secure 2FA/MFA mechanisms in replacement of simple push or one-click 2FA/MFA options. For example, having users enter a one-time code provided by the login screen into the 2FA/MFA application or utilizing other out-of-band 2FA/MFA mechanisms (such as rotating code-based hardware tokens providing rotating codes that need an accompanying user pin) may be more secure.",
+          "url": "https://attack.mitre.org/mitigations/M1032"
+        },
+        {
+          "id": "M1036",
+          "name": "Account Use Policies",
+          "how": "Enable account restrictions to prevent login attempts, and the subsequent 2FA/MFA service requests, from being initiated from suspicious locations or when the source of the login attempts do not match the location of the 2FA/MFA smart device. Use conditional access policies to block logins from non-compliant devices or from outside defined organization IP ranges.",
+          "url": "https://attack.mitre.org/mitigations/M1036"
+        }
+      ],
+      "detection_strategies": [
+        {
+          "id": "DET0160",
+          "name": "Detection Strategy for Multi-Factor Authentication Request Generation (T1621)",
+          "url": "https://attack.mitre.org/detectionstrategies/DET0160"
+        }
+      ],
+      "known_groups_count": 3,
+      "used_by_scattered_spider": true,
+      "known_groups_sample": [
+        "APT29",
+        "LAPSUS$",
+        "Scattered Spider"
+      ],
+      "control_layer_team_assumption": "Identity / login protection"
+    },
+    "T1657": {
+      "id": "T1657",
+      "name": "Financial Theft",
+      "url": "https://attack.mitre.org/techniques/T1657",
+      "tactics": "Impact",
+      "platforms": "Linux, macOS, Office Suite, SaaS, Windows",
+      "description": "Adversaries may steal monetary resources from targets through extortion, social engineering, technical theft, or other methods aimed at their own financial gain at the expense of the availability of these resources for victims.",
+      "mitigations": [
+        {
+          "id": "M1017",
+          "name": "User Training",
+          "how": "Train and encourage users to identify social engineering techniques used to enable financial theft. Also consider training users on procedures to prevent and respond to swatting and doxing, acts increasingly deployed by financially motivated groups to further coerce victims into satisfying ransom/extortion demands.",
+          "url": "https://attack.mitre.org/mitigations/M1017"
+        },
+        {
+          "id": "M1018",
+          "name": "User Account Management",
+          "how": "Limit access/authority to execute sensitive transactions, and switch to systems and procedures designed to authenticate/approve payments and purchase requests outside of insecure communication lines such as email.",
+          "url": "https://attack.mitre.org/mitigations/M1018"
+        }
+      ],
+      "detection_strategies": [
+        {
+          "id": "DET0495",
+          "name": "Detection Strategy for Financial Theft",
+          "url": "https://attack.mitre.org/detectionstrategies/DET0495"
+        }
+      ],
+      "known_groups_count": 17,
+      "used_by_scattered_spider": true,
+      "known_groups_sample": [
+        "Akira",
+        "AppleJeus",
+        "Cinnamon Tempest",
+        "Contagious Interview",
+        "FIN13",
+        "INC Ransom",
+        "Kimsuky",
+        "Malteiro"
+      ],
+      "control_layer_team_assumption": "Process (payment verification)"
+    },
+    "T1684.001": {
+      "id": "T1684.001",
+      "name": "Impersonation",
+      "url": "https://attack.mitre.org/techniques/T1684/001",
+      "tactics": "Stealth",
+      "platforms": "Linux, macOS, Office Suite, SaaS, Windows",
+      "description": "Adversaries may impersonate a trusted person or organization in order to persuade and trick a target into performing some action on their behalf. For example, adversaries may communicate with victims (via Phishing for Information, Phishing, or Internal Spearphishing) while impersonating a known sender such as an executive, colleague, or third-party vendor.",
+      "mitigations": [
+        {
+          "id": "M1017",
+          "name": "User Training",
+          "how": "Train users to be aware of impersonation tricks and how to counter them, for example confirming incoming requests through an independent platform like a phone call or in-person, to reduce risk.",
+          "url": "https://attack.mitre.org/mitigations/M1017"
+        },
+        {
+          "id": "M1019",
+          "name": "Threat Intelligence Program",
+          "how": "Threat intelligence helps defenders and users be aware of and defend against common lures and active campaigns that have been used for impersonation.",
+          "url": "https://attack.mitre.org/mitigations/M1019"
+        }
+      ],
+      "detection_strategies": [
+        {
+          "id": "DET0286",
+          "name": "Detection Strategy for Impersonation",
+          "url": "https://attack.mitre.org/detectionstrategies/DET0286"
+        }
+      ],
+      "known_groups_count": 16,
+      "used_by_scattered_spider": true,
+      "known_groups_sample": [
+        "APT-C-36",
+        "APT28",
+        "APT41",
+        "APT42",
+        "Contagious Interview",
+        "Kimsuky",
+        "LAPSUS$",
+        "MirrorFace"
+      ],
+      "control_layer_team_assumption": "User awareness; process"
+    }
+  },
+  "mappings": [
+    {
+      "tool_id": "email_security",
+      "technique_id": "T1566.002",
+      "effect": "stop",
+      "evidence_type": "mitre_mitigation",
+      "mitre_mitigation_hint": "Restrict Web-Based Content",
+      "ctid_support": [
+        {
+          "capability_id": "EOP-APH-E3",
+          "capability": "Anti-Phishing",
+          "score_category": "protect",
+          "score_value": "significant"
+        }
+      ],
+      "note": "Comparable Microsoft 365 capability is mapped by CTID. Applies directly if the company's email security is Microsoft Exchange Online Protection / Defender for Office 365."
+    },
+    {
+      "tool_id": "email_security",
+      "technique_id": "T1566.001",
+      "effect": "stop",
+      "evidence_type": "mitre_mitigation",
+      "mitre_mitigation_hint": "Antivirus/Antimalware",
+      "ctid_support": [
+        {
+          "capability_id": "EOP-APH-E3",
+          "capability": "Anti-Phishing",
+          "score_category": "protect",
+          "score_value": "significant"
+        },
+        {
+          "capability_id": "EOP-AMW-E3",
+          "capability": "Antimalware",
+          "score_category": "protect",
+          "score_value": "significant"
+        }
+      ],
+      "note": "Comparable Microsoft 365 capability is mapped by CTID. Applies directly if the company's email security is Microsoft Exchange Online Protection / Defender for Office 365."
+    },
+    {
+      "tool_id": "edr",
+      "technique_id": "T1059.001",
+      "effect": "stop",
+      "evidence_type": "mitre_mitigation",
+      "mitre_mitigation_hint": "Execution Prevention"
+    },
+    {
+      "tool_id": "edr",
+      "technique_id": "T1059",
+      "effect": "stop",
+      "evidence_type": "mitre_mitigation",
+      "mitre_mitigation_hint": "Execution Prevention"
+    },
+    {
+      "tool_id": "edr",
+      "technique_id": "T1003",
+      "effect": "stop",
+      "evidence_type": "mitre_mitigation",
+      "mitre_mitigation_hint": "Credential Access Protection"
+    },
+    {
+      "tool_id": "edr",
+      "technique_id": "T1490",
+      "effect": "stop",
+      "evidence_type": "team_assumption"
+    },
+    {
+      "tool_id": "edr",
+      "technique_id": "T1486",
+      "effect": "stop",
+      "evidence_type": "mitre_mitigation",
+      "mitre_mitigation_hint": "Behavior Prevention on Endpoint"
+    },
+    {
+      "tool_id": "edr",
+      "technique_id": "T1204.002",
+      "effect": "detect",
+      "evidence_type": "mitre_detection"
+    },
+    {
+      "tool_id": "edr",
+      "technique_id": "T1539",
+      "effect": "detect",
+      "evidence_type": "mitre_detection"
+    },
+    {
+      "tool_id": "edr",
+      "technique_id": "T1570",
+      "effect": "detect",
+      "evidence_type": "mitre_detection"
+    },
+    {
+      "tool_id": "firewall",
+      "technique_id": "T1133",
+      "effect": "stop",
+      "evidence_type": "mitre_mitigation",
+      "mitre_mitigation_hint": "Limit Access to Resource Over Network"
+    },
+    {
+      "tool_id": "firewall",
+      "technique_id": "T1190",
+      "effect": "stop",
+      "evidence_type": "mitre_mitigation",
+      "mitre_mitigation_hint": "Network Segmentation"
+    },
+    {
+      "tool_id": "firewall",
+      "technique_id": "T1021.001",
+      "effect": "stop",
+      "evidence_type": "mitre_mitigation",
+      "mitre_mitigation_hint": "Limit Access to Resource Over Network"
+    },
+    {
+      "tool_id": "firewall",
+      "technique_id": "T1567",
+      "effect": "detect",
+      "evidence_type": "mitre_detection"
+    },
+    {
+      "tool_id": "firewall",
+      "technique_id": "T1041",
+      "effect": "detect",
+      "evidence_type": "mitre_detection"
+    },
+    {
+      "tool_id": "siem",
+      "technique_id": "T1110.003",
+      "effect": "detect",
+      "evidence_type": "mitre_detection"
+    },
+    {
+      "tool_id": "siem",
+      "technique_id": "T1110.004",
+      "effect": "detect",
+      "evidence_type": "mitre_detection"
+    },
+    {
+      "tool_id": "siem",
+      "technique_id": "T1078.004",
+      "effect": "detect",
+      "evidence_type": "mitre_detection"
+    },
+    {
+      "tool_id": "tool_x",
+      "technique_id": "T1059.001",
+      "effect": "stop",
+      "evidence_type": "team_assumption"
+    },
+    {
+      "tool_id": "tool_x",
+      "technique_id": "T1059",
+      "effect": "stop",
+      "evidence_type": "team_assumption"
+    },
+    {
+      "tool_id": "mfa_owned",
+      "technique_id": "T1078.004",
+      "effect": "stop",
+      "evidence_type": "ctid_mapping",
+      "mitre_mitigation_hint": "Multi-factor Authentication",
+      "ctid_support": [
+        {
+          "capability_id": "EID-MFA-E3",
+          "capability": "Multifactor Authentication",
+          "score_category": "protect",
+          "score_value": "significant"
+        }
+      ]
+    },
+    {
+      "tool_id": "mfa_owned",
+      "technique_id": "T1621",
+      "effect": "stop",
+      "evidence_type": "ctid_mapping",
+      "mitre_mitigation_hint": "Multi-factor Authentication",
+      "ctid_support": [
+        {
+          "capability_id": "EID-MFA-E3",
+          "capability": "Multifactor Authentication",
+          "score_category": "protect",
+          "score_value": "significant"
+        }
+      ]
+    },
+    {
+      "tool_id": "mfa_owned",
+      "technique_id": "T1110.003",
+      "effect": "stop",
+      "evidence_type": "ctid_mapping",
+      "mitre_mitigation_hint": "Multi-factor Authentication",
+      "ctid_support": [
+        {
+          "capability_id": "EID-MFA-E3",
+          "capability": "Multifactor Authentication",
+          "score_category": "protect",
+          "score_value": "significant"
+        }
+      ]
+    },
+    {
+      "tool_id": "mfa_owned",
+      "technique_id": "T1110.004",
+      "effect": "stop",
+      "evidence_type": "ctid_mapping",
+      "mitre_mitigation_hint": "Multi-factor Authentication",
+      "ctid_support": [
+        {
+          "capability_id": "EID-MFA-E3",
+          "capability": "Multifactor Authentication",
+          "score_category": "protect",
+          "score_value": "significant"
+        }
+      ]
+    },
+    {
+      "tool_id": "mfa_owned",
+      "technique_id": "T1098.005",
+      "effect": "stop",
+      "evidence_type": "ctid_mapping",
+      "mitre_mitigation_hint": "Multi-factor Authentication",
+      "ctid_support": [
+        {
+          "capability_id": "EID-MFA-E3",
+          "capability": "Multifactor Authentication",
+          "score_category": "protect",
+          "score_value": "significant"
+        }
+      ]
+    },
+    {
+      "tool_id": "identity_suite",
+      "technique_id": "T1557",
+      "effect": "stop",
+      "evidence_type": "vendor_claim"
+    },
+    {
+      "tool_id": "identity_suite",
+      "technique_id": "T1539",
+      "effect": "stop",
+      "evidence_type": "vendor_claim"
+    },
+    {
+      "tool_id": "identity_suite",
+      "technique_id": "T1550.004",
+      "effect": "stop",
+      "evidence_type": "vendor_claim"
+    },
+    {
+      "tool_id": "identity_suite",
+      "technique_id": "T1110.003",
+      "effect": "stop",
+      "evidence_type": "vendor_claim"
+    },
+    {
+      "tool_id": "identity_suite",
+      "technique_id": "T1110.004",
+      "effect": "stop",
+      "evidence_type": "vendor_claim"
+    },
+    {
+      "tool_id": "payment_process",
+      "technique_id": "T1657",
+      "effect": "stop",
+      "evidence_type": "mitre_mitigation",
+      "mitre_mitigation_hint": "User Training"
+    }
+  ],
+  "noise": {
+    "email_security": 4,
+    "edr": 6,
+    "firewall": 9,
+    "siem": 18,
+    "tool_x": 31,
+    "mfa_owned": 0,
+    "identity_suite": null,
+    "payment_process": 0
+  },
+  "assumptions": {
+    "model": "FAIR-style: Annual Loss Exposure = Attempts per year × Probability of success × Loss per success",
+    "step_pass_probability": {
+      "stopped": 0.2,
+      "detected": 0.6,
+      "missed": 0.95,
+      "starting_condition": 1,
+      "source": {
+        "type": "model_parameter",
+        "label": "Model parameter — editable. No public dataset gives per-step control-failure rates."
+      }
+    },
+    "scenarios": {
+      "S1": {
+        "attempts_per_year": {
+          "min": 12,
+          "likely": 24,
+          "max": 48,
+          "source": {
+            "type": "sample_assumption",
+            "label": "Sample assumption — no public per-company attempt rate exists."
+          }
+        },
+        "loss_per_success": {
+          "min": 30000,
+          "likely": 60000,
+          "max": 180000,
+          "source": {
+            "type": "sample_assumption",
+            "label": "Sample assumption — cost of one mailbox takeover at a ~400-person company.",
+            "context": "IBM Cost of a Data Breach 2026 reports far higher averages for full breaches in its (mostly large-organization) sample; they are not used here because they would overstate a single-mailbox incident."
+          }
+        }
+      },
+      "S2": {
+        "attempts_per_year": {
+          "min": 6,
+          "likely": 12,
+          "max": 24,
+          "source": {
+            "type": "sample_assumption",
+            "label": "Sample assumption — no public per-company attempt rate exists."
+          }
+        },
+        "loss_per_success": {
+          "min": 20000,
+          "likely": 40000,
+          "max": 120000,
+          "source": {
+            "type": "sample_assumption",
+            "label": "Sample assumption — cost of one account takeover."
+          }
+        }
+      },
+      "S3": {
+        "attempts_per_year": {
+          "min": 1.5,
+          "likely": 3,
+          "max": 6,
+          "source": {
+            "type": "sample_assumption",
+            "label": "Sample assumption."
+          }
+        },
+        "loss_per_success": {
+          "min": 61502.5,
+          "likely": 123005,
+          "max": 369015,
+          "source": {
+            "type": "published_figure",
+            "label": "Average reported loss per business email compromise complaint, FBI IC3 2025: $3,046,598,558 ÷ 24,768 complaints = $123,005 (rounded).",
+            "citation": "Federal Bureau of Investigation, Internet Crime Complaint Center (IC3), 2025 Internet Crime Report.",
+            "url": "https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf",
+            "range_rule": "min = 0.5 × likely, max = 3 × likely (model convention)",
+            "caveat": "Complaints reported to IC3; averages are pulled up by a few very large losses (the median is lower)."
+          }
+        }
+      },
+      "S4": {
+        "attempts_per_year": {
+          "min": 3,
+          "likely": 6,
+          "max": 12,
+          "source": {
+            "type": "sample_assumption",
+            "label": "Sample assumption."
+          }
+        },
+        "loss_per_success": {
+          "min": 850100,
+          "likely": 1700200,
+          "max": 5100600,
+          "source": {
+            "type": "published_figure",
+            "label": "Mean cost to recover from a ransomware attack, excluding any ransom paid: $1,700,200 (Sophos, The State of Ransomware 2026, n = 2,158).",
+            "citation": "Sophos, The State of Ransomware 2026.",
+            "url": "https://www.sophos.com/en-us/content/state-of-ransomware",
+            "range_rule": "min = 0.5 × likely, max = 3 × likely (model convention)",
+            "caveat": "Survey mean across all organization sizes; excludes ransom payments (the median ransom paid was reported at $769,000)."
+          }
+        }
+      }
+    },
+    "severity_thresholds": {
+      "critical": 0.5,
+      "high": 0.2,
+      "medium": 0.05
+    },
+    "monte_carlo": {
+      "iterations": 10000,
+      "seed": 42,
+      "distribution": "PERT"
+    },
+    "context_figures": [
+      {
+        "label": "Global average cost of a data breach: $4.99M (IBM Cost of a Data Breach Report 2026, released 29 July 2026; 602 organizations).",
+        "url": "https://newsroom.ibm.com/2026-07-29-ibm-study-one-in-four-malicious-breaches-are-ai-enabled,-costing-companies-6-million-on-average",
+        "use": "Context only (shown on the Methodology page). Not used in calculations."
+      }
+    ]
+  },
+  "scenario_overrides": {
+    "S3": {
+      "steps": {
+        "1": {
+          "assumed_compromise": true,
+          "note": "Starts after an account is already compromised (e.g. via S1 or S2). Step 1 is a starting condition and is not evaluated."
+        }
+      }
+    }
+  },
+  "normal_day": {
+    "description": "A simulated normal workday. No attacks occur. Any alert is a false alarm.",
+    "event_types": [
+      {
+        "id": "E1",
+        "name": "Marketing newsletter with tracking links",
+        "count": 4,
+        "alerting_tools": [
+          "email_security"
+        ]
+      },
+      {
+        "id": "E2",
+        "name": "IT admin runs a PowerShell maintenance script",
+        "count": 6,
+        "alerting_tools": [
+          "edr",
+          "tool_x"
+        ]
+      },
+      {
+        "id": "E3",
+        "name": "Software update downloads large files",
+        "count": 9,
+        "alerting_tools": [
+          "firewall",
+          "tool_x"
+        ]
+      },
+      {
+        "id": "E4",
+        "name": "Employee signs in from a new city (business trip)",
+        "count": 8,
+        "alerting_tools": [
+          "siem"
+        ]
+      },
+      {
+        "id": "E5",
+        "name": "Several failed sign-ins after a password change",
+        "count": 10,
+        "alerting_tools": [
+          "siem"
+        ]
+      },
+      {
+        "id": "E6",
+        "name": "Finance team opens spreadsheets with macros",
+        "count": 16,
+        "alerting_tools": [
+          "tool_x"
+        ]
+      },
+      {
+        "id": "E7",
+        "name": "Normal internal emails",
+        "count": 220,
+        "alerting_tools": []
+      },
+      {
+        "id": "E8",
+        "name": "Normal file sharing",
+        "count": 85,
+        "alerting_tools": []
+      }
+    ]
+  },
+  "ctid_referenced_rows": [
+    {
+      "capability_id": "EOP-AMW-E3",
+      "capability_description": "Antimalware",
+      "capability_group": "eop",
+      "attack_object_id": "T1566.001",
+      "attack_object_name": "Spearphishing Attachment",
+      "score_category": "protect",
+      "score_value": "significant",
+      "comments": "In Microsoft 365 organizations with mailboxes in Exchange Online or standalone Exchange Online Protection (EOP) organizations without Exchange Online mailboxes, email messages are automatically protected against malware by EOP. Some of the major categories of malware are:\n\nViruses that infect other programs and data, and spread through your computer or network looking for programs to infect.\nSpyware that gathers your personal information, such as sign-in information and personal data, and sends it back to its author.\nRansomware that encrypts your data and demands payment to decrypt it. Anti-malware software doesn't help you decrypt encrypted files, but it can detect the malware payload that's associated with the ransomware.\nEOP offers multi-layered malware protection that's designed to catch all known malware in Windows, Linux, and Mac that travels into or out of your organization. The following options help provide anti-malware protection:\n\nLayered defenses against malware: Multiple anti-malware scan engines help protect against both known and unknown threats. These engines include powerful heuristic detection to provide protection even during the early stages of a malware outbreak. This multi-engine approach has been shown to provide significantly more protection than using just one anti-malware engine.\nReal-time threat response: During some outbreaks, the anti-malware team might have enough information about a virus or other form of malware to write sophisticated policy rules that detect the threat, even before a definition is available from any of the scan engines used by the service. These rules are published to the global network every 2 hours to provide your organization with an extra layer of protection against attacks.\nFast anti-malware definition deployment: The anti-malware team maintains close relationships with partners who develop anti-malware engines. As a result, the service can receive and integrate malware definitions and patches before they're publicly released. Our connection with these partners often allows us to develop our own remedies as well. The service checks for updated definitions for all anti-malware engines every hour.\n\nLicense Requirements: M365 E3 or Microsoft Defender for Office plan 1. ",
+      "references": [
+        "https://learn.microsoft.com/en-us/microsoft-365/security/office-365-security/anti-malware-protection-about?view=o365-worldwide"
+      ]
+    },
+    {
+      "capability_id": "EOP-APH-E3",
+      "capability_description": "Anti-Phishing",
+      "capability_group": "eop",
+      "attack_object_id": "T1566.001",
+      "attack_object_name": "Spearphishing Attachment",
+      "score_category": "protect",
+      "score_value": "significant",
+      "comments": "Policies to configure anti-phishing protection settings are available in Microsoft 365 organizations with Exchange Online mailboxes, standalone Exchange Online Protection (EOP) organizations without Exchange Online mailboxes, and Microsoft Defender for Office 365 organizations. The features provided with Anti-phishing policies in Defender for Office 365 are: Automatically creating default policies, creating custom policies, common policy settings, spoof settings, first contact safety tips, impersonation settings, and advanced phishing thresholds.\n\nMicrosoft 365's Anti-Phishing protection protects from Phishing attacks due to it's custom policy feature where users can create policies to determine if certain websites used for phishing are necessary for business operations and can block access if activity cannot be monitored well or if it poses a significant risk.\n\nLicense Requirements: \nMicrosoft Exchange Online Protection, Defender for Office 365 plan 1 and plan 2, Microsoft XDR",
+      "references": [
+        "[]"
+      ]
+    },
+    {
+      "capability_id": "EOP-APH-E3",
+      "capability_description": "Anti-Phishing",
+      "capability_group": "eop",
+      "attack_object_id": "T1566.002",
+      "attack_object_name": "Spearphishing Link",
+      "score_category": "protect",
+      "score_value": "significant",
+      "comments": "Policies to configure anti-phishing protection settings are available in Microsoft 365 organizations with Exchange Online mailboxes, standalone Exchange Online Protection (EOP) organizations without Exchange Online mailboxes, and Microsoft Defender for Office 365 organizations. The features provided with Anti-phishing policies in Defender for Office 365 are: Automatically creating default policies, creating custom policies, common policy settings, spoof settings, first contact safety tips, impersonation settings, and advanced phishing thresholds.\n\nMicrosoft 365's Anti-Phishing protection protects from Phishing attacks due to it's custom policy feature where users can create policies to determine if certain websites used for phishing are necessary for business operations and can block access if activity cannot be monitored well or if it poses a significant risk.\n\nLicense Requirements: \nMicrosoft Exchange Online Protection, Defender for Office 365 plan 1 and plan 2, Microsoft XDR",
+      "references": [
+        "[]"
+      ]
+    },
+    {
+      "capability_id": "EID-MFA-E3",
+      "capability_description": "Multifactor Authentication",
+      "capability_group": "entra-id",
+      "attack_object_id": "T1078.004",
+      "attack_object_name": "Cloud Accounts",
+      "score_category": "protect",
+      "score_value": "partial",
+      "comments": "MFA can provide protection against an adversary that obtains valid credentials by requiring the adversary to complete an additional authentication process before access is permitted.  This is an incomplete protection measure though as the adversary may also have obtained credentials enabling bypassing the additional authentication method. ",
+      "references": []
+    },
+    {
+      "capability_id": "EID-MFA-E3",
+      "capability_description": "Multifactor Authentication",
+      "capability_group": "entra-id",
+      "attack_object_id": "T1078.004",
+      "attack_object_name": "Cloud Accounts",
+      "score_category": "protect",
+      "score_value": "significant",
+      "comments": "Requiring the use of MFA for all users can significantly reduce the likelihood of adversaries gaining access to the environment's cloud accounts.",
+      "references": [
+        "https://learn.microsoft.com/en-us/entra/identity/conditional-access/howto-conditional-access-policy-all-users-mfa"
+      ]
+    },
+    {
+      "capability_id": "EID-MFA-E3",
+      "capability_description": "Multifactor Authentication",
+      "capability_group": "entra-id",
+      "attack_object_id": "T1098.005",
+      "attack_object_name": "Device Registration",
+      "score_category": "protect",
+      "score_value": "significant",
+      "comments": "Requiring the use of MFA to register devices in Entra ID along with conditional access policies can reduce the likelihood of successfu use of this technique.",
+      "references": [
+        "https://learn.microsoft.com/en-us/entra/identity/conditional-access/howto-conditional-access-policy-all-users-mfa"
+      ]
+    },
+    {
+      "capability_id": "EID-MFA-E3",
+      "capability_description": "Multifactor Authentication",
+      "capability_group": "entra-id",
+      "attack_object_id": "T1110.003",
+      "attack_object_name": "Password Spraying",
+      "score_category": "protect",
+      "score_value": "significant",
+      "comments": "MFA can significantly reduce the impact of a password compromise, requiring the adversary to complete an additional authentication method before their access is permitted.",
+      "references": []
+    },
+    {
+      "capability_id": "EID-MFA-E3",
+      "capability_description": "Multifactor Authentication",
+      "capability_group": "entra-id",
+      "attack_object_id": "T1110.003",
+      "attack_object_name": "Password Spraying",
+      "score_category": "protect",
+      "score_value": "significant",
+      "comments": "MFA can significantly reduce the impact of a password spraying, requiring the adversary to complete an additional authentication method before access is permitted. Based on studies, your account is less likely to get compromised by 99.9% by enabling MFA against the following techniques: phishing, brute force, credential stuffing, key logging, etc.",
+      "references": [
+        "https://techcommunity.microsoft.com/t5/microsoft-entra-blog/your-pa-word-doesn-t-matter/ba-p/731984"
+      ]
+    },
+    {
+      "capability_id": "EID-MFA-E3",
+      "capability_description": "Multifactor Authentication",
+      "capability_group": "entra-id",
+      "attack_object_id": "T1110.004",
+      "attack_object_name": "Credential Stuffing",
+      "score_category": "protect",
+      "score_value": "significant",
+      "comments": "MFA can significantly reduce the impact of a password compromise, requiring the adversary to complete an additional authentication method before their access is permitted.",
+      "references": []
+    },
+    {
+      "capability_id": "EID-MFA-E3",
+      "capability_description": "Multifactor Authentication",
+      "capability_group": "entra-id",
+      "attack_object_id": "T1110.004",
+      "attack_object_name": "Credential Stuffing",
+      "score_category": "protect",
+      "score_value": "significant",
+      "comments": "MFA can significantly reduce the impact of a password spraying, requiring the adversary to complete an additional authentication method before access is permitted. Based on studies, your account is less likely to get compromised by 99.9% by enabling MFA against the following techniques: phishing, brute force, credential stuffing, key logging, etc.",
+      "references": [
+        "https://techcommunity.microsoft.com/t5/microsoft-entra-blog/your-pa-word-doesn-t-matter/ba-p/731984"
+      ]
+    },
+    {
+      "capability_id": "EID-MFA-E3",
+      "capability_description": "Multifactor Authentication",
+      "capability_group": "entra-id",
+      "attack_object_id": "T1621",
+      "attack_object_name": "Multi-Factor Authentication Request Generation",
+      "score_category": "protect",
+      "score_value": "significant",
+      "comments": "Entra MFA can be used to implement limits upon the maximum number of MFA request prompts that can be sent to users in period of time and throttles sign-in attempts in certain cases involving repeated authentication requests.",
+      "references": []
+    }
+  ],
+  "limitations": [
+    {
+      "title": "Dataset version gap",
+      "description": "CTID mappings use ATT&CK v16.1 while the attack scenarios use v19.2 (T1684.001 has no CTID mapping row)."
+    },
+    {
+      "title": "Coverage gap",
+      "description": "4 tool-technique pairs rely on team assumptions where official mappings don't exist."
+    },
+    {
+      "title": "Monte Carlo",
+      "description": "10,000 iterations give ±$15K stability, not zero-variance determinism."
+    },
+    {
+      "title": "Independent steps",
+      "description": "The model treats scenario steps as conditionally independent given tool configuration."
+    },
+    {
+      "title": "Linear noise",
+      "description": "Normal-day baseline is an additive floor, not an attack-correlated multiplier."
+    }
+  ]
+}

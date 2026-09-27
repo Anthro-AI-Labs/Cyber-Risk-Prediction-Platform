@@ -1,0 +1,28 @@
+
+> frontend@0.1.0 pretest
+> npm run sync-data
+
+
+> frontend@0.1.0 sync-data
+> node ../scripts/sync-data.mjs
+
+[sync-data] Synced verified backend data to frontend:
+  - /Users/aminzayer/MyGit/Cyber-Risk-Prediction-Platform/frontend/src/data/generated.json (111.3 KB)
+  - /Users/aminzayer/MyGit/Cyber-Risk-Prediction-Platform/frontend/src/data/generated.meta.json
+
+> frontend@0.1.0 test
+> vitest run
+
+
+ RUN  v5.0.2 /Users/aminzayer/MyGit/Cyber-Risk-Prediction-Platform/frontend
+
+ ✓ src/lib/data-sync.test.ts (2 tests) 5ms
+ ✓ src/lib/engine.test.ts (5 tests) 1878ms
+   ✓ TypeScript Engine — Exact Section 8 Assertions (v3.2) (5)
+     ✓ verifies 100% parity across all 256 tool combinations with Python engine 1741ms
+
+ Test Files  2 passed (2)
+      Tests  7 passed (7)
+   Start at  09:45:33
+   Duration  2.01s (tests 96%, transform 3%, import 1%)
+

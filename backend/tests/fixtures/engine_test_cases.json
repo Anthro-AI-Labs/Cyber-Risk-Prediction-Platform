@@ -8,7 +8,7 @@
       "tool_x"
     ],
     "total_spend": 345000,
-    "total_ale_point_rounded": 699807,
+    "total_ale_point_rounded": 707619,
     "total_noise": 68,
     "scenarios": {
       "S1": {
@@ -44,7 +44,7 @@
         "probability": 0.8573749999999999,
         "risk_score_display": "85.7%",
         "severity": "critical",
-        "ale_point_rounded": 308655,
+        "ale_point_rounded": 316384,
         "stopping_points": 0,
         "status": "missed",
         "step_outcomes": [
@@ -58,7 +58,7 @@
         "probability": 6.912000000000002e-05,
         "risk_score_display": "< 0.1%",
         "severity": "low",
-        "ale_point_rounded": 622,
+        "ale_point_rounded": 705,
         "stopping_points": 5,
         "status": "stopped",
         "step_outcomes": [
@@ -82,7 +82,7 @@
       "siem"
     ],
     "total_spend": 285000,
-    "total_ale_point_rounded": 699807,
+    "total_ale_point_rounded": 707619,
     "total_noise": 37,
     "scenarios": {
       "S1": {
@@ -118,7 +118,7 @@
         "probability": 0.8573749999999999,
         "risk_score_display": "85.7%",
         "severity": "critical",
-        "ale_point_rounded": 308655,
+        "ale_point_rounded": 316384,
         "stopping_points": 0,
         "status": "missed",
         "step_outcomes": [
@@ -132,7 +132,7 @@
         "probability": 6.912000000000002e-05,
         "risk_score_display": "< 0.1%",
         "severity": "low",
-        "ale_point_rounded": 622,
+        "ale_point_rounded": 705,
         "stopping_points": 5,
         "status": "stopped",
         "step_outcomes": [
@@ -156,7 +156,7 @@
       "tool_x"
     ],
     "total_spend": 255000,
-    "total_ale_point_rounded": 866321,
+    "total_ale_point_rounded": 896358,
     "total_noise": 62,
     "scenarios": {
       "S1": {
@@ -192,7 +192,7 @@
         "probability": 0.8573749999999999,
         "risk_score_display": "85.7%",
         "severity": "critical",
-        "ale_point_rounded": 308655,
+        "ale_point_rounded": 316384,
         "stopping_points": 0,
         "status": "missed",
         "step_outcomes": [
@@ -206,7 +206,7 @@
         "probability": 0.0185707425,
         "risk_score_display": "1.9%",
         "severity": "low",
-        "ale_point_rounded": 167137,
+        "ale_point_rounded": 189444,
         "stopping_points": 2,
         "status": "stopped",
         "step_outcomes": [
@@ -232,7 +232,7 @@
       "mfa_owned"
     ],
     "total_spend": 345000,
-    "total_ale_point_rounded": 554799,
+    "total_ale_point_rounded": 555315,
     "total_noise": 68,
     "scenarios": {
       "S1": {
@@ -251,14 +251,14 @@
         ]
       },
       "S2": {
-        "probability": 0.0228,
-        "risk_score_display": "2.3%",
+        "probability": 0.007600000000000002,
+        "risk_score_display": "0.8%",
         "severity": "low",
-        "ale_point_rounded": 10944,
-        "stopping_points": 2,
+        "ale_point_rounded": 3648,
+        "stopping_points": 3,
         "status": "stopped",
         "step_outcomes": [
-          "detected",
+          "stopped",
           "stopped",
           "stopped",
           "missed"
@@ -268,7 +268,7 @@
         "probability": 0.8573749999999999,
         "risk_score_display": "85.7%",
         "severity": "critical",
-        "ale_point_rounded": 308655,
+        "ale_point_rounded": 316384,
         "stopping_points": 0,
         "status": "missed",
         "step_outcomes": [
@@ -282,7 +282,7 @@
         "probability": 6.912000000000002e-05,
         "risk_score_display": "< 0.1%",
         "severity": "low",
-        "ale_point_rounded": 622,
+        "ale_point_rounded": 705,
         "stopping_points": 5,
         "status": "stopped",
         "step_outcomes": [
@@ -308,7 +308,7 @@
       "identity_suite"
     ],
     "total_spend": 395000,
-    "total_ale_point_rounded": 392451,
+    "total_ale_point_rounded": 400264,
     "total_noise": 68,
     "scenarios": {
       "S1": {
@@ -344,7 +344,7 @@
         "probability": 0.8573749999999999,
         "risk_score_display": "85.7%",
         "severity": "critical",
-        "ale_point_rounded": 308655,
+        "ale_point_rounded": 316384,
         "stopping_points": 0,
         "status": "missed",
         "step_outcomes": [
@@ -358,7 +358,7 @@
         "probability": 6.912000000000002e-05,
         "risk_score_display": "< 0.1%",
         "severity": "low",
-        "ale_point_rounded": 622,
+        "ale_point_rounded": 705,
         "stopping_points": 5,
         "status": "stopped",
         "step_outcomes": [
@@ -384,7 +384,7 @@
       "payment_process"
     ],
     "total_spend": 353000,
-    "total_ale_point_rounded": 456132,
+    "total_ale_point_rounded": 457842,
     "total_noise": 68,
     "scenarios": {
       "S1": {
@@ -420,7 +420,7 @@
         "probability": 0.1805,
         "risk_score_display": "18.1%",
         "severity": "medium",
-        "ale_point_rounded": 64980,
+        "ale_point_rounded": 66607,
         "stopping_points": 1,
         "status": "stopped",
         "step_outcomes": [
@@ -434,7 +434,7 @@
         "probability": 6.912000000000002e-05,
         "risk_score_display": "< 0.1%",
         "severity": "low",
-        "ale_point_rounded": 622,
+        "ale_point_rounded": 705,
         "stopping_points": 5,
         "status": "stopped",
         "step_outcomes": [
