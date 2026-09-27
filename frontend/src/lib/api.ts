@@ -244,3 +244,8 @@ export async function fetchSummary(
     }
   );
 }
+
+/** Report written by the last scripts/validate.py run; falls back to the copy made by sync-data. */
+export async function fetchValidationReport<T>(fallback: T): Promise<{ data: T; isOffline: boolean }> {
+  return fetchWithFallback<T>("/api/meta/validation", { method: "GET" }, () => fallback);
+}

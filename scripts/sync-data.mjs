@@ -179,6 +179,16 @@ export function syncData() {
   fs.writeFileSync(outDataPath, JSON.stringify(generatedData, null, 2), "utf8");
   fs.writeFileSync(outMetaPath, JSON.stringify(metaData, null, 2), "utf8");
 
+  // Offline copy of the last validation run (written by scripts/validate.py) for the /validation page.
+  const reportSrc = path.join(REPO_ROOT, "validation_report.json");
+  const reportDst = path.join(outDataDir, "validation-report.json");
+  if (fs.existsSync(reportSrc)) {
+    fs.copyFileSync(reportSrc, reportDst);
+    console.log(`  - ${reportDst} (copy of validation_report.json)`);
+  } else if (!fs.existsSync(reportDst)) {
+    fs.writeFileSync(reportDst, JSON.stringify({ scorecard: [], all_passed: false, missing: true }, null, 2), "utf8");
+  }
+
   console.log(`[sync-data] Synced verified backend data to frontend:`);
   console.log(`  - ${outDataPath} (${(fs.statSync(outDataPath).size / 1024).toFixed(1)} KB)`);
   console.log(`  - ${outMetaPath}`);

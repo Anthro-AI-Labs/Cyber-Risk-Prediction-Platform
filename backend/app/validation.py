@@ -823,6 +823,18 @@ def generate_full_validation_report(
     ctid_techniques = {row.get("attack_object_id") for row in json.loads(CTID_SUBSET_PATH.read_text(encoding="utf-8")).get("mapping_objects", [])}
     subset_techniques = sorted(data_loader.techniques)
     no_ctid = [t for t in subset_techniques if t not in ctid_techniques]
+    details = {
+        "Accuracy vs. source": [d1["mitre_fidelity"], d1["ctid_fidelity"], d1["published_figures"]],
+        "Completeness & validity": list(d2.values()),
+        "Traceability": list(d3.values()),
+        "Correctness": [d4["acceptance_tests"], d4["python_ts_parity"]] + ([d4["monte_carlo_agreement"]] if "monte_carlo_agreement" in d4 else []),
+        "Reproducibility": [d4["determinism"]],
+        "Robustness": [d5["one_at_a_time"], d5["joint_perturbation"]],
+        "Compliance": [d4["copy_compliance"]],
+    }
+    for row in scorecard:
+        row["details"] = [{"status": c["status"], "meaning": c["meaning"]} for c in details[row["dimension"]]]
+
     limitations = [
         "No predictive validation is possible without real incident data for the fictional company.",
         f"CTID mappings use ATT&CK v16.1 while the scenarios use v{data_loader.mitre_source.version}; "

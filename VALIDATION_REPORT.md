@@ -2,7 +2,7 @@
 
 > This project has no historical incident data for the fictional company, so predictive accuracy cannot be measured. Following data-quality best practice (dimensions used by ISO/IEC 25012 and DAMA-DMBOK), we measure (1) how faithfully our data reproduces its official sources, (2) completeness, validity and consistency, (3) traceability of every number, (4) correctness and reproducibility of the calculation engine, and (5) how stable the recommendations are when assumptions change.
 
-**Overall: FAIL**
+**Overall: PASS**
 
 ## Executive Scorecard
 
@@ -11,10 +11,10 @@
 | Accuracy vs. source | MITRE fidelity / CTID fidelity / published figures | **118/118 (100%) / 179/179 (100%) / 2/2 (100%)** | PASS |
 | Completeness & validity | schema validity / referential integrity / completeness | **7/7 (100%) / 100/100 (100%) / 49/49 (100%)** | PASS |
 | Traceability | mappings with evidence labels / inputs with source labels (backed by official sources; from published figures) | **31/31 (100%) / 11/11 (100%) (74.2% = 23/31; 18.2% = 2/11)** | PASS |
-| Correctness | automated tests (pytest + vitest) / Python–TS parity / Monte Carlo range agreement | **45/45 (100%) / 256/256 (100%) / 2/2 (100%)** | PASS |
+| Correctness | automated tests (pytest + vitest) / Python–TS parity / Monte Carlo range agreement | **51/51 (100%) / 256/256 (100%) / 2/2 (100%)** | PASS |
 | Reproducibility | determinism checks (simulation & Monte Carlo) | **2/2 (100%)** | PASS |
 | Robustness | plan and Tool X finding unchanged under ±50% (one-at-a-time / joint) | **22/22 (100%) / 500/500 (100%)** | PASS |
-| Compliance | banned-phrase violations | **2 violations** | FAIL |
+| Compliance | banned-phrase violations | **0 violations** | PASS |
 
 ## D1. Source Fidelity
 
@@ -72,10 +72,10 @@
 
 ## D4. Engine Correctness and Reproducibility
 
-- **Automated tests:** 45 / 45 (100.0%) — **PASS**
-  - 45 of 45 automated tests passed (pytest: 38/38, vitest: 7/7).
+- **Automated tests:** 51 / 51 (100.0%) — **PASS**
+  - 51 of 51 automated tests passed (pytest: 44/44, vitest: 7/7).
   - Evidence: pytest-json-report and vitest --reporter=json output
-  - pytest: 38 passed, 0 failed, 0 errors, 0 skipped (of 38)
+  - pytest: 44 passed, 0 failed, 0 errors, 0 skipped (of 44)
   - vitest: 7 passed, 0 failed, 0 errors, 0 skipped (of 7)
 - **Python–TypeScript parity:** 256 / 256 (100.0%) — **PASS**
   - 256 of 256 tool combinations give identical rounded ALE, risk score, severity and step outcomes in the Python and TypeScript engines.
@@ -89,10 +89,8 @@
 - **Determinism:** 2 / 2 (100.0%) — **PASS**
   - Repeated runs give identical point ALE and Monte Carlo percentiles (seed 42, 10,000 iterations).
   - Evidence: double run of the baseline simulation
-- **Copy compliance:** 2 violations — **FAIL**
-  - 2 occurrence(s) of a banned phrase found in code or user-facing copy; see violations.
-  - ✗ frontend/src/app/validation/page.tsx:78
-  - ✗ frontend/src/app/validation/page.tsx:78
+- **Copy compliance:** 0 violations — **PASS**
+  - No absolute security or guarantee claims were found in code or user-facing copy.
 
 ## D5. Decision Robustness (Sensitivity Analysis)
 

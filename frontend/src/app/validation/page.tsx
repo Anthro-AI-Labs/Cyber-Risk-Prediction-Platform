@@ -2,20 +2,27 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { ArrowLeft, Check, AlertCircle } from "lucide-react";
+import { ArrowLeft, Check, X, AlertCircle } from "lucide-react";
 import { Header } from "../../components/Header";
 import { Footer } from "../../components/Footer";
 import { AssumptionsDrawer } from "../../components/AssumptionsDrawer";
 import { DEFAULT_ASSUMPTIONS } from "../../lib/engine";
 import { RiskAssumptions } from "../../lib/types";
 import generated from "../../data/generated.json";
+import offlineReport from "../../data/validation-report.json";
+import { fetchValidationReport } from "../../lib/api";
+
+interface ValidationDetail {
+  status: string;
+  meaning: string;
+}
 
 interface ValidationScorecardItem {
   dimension: string;
   metric: string;
   result: string;
-  meaning: string;
   status: string;
+  details?: ValidationDetail[];
 }
 
 interface TornadoItem {
@@ -28,71 +35,32 @@ interface TornadoItem {
   swing: number;
 }
 
-const DEFAULT_SCORECARD: ValidationScorecardItem[] = [
-  {
-    dimension: "Accuracy vs. source",
-    metric: "MITRE fidelity / CTID fidelity / published figures",
-    result: "118/118 (100%) / 179/179 (100%) / 2/2 (100%)",
-    meaning: "All 28 ATT&CK techniques, 179 CTID capability rows, and published losses match official sources identically.",
-    status: "PASS",
-  },
-  {
-    dimension: "Completeness & validity",
-    metric: "schema validity / referential integrity / completeness",
-    result: "7/7 / 100/100 / 49/49",
-    meaning: "All 7 data files validate against strict Pydantic schemas with 100% referential integrity and completeness.",
-    status: "PASS",
-  },
-  {
-    dimension: "Traceability",
-    metric: "mappings backed by official sources / model inputs from published figures",
-    result: "74.2% (23/31) / 18.2% (2/11)",
-    meaning: "74.2% of mappings are backed by official MITRE or CTID datasets; all other model inputs are labeled editable assumptions.",
-    status: "PASS",
-  },
-  {
-    dimension: "Correctness",
-    metric: "acceptance tests (Python + TS) / Python–TS parity (256 configs)",
-    result: "34/34 (100%) / 256/256 (100%)",
-    meaning: "All acceptance tests pass; all 2⁸ (256) tool configurations produce bit-for-bit identical results in Python and TypeScript.",
-    status: "PASS",
-  },
-  {
-    dimension: "Reproducibility",
-    metric: "determinism checks (simulation & Monte Carlo)",
-    result: "2/2 (100%)",
-    meaning: "Repeated executions of baseline simulation and Monte Carlo (seed 42) yield identical numbers.",
-    status: "PASS",
-  },
-  {
-    dimension: "Robustness",
-    metric: "plan unchanged under ±50% (one-at-a-time / joint 500-run)",
-    result: "22/22 (100%) / 500/500 (100%)",
-    meaning: "Even if every assumption is off by up to ±50%, the recommended plan and the Tool X finding do not change.",
-    status: "PASS",
-  },
-  {
-    dimension: "Compliance",
-    metric: "banned-phrase violations",
-    result: "0 violations",
-    meaning: "Zero banned vendor marketing claims ('100% secure', 'guaranteed', 'hack-proof') detected.",
-    status: "PASS",
-  },
-];
+interface ValidationReport {
+  all_passed: boolean;
+  missing?: boolean;
+  scorecard: ValidationScorecardItem[];
+  d5_decision_robustness?: {
+    conclusion: string;
+    tornado: TornadoItem[];
+    one_at_a_time: { meaning: string };
+  };
+  limitations?: string[];
+}
 
-const DEFAULT_TORNADO: TornadoItem[] = [
-  { param: "pass.missed", label: "Missed step pass probability", low_mult: 0.5, low_ale: 93902, high_mult: 1.5, high_ale: 830520, swing: 736618 },
-  { param: "S3.attempts", label: "S3 (BEC / Invoice fraud) attempts/year", low_mult: 0.5, low_ale: 549427, high_mult: 1.5, high_ale: 865811, swing: 316384 },
-  { param: "S3.loss", label: "S3 (BEC / Invoice fraud) loss/success", low_mult: 0.5, low_ale: 549427, high_mult: 1.5, high_ale: 865811, swing: 316384 },
-  { param: "pass.detected", label: "Detected step pass probability", low_mult: 0.5, low_ale: 590038, high_mult: 1.5, high_ale: 904234, swing: 314196 },
-  { param: "pass.stopped", label: "Stopped step pass probability", low_mult: 0.5, low_ale: 589647, high_mult: 1.5, high_ale: 829557, swing: 239910 },
-  { param: "S1.attempts", label: "S1 (Phishing) attempts/year", low_mult: 0.5, low_ale: 590330, high_mult: 1.5, high_ale: 824908, swing: 234578 },
-  { param: "S1.loss", label: "S1 (Phishing) loss/success", low_mult: 0.5, low_ale: 590330, high_mult: 1.5, high_ale: 824908, swing: 234578 },
-  { param: "S2.attempts", label: "S2 (Password spray) attempts/year", low_mult: 0.5, low_ale: 629643, high_mult: 1.5, high_ale: 785595, swing: 155952 },
-  { param: "S2.loss", label: "S2 (Password spray) loss/success", low_mult: 0.5, low_ale: 629643, high_mult: 1.5, high_ale: 785595, swing: 155952 },
-  { param: "S4.attempts", label: "S4 (Ransomware) attempts/year", low_mult: 0.5, low_ale: 707267, high_mult: 1.5, high_ale: 707972, swing: 705 },
-  { param: "S4.loss", label: "S4 (Ransomware) loss/success", low_mult: 0.5, low_ale: 707267, high_mult: 1.5, high_ale: 707972, swing: 705 },
-];
+// Copy of the last validation run, generated by scripts/sync-data.mjs from validation_report.json.
+const OFFLINE_REPORT = offlineReport as unknown as ValidationReport;
+
+function StatusBadge({ status }: { status: string }) {
+  const pass = status === "PASS";
+  return (
+    <span
+      className={`${pass ? "bg-[var(--stop-soft)] text-[var(--stop)]" : "bg-[var(--miss-soft)] text-[var(--miss)]"} text-xs font-semibold px-2.5 py-1 rounded-full inline-flex items-center gap-1`}
+    >
+      {pass ? <Check className="w-3.5 h-3.5" /> : <X className="w-3.5 h-3.5" />}
+      <span>{status}</span>
+    </span>
+  );
+}
 
 export default function ValidationPage() {
   const [isDark, setIsDark] = useState<boolean>(() => {
@@ -106,8 +74,24 @@ export default function ValidationPage() {
   });
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [assumptions, setAssumptions] = useState<RiskAssumptions>(DEFAULT_ASSUMPTIONS);
-  const [scorecard] = useState<ValidationScorecardItem[]>(DEFAULT_SCORECARD);
-  const [tornado] = useState<TornadoItem[]>(DEFAULT_TORNADO);
+  const [report, setReport] = useState<ValidationReport>(OFFLINE_REPORT);
+  const [isOffline, setIsOffline] = useState<boolean>(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchValidationReport<ValidationReport>(OFFLINE_REPORT).then(({ data, isOffline }) => {
+      if (!cancelled) {
+        setReport(data);
+        setIsOffline(isOffline);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const scorecard = report.scorecard || [];
+  const tornado = report.d5_decision_robustness?.tornado || [];
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
@@ -162,9 +146,14 @@ export default function ValidationPage() {
 
           {/* Section: Scorecard */}
           <div className="mb-10">
-            <h2 className="text-[20px] font-bold text-[var(--ink)] mb-4">
+            <h2 className="text-[20px] font-bold text-[var(--ink)] mb-1">
               Validation Scorecard
             </h2>
+            <p className="text-[14px] text-[var(--muted)] mb-4">
+              Every result and status below is computed by <code>scripts/validate.py</code>
+              {isOffline ? " (showing the copy from the last validation run — backend offline)" : " (last validation run)"}.
+              {" "}Overall: <strong className="text-[var(--ink)]">{report.missing ? "not run yet" : report.all_passed ? "every check passed" : "at least one check failed"}</strong>.
+            </p>
             <div className="rows flex flex-col gap-2.5">
               {scorecard.map((item, idx) => (
                 <div
@@ -178,19 +167,21 @@ export default function ValidationPage() {
                         ({item.metric})
                       </span>
                     </div>
-                    <div className="text-[14.5px] text-[var(--muted)] mt-1 leading-normal">
-                      {item.meaning}
-                    </div>
+                    <ul className="text-[14.5px] text-[var(--muted)] mt-1 leading-normal space-y-1">
+                      {(item.details || []).map((d, i) => (
+                        <li key={i}>
+                          {d.status === "PASS" || d.status === "INFO" ? "" : `[${d.status}] `}
+                          {d.meaning}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
 
                   <div className="flex items-center gap-3.5 self-start md:self-center shrink-0">
                     <span className="font-bold text-lg sm:text-xl tabular-nums text-[var(--ink)]">
                       {item.result}
                     </span>
-                    <span className="bg-[var(--stop-soft)] text-[var(--stop)] text-xs font-semibold px-2.5 py-1 rounded-full inline-flex items-center gap-1">
-                      <Check className="w-3.5 h-3.5" />
-                      <span>{item.status}</span>
-                    </span>
+                    <StatusBadge status={item.status} />
                   </div>
                 </div>
               ))}
@@ -204,10 +195,8 @@ export default function ValidationPage() {
                 Decision Robustness — Sensitivity Analysis (Tornado Chart)
               </h2>
               <p className="text-[14.5px] text-[var(--muted)] leading-relaxed">
-                Inputs ranked by impact on baseline total loss exposure when varied by ±50% one-at-a-time (22 runs).{" "}
-                <strong className="text-[var(--ink)] font-semibold">
-                  Even if every assumption is off by up to ±50%, the recommended plan and the Tool X finding do not change.
-                </strong>
+                Inputs ranked by impact on baseline total loss exposure. {report.d5_decision_robustness?.one_at_a_time.meaning}{" "}
+                <strong className="text-[var(--ink)] font-semibold">{report.d5_decision_robustness?.conclusion}</strong>
               </p>
             </div>
 
@@ -248,7 +237,22 @@ export default function ValidationPage() {
             </div>
           </div>
 
-          {/* Section: Limitations */}
+          {/* Section: Validation limitations (from the report) */}
+          {(report.limitations || []).length > 0 && (
+            <div className="card bg-[var(--surface)] border border-[var(--line)] rounded-[14px] p-6 mb-6">
+              <h2 className="text-[20px] font-bold text-[var(--ink)] mb-3 flex items-center gap-2">
+                <AlertCircle className="w-5 h-5 text-[var(--muted)]" />
+                <span>Validation Limitations</span>
+              </h2>
+              <ul className="list-disc pl-5 space-y-2 text-[15px] text-[var(--muted)] leading-relaxed">
+                {(report.limitations || []).map((lim, idx) => (
+                  <li key={idx}>{lim}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Section: Model limitations */}
           <div className="card bg-[var(--surface)] border border-[var(--line)] rounded-[14px] p-6 mb-8">
             <h2 className="text-[20px] font-bold text-[var(--ink)] mb-3 flex items-center gap-2">
               <AlertCircle className="w-5 h-5 text-[var(--muted)]" />
