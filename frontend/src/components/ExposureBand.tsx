@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { fmt, fmtK } from "../lib/format";
 import { PresentationMode, SimulationResponse } from "../lib/types";
+import { RANGE_EXPLANATION } from "../lib/copy";
 
 interface ExposureBandProps {
   currentSim: SimulationResponse;
@@ -100,6 +101,7 @@ export const ExposureBand: React.FC<ExposureBandProps> = ({
               ? `P10–P90: ${fmtK(currentSim.total_ale_range.p10)} – ${fmtK(currentSim.total_ale_range.p90)}`
               : `Likely range ${fmtK(currentSim.total_ale_range.p10)} – ${fmtK(currentSim.total_ale_range.p90)} (P10–P90)`}
           </div>
+          <p className="text-[12.5px] opacity-75 mt-1 max-w-[46ch] leading-snug">{RANGE_EXPLANATION}</p>
 
           <div className="mt-2 min-h-[26px] flex items-center">
             {!isExpoDiff ? (

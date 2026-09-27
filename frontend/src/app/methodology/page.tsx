@@ -7,6 +7,7 @@ import { Header } from "../../components/Header";
 import { Footer } from "../../components/Footer";
 import { EvidenceReport } from "../../lib/types";
 import { DEFAULT_ASSUMPTIONS } from "../../lib/engine";
+import { RANGE_EXPLANATION } from "../../lib/copy";
 
 const MC = DEFAULT_ASSUMPTIONS.monte_carlo;
 
@@ -129,6 +130,7 @@ export default function MethodologyPage() {
             <p className="text-[15.5px] text-[var(--muted)] mb-3 leading-relaxed">
               Every exposure figure displays a P10–P90 range computed using a {MC.iterations.toLocaleString("en-US")}-iteration Monte Carlo simulation (fixed seed {MC.seed}) with Program Evaluation and Review Technique (PERT) Beta distributions for annual attempts and cost per success (low = min, likely = mode, high = max). The browser and the server use different random number generators, so their ranges are close but not identical; the validation checks they agree within ±3%.
             </p>
+            <p className="text-[15.5px] text-[var(--ink)] leading-relaxed">{RANGE_EXPLANATION}</p>
           </section>
 
           {/* Section 5: Evidence Validation Report */}
