@@ -118,6 +118,7 @@ def simulate_agent_traversal(
     use_llm = bool(api_key)
 
     steps: List[AgentNarrativeStep] = []
+    llm_steps = 0  # steps whose narration actually came from the LLM (after validation)
 
     for step_out in sc_eval.steps:
         orig_step = next(s for s in scenario.steps if s.order == step_out.order)
@@ -169,6 +170,7 @@ def simulate_agent_traversal(
                                 else candidate_route
                             )
                             final_step.narration = narration
+                            llm_steps += 1
             except Exception as e:
                 logger.warning(f"LLM narration fallback to heuristic: {e}")
                 final_step = heuristic_step
@@ -177,7 +179,9 @@ def simulate_agent_traversal(
 
     return AgentNarrateResponse(
         scenario_id=request.scenario_id,
-        mode="llm" if use_llm else "heuristic",
+        # "llm" only if at least one step's narration really came from the LLM; a configured key whose
+        # calls all failed or were rejected is still a heuristic narration.
+        mode="llm" if llm_steps > 0 else "heuristic",
         badge="AI attack simulation — results computed by the rule engine",
         steps=steps,
     )

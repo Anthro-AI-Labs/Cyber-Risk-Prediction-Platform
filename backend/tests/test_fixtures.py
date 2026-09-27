@@ -3,7 +3,7 @@ from pathlib import Path
 from app.data_loader import data_loader
 from app.risk import compute_simulation
 
-def test_export_and_verify_engine_fixtures():
+def test_engine_matches_committed_fixture_snapshot():
     data_loader.reset_assumptions()
     fixture_configs = {
         "baseline": ["email_security", "edr", "firewall", "siem", "tool_x"],
@@ -53,11 +53,7 @@ def test_export_and_verify_engine_fixtures():
     assert results["add_identity_suite"]["total_ale_point_rounded"] == 400264
     assert results["add_payment_process"]["total_ale_point_rounded"] == 457842
 
-    # Save to fixtures directory for vitest
-    fixtures_dir = Path(__file__).parent / "fixtures"
-    fixtures_dir.mkdir(exist_ok=True)
-    fixture_path = fixtures_dir / "engine_test_cases.json"
-    with open(fixture_path, "w", encoding="utf-8") as f:
-        json.dump(results, f, indent=2)
-
-    assert fixture_path.exists()
+    # Read-only: the committed snapshot must equal what the engine produces now.
+    fixture_path = Path(__file__).parent / "fixtures" / "engine_test_cases.json"
+    committed = json.loads(fixture_path.read_text(encoding="utf-8"))
+    assert results == committed

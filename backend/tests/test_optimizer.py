@@ -1,5 +1,6 @@
 from app.data_loader import data_loader
 from app.optimizer import run_optimizer
+from app.risk import compute_simulation
 
 def test_optimizer_locked_baseline():
     data_loader.reset_assumptions()
@@ -73,3 +74,34 @@ def test_optimizer_allow_remove_baseline():
     assert plan.baseline_warning == (
         "Removes a required baseline control — check compliance and incident-response needs first."
     )
+
+
+def test_optimizer_budget_below_required_tools_is_consistent():
+    # The required baseline tools (email_security, firewall, siem) alone cost more than this budget.
+    plan = run_optimizer(
+        budget=150000,
+        allow_remove_baseline=False,
+        all_tools=data_loader.tools,
+        scenarios=data_loader.scenarios,
+        mappings=data_loader.mappings,
+        scenario_overrides=data_loader.scenario_overrides,
+        techniques=data_loader.techniques,
+        assumptions=data_loader.current_assumptions,
+    )
+    locked = [t for t, tool in data_loader.tools.items() if tool.baseline_required]
+    sim = compute_simulation(
+        active_tool_ids=locked,
+        all_tools=data_loader.tools,
+        scenarios=data_loader.scenarios,
+        mappings=data_loader.mappings,
+        scenario_overrides=data_loader.scenario_overrides,
+        techniques=data_loader.techniques,
+        assumptions=data_loader.current_assumptions,
+        tool_noise_fn=data_loader.get_tool_noise,
+    )
+    assert plan.fits_budget is False
+    assert sorted(plan.recommended_tools) == sorted(locked)
+    assert plan.spend_after == sim.total_spend
+    assert plan.ale_after == sim.total_ale_point_rounded  # was the baseline ALE, inconsistent with the tools
+    assert plan.ale_range_after.p10 < plan.ale_after < plan.ale_range_after.p90
+    assert "No plan fits" in plan.risk_reduction_sentence

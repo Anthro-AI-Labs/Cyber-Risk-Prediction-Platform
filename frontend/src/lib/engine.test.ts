@@ -6,6 +6,7 @@ import {
   BASELINE_TOOLS,
   DEFAULT_ASSUMPTIONS,
   DEFAULT_MC_ITERATIONS,
+  TOOLS,
 } from "./engine";
 
 describe("TypeScript Engine — Exact Section 8 Assertions (v3.2)", () => {
@@ -242,5 +243,16 @@ describe("TypeScript Engine — Exact Section 8 Assertions (v3.2)", () => {
     const tolerance = 0.03;
     expect(Math.abs(sim.total_ale_range.p10 - ref.p10) / ref.p10).toBeLessThanOrEqual(tolerance);
     expect(Math.abs(sim.total_ale_range.p90 - ref.p90) / ref.p90).toBeLessThanOrEqual(tolerance);
+  });
+
+  it("reports consistent figures when even the required tools exceed the budget", () => {
+    const plan = computeOptimizer(150000, false, DEFAULT_ASSUMPTIONS);
+    const locked = TOOLS.filter((t) => t.baseline_required).map((t) => t.id);
+    const sim = computeRisk(locked, DEFAULT_ASSUMPTIONS);
+    expect(plan.fits_budget).toBe(false);
+    expect(new Set(plan.recommended_tools)).toEqual(new Set(locked));
+    expect(plan.spend_after).toBe(sim.total_spend);
+    expect(plan.ale_after).toBe(sim.total_ale_point_rounded);
+    expect(Number.isFinite(plan.risk_reduction_pct)).toBe(true);
   });
 });

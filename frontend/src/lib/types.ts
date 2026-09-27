@@ -226,6 +226,8 @@ export interface OptimizerPlan {
   risk_reduction_sentence: string;
   removes_baseline_control: boolean;
   baseline_warning?: string | null;
+  /** false when even the required baseline tools exceed the budget */
+  fits_budget?: boolean;
 }
 
 export interface AgentNarrativeStep {

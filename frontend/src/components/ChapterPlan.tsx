@@ -215,13 +215,20 @@ export const ChapterPlan: React.FC<ChapterPlanProps> = ({
 
         {/* Right Card: Computed Results and Comparison Bars */}
         <div className="card bg-[var(--surface)] border border-[var(--line)] rounded-[14px] p-[22px]">
-          <div className="text-[var(--muted)] text-[15px]">
-            In this sample model, the plan lowers estimated yearly loss by
-          </div>
-          {/* LCD-optimized Hero Risk Reduction Percentage with Neon Glow */}
-          <div className="hero-red text-[52px] sm:text-[60px] font-bold tracking-tight leading-none text-[var(--stop)] my-2.5">
-            {plan ? `${plan.risk_reduction_pct.toFixed(1)}%` : "0.0%"}
-          </div>
+          {plan && plan.fits_budget === false ? (
+            <div className="text-[15px] text-[var(--miss)] font-semibold my-2.5" role="status">
+              {plan.risk_reduction_sentence} Showing the required tools only.
+            </div>
+          ) : (
+            <>
+              <div className="text-[var(--muted)] text-[15px]">
+                In this sample model, the plan lowers estimated yearly loss by
+              </div>
+              <div className="hero-red text-[52px] sm:text-[60px] font-bold tracking-tight leading-none text-[var(--stop)] my-2.5">
+                {plan ? `${plan.risk_reduction_pct.toFixed(1)}%` : "0.0%"}
+              </div>
+            </>
+          )}
 
           {/* Today vs Plan Comparison Bars */}
           <div className="cmpbar my-3.5 space-y-2">

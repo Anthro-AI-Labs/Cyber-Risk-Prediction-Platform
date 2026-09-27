@@ -336,6 +336,7 @@ class OptimizerPlan(BaseModel):
     ale_after: int
     ale_range_after: LossRange
     risk_reduction_pct: float
+    fits_budget: bool = True
     risk_reduction_sentence: str
     removes_baseline_control: bool
     baseline_warning: Optional[str] = None

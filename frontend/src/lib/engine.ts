@@ -543,7 +543,13 @@ export function computeOptimizer(
     });
   });
 
+  // If even the required (locked) tools exceed the budget, report them with their own figures.
+  const fitsBudget = Number.isFinite(bestAle);
   const bestSim = computeRisk(bestTools, assumptions);
+  if (!fitsBudget) {
+    bestAle = bestSim.total_ale_point;
+    bestSpend = bestSim.total_spend;
+  }
   const reductionPct = ((1 - bestSim.total_ale_point / baselineAle) * 100);
 
   const removesBaseline = moves.some((m) => m.action === "remove" && TOOL_MAP[m.tool_id].baseline_required);
@@ -560,9 +566,12 @@ export function computeOptimizer(
     ale_after: Math.round(bestAle),
     ale_range_after: bestSim.total_ale_range,
     risk_reduction_pct: Math.round(reductionPct * 10) / 10,
-    risk_reduction_sentence: `In this sample model, this plan reduces estimated loss exposure by ${reductionPct.toFixed(1)}%.`,
+    risk_reduction_sentence: fitsBudget
+      ? `In this sample model, this plan reduces estimated loss exposure by ${reductionPct.toFixed(1)}%.`
+      : `No plan fits a budget of $${budget.toLocaleString("en-US")}: the required baseline tools alone cost $${bestSpend.toLocaleString("en-US")}.`,
     removes_baseline_control: removesBaseline,
     baseline_warning: baselineWarning,
+    fits_budget: fitsBudget,
   };
 }
 

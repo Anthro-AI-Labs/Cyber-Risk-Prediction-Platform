@@ -109,12 +109,24 @@ def run_optimizer(
                 best_config = cfg
                 best_probs = curr_probs
 
-    if best_config is None:
-        # Fallback to locked tools if within budget, else empty
-        best_config = locked_tool_ids
+    fits_budget = best_config is not None
+    if not fits_budget:
+        # Even the locked (required) tools alone exceed the budget: report that configuration with its
+        # own, consistently computed, ALE and probabilities, and flag that it does not fit.
+        best_config = list(locked_tool_ids)
         best_spend = sum(all_tools[t].annual_cost for t in best_config)
-        best_ale = baseline_ale
-        best_probs = {sc_id: 1.0 for sc_id in scenarios}
+        evals = evaluate_all_scenarios(
+            scenarios=scenarios,
+            active_tool_ids=best_config,
+            mappings=mappings,
+            scenario_overrides=scenario_overrides,
+            techniques=techniques,
+        )
+        best_probs = {sc_id: calculate_scenario_probability(e.steps, pass_probs) for sc_id, e in evals.items()}
+        best_ale = sum(
+            assumptions.scenarios[sc_id].attempts_per_year.likely * p * assumptions.scenarios[sc_id].loss_per_success.likely
+            for sc_id, p in best_probs.items()
+        )
 
     # Moves calculation
     moves: List[OptimizerMove] = []
@@ -173,7 +185,12 @@ def run_optimizer(
         ale_after=round(best_ale),
         ale_range_after=ale_range_after,
         risk_reduction_pct=round(reduction_pct, 1),
-        risk_reduction_sentence=f"In this sample model, this plan reduces estimated loss exposure by {reduction_pct:.1f}%.",
+        risk_reduction_sentence=(
+            f"In this sample model, this plan reduces estimated loss exposure by {reduction_pct:.1f}%."
+            if fits_budget else
+            f"No plan fits a budget of ${target_budget:,}: the required baseline tools alone cost ${best_spend:,}."
+        ),
+        fits_budget=fits_budget,
         removes_baseline_control=removes_baseline,
         baseline_warning=baseline_warning,
     )

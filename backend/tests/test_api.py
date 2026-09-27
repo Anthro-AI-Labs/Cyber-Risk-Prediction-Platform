@@ -158,3 +158,17 @@ def test_validation_report_served_from_last_run():
     data = res.json()
     assert {"scorecard", "all_passed", "d1_source_fidelity"} <= set(data)
     assert all(row["status"] in {"PASS", "FAIL", "NOT_RUN"} for row in data["scorecard"])
+
+def test_agent_narrate_unknown_scenario_is_404():
+    res = client.post("/api/agent/narrate", json={"scenario_id": "S99", "tool_ids": ["edr"]})
+    assert res.status_code == 404
+
+
+def test_agent_mode_is_heuristic_when_llm_calls_fail(monkeypatch):
+    # A configured key whose calls fail must not be reported as LLM narration.
+    import app.agent as agent
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key-not-real")
+    monkeypatch.setattr(agent, "_call_llm_for_step", lambda **kw: (_ for _ in ()).throw(RuntimeError("offline")))
+    res = client.post("/api/agent/narrate", json={"scenario_id": "S1", "tool_ids": ["email_security"]})
+    assert res.status_code == 200
+    assert res.json()["mode"] == "heuristic"
